@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\RegisterRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use phpDocumentor\Reflection\Types\Self_;
@@ -14,13 +16,11 @@ class RegisterController extends Controller
 {
 
     const REGISTER_REQUEST_RULES = [
-        'surname'    => 'string|required',
-        'name'       => 'string|required',
-        'secondname' => 'string',
-        'birthday'   => 'date',
-        'role'       => 'required|in:creator,student',
-        'email'      => 'required|email|unique:users',
-        'password'   => 'required|string',
+        'name'     => 'string|required',
+        'birthday' => 'date',
+        'role'     => 'required|in:creator,student',
+        'email'    => 'required|email|unique:users',
+        'password' => 'required|string',
     ];
 
     const REGISTER_REQUEST_MESSAGES = [
@@ -31,6 +31,7 @@ class RegisterController extends Controller
     ];
 
     public function __invoke( Request $request ) {
+
         $validator = Validator::make($request->all(), self::REGISTER_REQUEST_RULES, self::REGISTER_REQUEST_MESSAGES);
         if ( $validator->fails() ) {
             $errors = $validator->errors();
@@ -39,8 +40,16 @@ class RegisterController extends Controller
         }
 
         $user = User::create($request->all());
-        return response()->json([
-            'message' => 'Вы успешно зарегистрированы!',
-        ], 200);
+
+        if ( Auth::attempt(['email' => $request->input('email'), "password" => $request->input('password')]) ) {
+            $token = Auth::user()->createToken(config('app.name'));
+            $token->token->save();
+            return response()->json([
+                'message'    => 'Вы успешно зарегистрированы!',
+                'token_type' => 'Bearer',
+                'token'      => $token->accessToken,
+                'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
+            ], 200);
+        }
     }
 }

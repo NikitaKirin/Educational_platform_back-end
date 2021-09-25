@@ -8,14 +8,11 @@ class RegisterRequest extends FormRequest
 {
     public function rules() {
         return [
-            'surname'    => 'string|required',
-            'name'       => 'string|required',
-            'secondname' => 'string',
-            'birthday'   => 'date',
-            'avatar'     => 'string',
-            'role'       => 'required|in:creator,student',
-            'email'      => 'required|email|unique:users',
-            'password'   => 'required|string',
+            'name'     => 'string|required',
+            'birthday' => 'date',
+            'role'     => 'required|in:creator,student',
+            'email'    => 'required|email|unique:users',
+            'password' => 'required|string',
         ];
     }
 
