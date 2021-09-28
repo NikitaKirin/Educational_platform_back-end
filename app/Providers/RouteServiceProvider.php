@@ -33,20 +33,22 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
+    public function boot() {
         $this->configureRateLimiting();
 
         $this->routes(function () {
             Route::prefix('api')
-                ->middleware('api')
-                ->middleware('json.response')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/api.php'));
+                 ->middleware('api')
+                 ->middleware('json.response')
+                 ->namespace($this->namespace)
+                 ->group(function () {
+                     require_once base_path('routes/api/user/auth/auth.php'); // Роуты с авторизацией пользователей
+                     require_once base_path('routes/api/admin/auth/auth.php'); // Роуты с авторизацией для админов
+                 });
 
             Route::middleware('web')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/web.php'));
+                 ->namespace($this->namespace)
+                 ->group(base_path('routes/web.php'));
         });
     }
 
@@ -55,10 +57,10 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function configureRateLimiting()
-    {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+    protected function configureRateLimiting() {
+        RateLimiter::for('api', function ( Request $request ) {
+            return Limit::perMinute(60)
+                        ->by(optional($request->user())->id ?: $request->ip());
         });
     }
 }
