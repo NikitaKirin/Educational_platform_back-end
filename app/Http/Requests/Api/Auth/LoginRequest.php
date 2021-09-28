@@ -20,13 +20,13 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    public function withValidator( $validator ) {
+/*    public function withValidator( $validator ) {
         if ( $validator->fails() ) {
             return response()->json([
                 'errors' => $validator->errors(),
             ]);
         }
-    }
+    }*/
 
     public function authorize() {
         return true;

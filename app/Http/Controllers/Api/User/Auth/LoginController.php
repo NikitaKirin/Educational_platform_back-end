@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    const LOGIN_REQUEST_RULES = [
+/*    const LOGIN_REQUEST_RULES = [
         'email'    => 'required|email',
         'password' => 'string|required',
     ];
@@ -19,20 +19,20 @@ class LoginController extends Controller
     const LOGIN_REQUEST_MESSAGES = [
         'required' => 'Данное поле обязательно для заполнения',
         'email'    => 'Вы ввели некорректный email',
-    ];
+    ];*/
 
-    public function __invoke( Request $request ) {
+    public function __invoke( LoginRequest $request ) {
 
-        $validator = Validator::make($request->all(), self::LOGIN_REQUEST_RULES, self::LOGIN_REQUEST_MESSAGES);
+        /*$validator = Validator::make($request->all(), self::LOGIN_REQUEST_RULES, self::LOGIN_REQUEST_MESSAGES);
 
         if ( $validator->fails() ) {
             $errors = $validator->errors();
             return response()->json(["messages" => $errors], 422);
-        }
+        }*/
 
         if ( !Auth::attempt($request->all()) ) {
             return response()->json([
-                'message' => 'You cannot sign with those credentials',
+                'message' => 'Неверный логин или пароль',
                 'errors'  => 'Unauthorised',
             ], 401);
         }

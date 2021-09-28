@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Auth\LoginRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    const LOGIN_REQUEST_RULES = [
+/*    const LOGIN_REQUEST_RULES = [
         'email'    => 'required|email',
         'password' => 'string|required',
     ];
@@ -18,14 +19,14 @@ class LoginController extends Controller
     const LOGIN_REQUEST_MESSAGES = [
         'required' => 'Данное поле обязательно для заполнения',
         'email'    => 'Вы ввели некорректный email',
-    ];
+    ];*/
 
-    public function __invoke( Request $request ) {
-        $validator = Validator::make($request->all(), self::LOGIN_REQUEST_RULES, self::LOGIN_REQUEST_MESSAGES);
+    public function __invoke( LoginRequest $request ) {
+       /* $validator = Validator::make($request->all(), self::LOGIN_REQUEST_RULES, self::LOGIN_REQUEST_MESSAGES);
         if ( $validator->fails() ) {
             $errors = $validator->errors();
             return response()->json(["messages" => $errors], 422);
-        }
+        }*/
 
         if ( Auth::attempt($request->all()) && Auth::user()->role == 'admin' ) {
             $token = Auth::user()->createToken(config('app.name'));
@@ -38,7 +39,7 @@ class LoginController extends Controller
         }
 
         return response()->json([
-            'message' => 'You cannot sign with those credentials',
+            'message' => 'Неверный адрес электронной почты или пароль',
             'errors'  => 'Unauthorised',
         ], 401);
     }
