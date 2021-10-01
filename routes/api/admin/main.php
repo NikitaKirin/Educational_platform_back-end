@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 
 Route::namespace('App\\Http\\Controllers\\Api\\Admin')->middleware('auth:api')->group(function () {
-    Route::post('/admin', 'HomeController');
-    Route::get('/admin/users', 'UserController');
+    Route::get('admin/home', 'HomeController');
+    //    Route::post('/admin', );
+});
+
+Route::namespace('App\\Http\\Controllers\\Api')->middleware('auth:api')->group(function () {
+    Route::get('admin/users', 'UserController@index');
 });
