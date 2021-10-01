@@ -8,8 +8,8 @@ class RegisterRequest extends FormRequest
 {
     public function rules() {
         return [
-            'name'     => 'string|required',
-            'birthday' => 'date',
+            'name'     => 'required|string',
+            'birthday' => 'nullable|date',
             'role'     => 'required|in:creator,student',
             'email'    => 'required|email|unique:users',
             'password' => 'required|string',
@@ -18,9 +18,10 @@ class RegisterRequest extends FormRequest
 
     public function messages() {
         return [
-            'string'       => 'Вы ввели недоступные символы',
             'required'     => 'Данное поле является обязательным для заполнения',
+            'string'       => 'Вы ввели недоступные символы',
             'email.unique' => 'Данный email уже занят',
+            'date'         => 'Введены недоступные символы',
         ];
     }
 
