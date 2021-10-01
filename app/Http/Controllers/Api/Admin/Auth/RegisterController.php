@@ -18,6 +18,6 @@ class RegisterController extends Controller
         return response()->json([
             'message' => 'Новый администратор успешно зарегистрирован!',
             'user'    => $user,
-        ], 200);
+        ], 201);
     }
 }
