@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\User\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\Auth\LoginRequest;
+use App\Http\Requests\Api\User\Auth\LoginRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

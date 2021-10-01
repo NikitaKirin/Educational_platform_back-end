@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\User\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\Auth\RegisterRequest;
+use App\Http\Requests\Api\User\Auth\RegisterRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
