@@ -45,6 +45,7 @@ class RouteServiceProvider extends ServiceProvider
                      require_once base_path('routes/api/user/auth/auth.php'); // Роуты с авторизацией пользователей
                      require_once base_path('routes/api/user/main.php'); // Роуты всех пользователей
                      require_once base_path('routes/api/admin/auth/auth.php'); // Роуты с авторизацией для админов
+                     require_once base_path('routes/api/admin/main.php'); // Роуты для администраторов
                  });
 
             Route::middleware('web')
