@@ -25,22 +25,32 @@ class UserController extends Controller
         ], 201);
     }
 
-    public function show( Request $request ) {
+    public function show( User $user ) {
 
-        $user = User::find($request->user);
+        /*        $user = User::find($request->user);
+                if ( $user ) {
+                    return response([
+                        'message' => 'Страница пользователя',
+                        'data'    => $user,
+                    ], 200);
+                }
+                else {
+                    return response()->json([
+                        'message' => 'Такого пользователя не существует',
+                    ], 404);
+                }*/
         if ( $user ) {
-            return response([
-                'message' => 'Страница пользователя',
-                'data'    => $user,
-            ], 200);
-        }
-        else {
             return response()->json([
-                'message' => 'Такого пользователя не существует',
-            ], 404);
+                'user' => $user,
+            ]);
         }
-
+        return response()->json([
+            'message' => 'Такого пользователя не существует',
+        ], 404);
     }
 
+    public function update( User $user ) {
+        return response()->json(['user' => $user]);
+    }
 
 }
