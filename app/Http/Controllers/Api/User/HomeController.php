@@ -10,7 +10,7 @@ class HomeController extends Controller
     public function __invoke() {
         return response()->json([
             'message' => 'Добро пожаловать',
-            'data' => Auth::user()
+            'data' => 'Главная страница студента или преподавателя'
         ]);
     }
 }

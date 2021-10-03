@@ -17,6 +17,11 @@ class UserController extends Controller
         return new UserResourceCollection(User::paginate(5));
     }
 
+    // Вывод страницы мой профиль
+    public function me(): UserResource {
+        return new UserResource(Auth::user());
+    }
+
     public function store( RegisterRequest $request ): \Illuminate\Http\JsonResponse {
         $user = User::create($request->all());
         return response()->json([

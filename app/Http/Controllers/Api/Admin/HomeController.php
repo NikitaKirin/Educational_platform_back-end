@@ -13,10 +13,10 @@ class HomeController extends Controller
         if ( Auth::user()->role == 'admin' ) {
             return [
                 'messages' => 'Добро пожаловать!',
-                'data'     => Auth::user(),
+                'data'     => 'Главная страница администратора',
             ];
         }
 
-        abort(403, 'Unauthorised');
+        abort(403, 'Forbidden');
     }
 }
