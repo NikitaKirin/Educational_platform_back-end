@@ -35,9 +35,9 @@ class UserPolicy
     }
 
     // Обновление данных профиля
-    public function update( User $user, User $model ): Response {
+/*    public function update( User $user, User $model ): Response {
         return $user->id == $model->id ? Response::allow('Данные профиля успешно обновлены!') : Response::deny('Forbidden', 403);
-    }
+    }*/
 
     public function delete( User $user, User $model ): bool {
         return false;

@@ -16,7 +16,7 @@ class RegisterRequest extends FormRequest
         ];
     }
 
-    public function messages() {
+    public function messages(): array {
         return [
             'required'     => 'Это поле обязательно для заполнения',
             'email'        => 'Введен некорректный email',
@@ -25,6 +25,7 @@ class RegisterRequest extends FormRequest
         ];
     }
 
+    // Создать нового пользователя в рамках авторизации может только администратор
     public function authorize(): bool {
         return Auth::user()->role == 'admin';
     }

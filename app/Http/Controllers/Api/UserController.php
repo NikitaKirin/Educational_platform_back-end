@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Admin\Auth\RegisterRequest;
+use App\Http\Requests\Api\User\Profile\UpdateOwnProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceCollection;
 use App\Models\User;
@@ -18,8 +19,21 @@ class UserController extends Controller
     }
 
     // Вывод страницы мой профиль
-    public function me(): UserResource {
-        return new UserResource(Auth::user());
+    public function me() {
+
+        $user = new UserResource(Auth::user());
+        if ( $user->role == 'admin' ) {
+            return response()->json([
+                'message' => 'Моя страница - администратор',
+                'data'    => $user,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Моя страница - пользователь',
+            'data'    => $user,
+        ]);
+
     }
 
     public function store( RegisterRequest $request ): \Illuminate\Http\JsonResponse {
@@ -54,8 +68,14 @@ class UserController extends Controller
         ], 404);
     }
 
-    public function update( User $user ) {
-        return response()->json(['user' => $user]);
+    public function update( UpdateOwnProfileRequest $request ) {
+        $user = User::find(Auth::user()->id);
+        if ( $user->update($request->all()) ) {
+            return response()->json([
+                'message' => 'Данные успешно обновлены!',
+                'user'    => new UserResource($user),
+            ], 200);
+        }
     }
 
 }
