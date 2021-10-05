@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 /** @see \App\Models\User */
 class UserResourceCollection extends ResourceCollection
 {
+    public static $wrap = 'users';
     public function toArray( $request ): array {
         return [
-            'data' => $this->collection,
+            'users' => $this->collection,
         ];
     }
 }
