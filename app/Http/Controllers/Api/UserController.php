@@ -62,9 +62,6 @@ class UserController extends Controller
     // Изменить данные своего профиля: пользователи и администраторы
     public function update( UpdateOwnProfileRequest $request ) {
 
-        if ( $request['birthday'] )
-            $request['birthday'] = Carbon::parse($request['birthday'])->toDateString();
-
         $user = User::find(Auth::user()->id);
         if ( $user->update($request->all()) ) {
             return response()->json([
@@ -77,16 +74,12 @@ class UserController extends Controller
     // Изменить данные профиля любого пользователя. Функционал администратора.
     public function updateSomeOneProfile( UpdateSomeOneProfileRequest $request, User $user ) {
 
-        if ( $request['birthday'] )
-            $request['birthday'] = Carbon::parse($request['birthday'])->toDateString();
-
         if ( $user->update($request->all()) ) {
             return response()->json([
                 'message' => 'Данные успешно обновлены!',
                 'user'    => new UserResource($user),
             ], 200);
         }
-
     }
 
 }

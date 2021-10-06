@@ -11,19 +11,10 @@ class UserResource extends JsonResource
 
     public function toArray( $request ): array {
 
-        if ( $this->birthday != null ) {
-            return [
-                'id'       => $this->id,
-                'name'     => $this->name,
-                'birthday' => Carbon::parse($this->birthday)->format('d.m.Y'),
-                'role'     => $this->role,
-                'email'    => $this->email,
-            ];
-        }
         return [
             'id'       => $this->id,
             'name'     => $this->name,
-            'birthday' => null,
+            'birthday' => $this->birthday,
             'role'     => $this->role,
             'email'    => $this->email,
         ];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -50,5 +51,20 @@ class User extends Authenticatable implements HasMedia
     // Мутатор для хеширования пароля пользователя
     public function setPasswordAttribute( $value ) {
         $this->attributes['password'] = Hash::make($value);
+    }
+
+    //Акцессор для преобразования формата даты рождения пользователя
+    public function getBirthdayAttribute( $value ): ?string {
+        if ( isset($value) ) {
+            return Carbon::parse($value)->format('d.m.Y');
+        }
+
+        return null;
+    }
+
+    //Мутатор для преобразования формата даты рождения пользователя
+    public function setBirthdayAttribute( $value ) {
+        if(isset($value))
+            $this->attributes['birthday'] = Carbon::parse($value)->toDateString();
     }
 }
