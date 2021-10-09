@@ -7,7 +7,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 use Laravel\Passport\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -64,7 +66,24 @@ class User extends Authenticatable implements HasMedia
 
     //Мутатор для преобразования формата даты рождения пользователя
     public function setBirthdayAttribute( $value ) {
-        if(isset($value))
+        if ( isset($value) )
             $this->attributes['birthday'] = Carbon::parse($value)->toDateString();
+    }
+
+    //Проверяем наличие у пользователя аватара
+    public function hasAvatar(): bool {
+        $avatar = Auth::user()->getFirstMediaUrl('user_avatars');
+        if ( empty($avatar) )
+            return false;
+        return true;
+    }
+
+    //Получаем аватар пользователя
+    public function getAvatar() {
+        if ( $this->hasAvatar() ) {
+            $avatar = Auth::user()->getFirstMediaUrl('user_avatars');
+            return $avatar;
+        }
+        return url('img/default_profile.png');
     }
 }
