@@ -8,10 +8,13 @@ use App\Http\Requests\Api\Admin\Profile\UpdateSomeOneProfileRequest;
 use App\Http\Requests\Api\User\Profile\UpdateOwnProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceCollection;
+use App\Mail\RegisterNewUserMail;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -41,6 +44,8 @@ class UserController extends Controller
     // Создать нового пользователя - функционал администратора
     public function store( RegisterRequest $request ): \Illuminate\Http\JsonResponse {
         $user = User::create($request->all());
+        Mail::to($request->email)
+            ->send(new RegisterNewUserMail($request->name, $request->role, $request->email, $request->password));
         return response()->json([
             'message' => 'Новый пользователь успешно создан!',
             'user'    => $user,
