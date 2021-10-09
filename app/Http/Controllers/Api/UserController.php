@@ -68,7 +68,7 @@ class UserController extends Controller
     public function update( UpdateOwnProfileRequest $request ) {
 
         $user = User::find(Auth::user()->id);
-        if ( $user->update($request->all()) ) {
+        if ( $user->update($request->except(['role'])) ) {
             if ( isset($request->avatar) ) {
                 if ( $user->hasAvatar() )
                     $user->clearMediaCollection('user_avatars');
