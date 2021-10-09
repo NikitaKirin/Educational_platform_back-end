@@ -27,13 +27,13 @@ class UserController extends Controller
         if ( $user->role == 'admin' ) {
             return response()->json([
                 'message' => 'Моя страница - администратор',
-                'data'    => $user,
+                'user'    => $user,
             ]);
         }
 
         return response()->json([
             'message' => 'Моя страница - пользователь',
-            'data'    => $user,
+            'user'    => $user,
         ]);
 
     }
@@ -65,7 +65,7 @@ class UserController extends Controller
         $user = User::find(Auth::user()->id);
         if ( $user->update($request->all()) ) {
             if ( isset($request->avatar) ) {
-                if($user->hasAvatar())
+                if ( $user->hasAvatar() )
                     $user->clearMediaCollection('user_avatars');
                 $user->addMediaFromRequest('avatar')->toMediaCollection('user_avatars', 'user_avatars');
             }
