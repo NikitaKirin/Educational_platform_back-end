@@ -68,12 +68,12 @@ class UserController extends Controller
     public function update( UpdateOwnProfileRequest $request ) {
 
         $user = User::find(Auth::user()->id);
-        if ( $user->update($request->except(['role'])) ) {
-            if ( isset($request->avatar) ) {
-                if ( $user->hasAvatar() )
-                    $user->clearMediaCollection('user_avatars');
-                $user->addMediaFromRequest('avatar')->toMediaCollection('user_avatars', 'user_avatars');
-            }
+        if ( $user->update($request->except(['role', 'avatar'])) ) {
+            /*            if ( isset($request->avatar) ) {
+                            if ( $user->hasAvatar() )
+                                $user->clearMediaCollection('user_avatars');
+                            $user->addMediaFromRequest('avatar')->toMediaCollection('user_avatars', 'user_avatars');
+                        }*/
             return response()->json([
                 'message' => 'Данные успешно обновлены!',
                 'user'    => new UserResource($user),

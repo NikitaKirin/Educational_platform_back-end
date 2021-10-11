@@ -84,6 +84,6 @@ class User extends Authenticatable implements HasMedia
             $avatar = Auth::user()->getFirstMediaUrl('user_avatars');
             return $avatar;
         }
-        return url('img/default_profile.png');
+        return null;
     }
 }
