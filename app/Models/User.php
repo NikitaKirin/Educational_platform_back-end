@@ -71,18 +71,17 @@ class User extends Authenticatable implements HasMedia
     }
 
     //Проверяем наличие у пользователя аватара
-    public function hasAvatar(): bool {
-        $avatar = Auth::user()->getFirstMediaUrl('user_avatars');
+    public static function hasAvatar( User $user ): bool {
+        $avatar = $user->getFirstMediaUrl('user_avatars');
         if ( empty($avatar) )
             return false;
         return true;
     }
 
     //Получаем аватар пользователя
-    public function getAvatar() {
-        if ( $this->hasAvatar() ) {
-            $avatar = Auth::user()->getFirstMediaUrl('user_avatars');
-            return $avatar;
+    public static function getAvatar( User $user ): ?string {
+        if ( $user->hasAvatar($user) ) {
+            return $user->getFirstMediaUrl('user_avatars');
         }
         return null;
     }
