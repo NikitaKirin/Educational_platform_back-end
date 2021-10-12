@@ -12,4 +12,5 @@ Route::namespace('App\\Http\\Controllers\\Api')->middleware('auth:api')->group(f
     Route::patch('/user/me', 'UserController@update'); // Обновить данные своего профиля;
     Route::post('/user/me/avatar', 'AvatarController@updateOwnAvatar'); // Загрузить новый аватар своего профиля;
     Route::delete('/user/me/avatar', 'AvatarController@destroyOwnAvatar'); // Удалить свой аватар;
+    Route::patch('/user/password','PasswordController@passwordUpdate'); // Обновить свой пароль;
 });
