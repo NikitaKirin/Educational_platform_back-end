@@ -12,12 +12,15 @@ class UserPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ) {
-        if ( $user->role == 'admin' )
-            return true;
+        return $user->role == 'admin' ? true : Response::deny('Forbidden', 403);
     }
 
     public function __construct() {
         //
+    }
+
+    public function destroySomeOneAvatar( User $user ): bool {
+        return false;
     }
 
     // Просмотр списка пользователей

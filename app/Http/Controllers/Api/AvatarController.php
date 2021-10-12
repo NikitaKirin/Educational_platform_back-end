@@ -62,6 +62,7 @@ class AvatarController extends Controller
         ], 400);
     }
 
+    // Удалить аватар любого пользователя. Функционал администратора.
     public function destroySomeOneAvatar( User $user ): JsonResponse {
         if ( $user->hasAvatar($user) ) {
             $user->clearMediaCollection('user_avatars');

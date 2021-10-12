@@ -15,6 +15,7 @@ Route::namespace('App\\Http\\Controllers\\Api')->middleware('auth:api')->group(f
          ->name('admin.users.show'); // Посмотреть страницу пользователя
     Route::patch('admin/users/{user}', 'UserController@updateSomeOneProfile')
          ->name('admin.users.update');// Обновляет данные профиля любого пользователя;
-/*    Route::post('admin/users/{user}/avatar', 'AvatarCOntroller@updateSomeOneAvatar')
-         ->name('admin.users.avatar.update');*/ //Обновляет аватар любого пользователя;
+    Route::delete('admin/users/{user}/avatar', 'AvatarController@destroySomeOneAvatar')
+         ->middleware('can:destroySomeOneAvatar,user')
+         ->name('admin.users.avatar.update'); //Обновляет аватар любого пользователя;
 });
