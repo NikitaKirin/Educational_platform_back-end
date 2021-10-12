@@ -26,6 +26,7 @@ class AvatarController extends Controller
             if ( $user->hasAvatar($user) )
                 $user->clearMediaCollection('user_avatars');
             $user->addMediaFromRequest('avatar')->toMediaCollection('user_avatars', 'user_avatars');
+            $user->refresh();
         }
         return response()->json([
             'message' => 'Аватар успешно загружен!',
@@ -53,6 +54,20 @@ class AvatarController extends Controller
             $user->clearMediaCollection('user_avatars');
             return response()->json([
                 'message' => 'Аватар пользователя успешно удалён',
+            ], 200);
+        }
+        return response()->json([
+            'message' => 'Аватар профиля отсутствует',
+
+        ], 400);
+    }
+
+    public function destroySomeOneAvatar( User $user ): JsonResponse {
+        if ( $user->hasAvatar($user) ) {
+            $user->clearMediaCollection('user_avatars');
+            return response()->json([
+                'message' => 'Аватар пользователя успешно удалён',
+                'user'    => new UserResource($user),
             ], 200);
         }
         return response()->json([

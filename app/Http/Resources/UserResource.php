@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
+use phpDocumentor\Reflection\Types\Self_;
 
 class UserResource extends JsonResource
 {
@@ -17,7 +19,7 @@ class UserResource extends JsonResource
             'birthday' => $this->birthday,
             'role'     => $this->role,
             'email'    => $this->email,
-            'avatar'   => $this->getAvatar(),
+            'avatar'   => User::getAvatar(User::find($this->id)),
         ];
     }
 }
