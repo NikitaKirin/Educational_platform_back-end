@@ -17,5 +17,5 @@ Route::namespace('App\\Http\\Controllers\\Api')->middleware('auth:api')->group(f
          ->name('admin.users.update');// Обновляет данные профиля любого пользователя;
     Route::delete('admin/users/{user}/avatar', 'AvatarController@destroySomeOneAvatar')
          ->middleware('can:destroySomeOneAvatar,user')
-         ->name('admin.users.avatar.update'); //Обновляет аватар любого пользователя;
+         ->name('admin.users.avatar.delete'); //Удаляет аватар любого пользователя;
 });
