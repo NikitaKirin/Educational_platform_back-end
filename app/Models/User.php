@@ -29,6 +29,7 @@ class User extends Authenticatable implements HasMedia
         'password',
         'birthday',
         'role',
+        'blocked_at',
     ];
 
     /**
@@ -83,6 +84,14 @@ class User extends Authenticatable implements HasMedia
         if ( $user->hasAvatar($user) ) {
             return $user->getFirstMediaUrl('user_avatars');
         }
+        return null;
+    }
+
+    //Акцессор для преобразования формата поля блокировки пользователя
+    public function getBlockedAtAttribute( $value ): ?string {
+        if ( isset($value) )
+            return Carbon::parse($value)->format('d.m.Y / H:i:s');
+
         return null;
     }
 }

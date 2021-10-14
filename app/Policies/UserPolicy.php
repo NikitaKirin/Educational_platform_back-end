@@ -19,6 +19,16 @@ class UserPolicy
         //
     }
 
+    // Разблокировать любого пользователя. Функционал администратора.
+    public function unblock( User $user ): bool {
+        return false;
+    }
+
+    // Заблокировать любого пользователя. Функционал администратора.
+    public function block( User $user ): bool {
+        return false;
+    }
+
     public function destroySomeOneAvatar( User $user ): bool {
         return false;
     }

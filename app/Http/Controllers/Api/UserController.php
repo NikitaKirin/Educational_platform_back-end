@@ -92,4 +92,40 @@ class UserController extends Controller
         }
     }
 
+    // Заблокировать любого пользователя. Функционал администратора.
+    public function block( User $user ) {
+
+        if ( $user->blocked_at != null ) {
+            return response()->json([
+                'message' => 'Невозможно заблокировать уже заблокированного пользователя',
+            ], 409);
+        }
+        elseif ( $user->update(['blocked_at' => Carbon::now()->toDateTimeString()]) )
+            return response()->json([
+                'message' => 'Пользователь успешно заблокирован',
+                'user'    => new UserResource($user),
+            ], 200);
+
+        return response()->json([
+            'Не удалось заблокировать пользователя',
+        ], 409);
+    }
+
+    // Разблокировать любого пользователя. Функционал администратора.
+    public function unblock( User $user ) {
+        if ( $user->blocked_at == null )
+            return response()->json([
+                'message' => 'Невозможно разблокировать незаблокированного пользователя',
+            ], 409);
+
+        elseif ( $user->update(['blocked_at' => null]) )
+            return response()->json([
+                'message' => 'Пользователь успешно разблокирован',
+                'user'    => new UserResource($user),
+            ], 200);
+
+        return response()->json([
+            'Не удалось разблокировать пользователя',
+        ], 409);
+    }
 }
