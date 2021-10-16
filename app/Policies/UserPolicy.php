@@ -19,6 +19,10 @@ class UserPolicy
         //
     }
 
+    public function showBlocked( User $user ): bool {
+        return false;
+    }
+
     // Разблокировать любого пользователя. Функционал администратора.
     public function unblock( User $user ): bool {
         return false;

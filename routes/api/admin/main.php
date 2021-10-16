@@ -8,6 +8,8 @@ Route::namespace('Admin')->middleware(['auth:api', 'blockUser'])->group(function
 });
 
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
+    Route::get('admin/users/blocked', 'UserController@showBlocked')->middleware('can:showBlocked,App\\Models\\User')
+         ->name('admin.users.show.blocked'); // Вывести список заблокированных пользователей;
     Route::get('/admin/users', 'UserController@index')->middleware('can:viewAny,App\\Models\\User')
          ->name('admin.users.index'); // Выводит список всех пользователей
     Route::post('/admin/users', 'UserController@store')->name('admin.users.store'); // Регистрирует нового пользователя

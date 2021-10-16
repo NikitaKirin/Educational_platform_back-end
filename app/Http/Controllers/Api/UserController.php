@@ -128,4 +128,9 @@ class UserController extends Controller
             'Не удалось разблокировать пользователя',
         ], 409);
     }
+
+    // Вывести список заблокированных пользователей. Функционал администратора.
+    public function showBlocked() {
+        return new UserResourceCollection(User::where('blocked_at', '!=', null)->paginate(5));
+    }
 }
