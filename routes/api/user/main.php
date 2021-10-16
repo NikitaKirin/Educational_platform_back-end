@@ -14,3 +14,6 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
     Route::delete('/user/me/avatar', 'AvatarController@destroyOwnAvatar'); // Удалить свой аватар;
     Route::patch('/user/me/password', 'PasswordController@passwordUpdate'); // Обновить свой пароль;
 });
+
+Route::post('/forgot-password', 'PasswordController@forgotPassword')->middleware('guest'); // Забыл пароль.
+Route::post('/reset-password/{token?}', 'PasswordController@resetPassword')->middleware('guest'); // Сброс пароля;
