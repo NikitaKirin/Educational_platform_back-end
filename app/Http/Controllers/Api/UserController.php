@@ -48,7 +48,7 @@ class UserController extends Controller
             ->send(new RegisterNewUserMail($request->name, $request->role, $request->email, $request->password));
         return response()->json([
             'message' => 'Новый пользователь успешно создан!',
-            'user'    => $user,
+            'user'    => new UserResource($user),
         ], 201);
     }
 
