@@ -39,7 +39,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->routes(function () {
             Route::prefix('api')
                  ->middleware('api')
-                 ->namespace($this->namespace)
+                 ->namespace($this->namespace . '\\Api')
                  ->group(function () {
                      require_once base_path('routes/api/user/auth/auth.php'); // Роуты с авторизацией пользователей
                      require_once base_path('routes/api/user/main.php'); // Роуты всех пользователей

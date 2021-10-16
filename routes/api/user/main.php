@@ -3,11 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::namespace('Api\User')->middleware(['auth:api', 'blockUser'])->group(function () {
+Route::namespace('User')->middleware(['auth:api', 'blockUser'])->group(function () {
     Route::get('/user/home', 'HomeController');
 });
 
-Route::namespace('Api')->middleware(['auth:api', 'blockUser'])->group(function () {
+Route::middleware(['auth:api', 'blockUser'])->group(function () {
     Route::get('/user/me', 'UserController@me'); // Посмотреть страницу своего профиля
     Route::patch('/user/me', 'UserController@update'); // Обновить данные своего профиля;
     Route::post('/user/me/avatar', 'AvatarController@updateOwnAvatar'); // Загрузить новый аватар своего профиля;
