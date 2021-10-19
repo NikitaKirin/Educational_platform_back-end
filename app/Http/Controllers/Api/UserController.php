@@ -14,13 +14,14 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
     // Выводит список всех пользователей для администратора с пагинацией.
     public function index(): UserResourceCollection {
-        return new UserResourceCollection(User::paginate(5));
+        return new UserResourceCollection(DB::table('users')->orderBy('name', 'asc')->paginate(10));
     }
 
     // Вывод страницы мой профиль
@@ -131,6 +132,6 @@ class UserController extends Controller
 
     // Вывести список заблокированных пользователей. Функционал администратора.
     public function showBlocked() {
-        return new UserResourceCollection(User::where('blocked_at', '!=', null)->paginate(5));
+        return new UserResourceCollection(DB::table('users')->where('blocked_at', '!=', null)->orderBy('name', 'asc')->paginate(10));
     }
 }
