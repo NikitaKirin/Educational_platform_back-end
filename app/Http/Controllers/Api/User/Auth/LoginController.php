@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-/*    const LOGIN_REQUEST_RULES = [
-        'email'    => 'required|email',
-        'password' => 'string|required',
-    ];
+    /*    const LOGIN_REQUEST_RULES = [
+            'email'    => 'required|email',
+            'password' => 'string|required',
+        ];
 
-    const LOGIN_REQUEST_MESSAGES = [
-        'required' => 'Данное поле обязательно для заполнения',
-        'email'    => 'Вы ввели некорректный email',
-    ];*/
+        const LOGIN_REQUEST_MESSAGES = [
+            'required' => 'Данное поле обязательно для заполнения',
+            'email'    => 'Вы ввели некорректный email',
+        ];*/
 
     public function __invoke( LoginRequest $request ) {
 
@@ -45,6 +45,7 @@ class LoginController extends Controller
             'token_type' => 'Bearer',
             'token'      => $token->accessToken,
             'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
+            'message'    => 'Добро пожаловать, ' . Auth::user()->name . '!',
         ], 200);
     }
 }
