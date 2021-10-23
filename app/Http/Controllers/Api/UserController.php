@@ -132,6 +132,6 @@ class UserController extends Controller
 
     // Вывести список заблокированных пользователей. Функционал администратора.
     public function showBlocked() {
-        return new UserResourceCollection(DB::table('users')->where('blocked_at', '!=', null)->orderBy('name', 'asc')->paginate(10));
+return new UserResourceCollection(DB::table('users')->where('blocked_at', '!=', null)->orderBy('name', 'asc')->paginate(10));
     }
 }
