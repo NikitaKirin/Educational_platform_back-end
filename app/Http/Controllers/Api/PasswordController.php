@@ -31,7 +31,7 @@ class PasswordController extends Controller
 
         return response()->json([
             'messages' => 'Не удалось обновить пароль',
-        ]);
+        ],409);
     }
 
     // Забыл пароль. Функционал пользователя и администратора.
