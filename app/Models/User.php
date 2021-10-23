@@ -95,4 +95,9 @@ class User extends Authenticatable implements HasMedia
 
         return null;
     }
+
+    // Устанавливаем прямую связь "один со многим" с таблицей "fragments"
+    public function fragments(  ): \Illuminate\Database\Eloquent\Relations\HasMany {
+        return $this->hasMany(Fragment::class);
+    }
 }

@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Http\Resources\UserResource;
+use App\Models\Article;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,8 +14,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
-    {
+    public function register() {
         //
     }
 
@@ -22,8 +23,10 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
+    public function boot() {
         UserResource::wrap('users');
+        Relation::morphMap([
+            'Article' => Article::class,
+        ]);
     }
 }
