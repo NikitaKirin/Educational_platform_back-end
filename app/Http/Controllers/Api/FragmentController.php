@@ -53,7 +53,7 @@ class FragmentController extends Controller
             ], 200);
         }
 
-        return response()->json(print [
+        return response()->json([
             'message' => 'Произошла ошибка',
         ], 400);
     }
