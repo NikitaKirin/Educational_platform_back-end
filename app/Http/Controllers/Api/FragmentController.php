@@ -18,7 +18,7 @@ class FragmentController extends Controller
 {
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
     public function index(): FragmentResourceCollection {
-        return new FragmentResourceCollection(Fragment::orderBy('title', 'asc')->paginate(10));
+        return new FragmentResourceCollection(Fragment::orderBy('title', 'asc')->paginate(6));
     }
 
     // Создать новый фрагмент. Функционал пользователя и администратора.
@@ -44,7 +44,7 @@ class FragmentController extends Controller
 
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
     public function update( UpdateFragmentRequest $request, Fragment $fragment ) {
-        if ( $fragment->fragmentgable_type == 'Article' ) {
+        if ( $fragment->fragmentgable_type == 'article' ) {
             $request->validate(['content' => 'json'], ['json' => 'Введен неверный формат']);
             $fragment->update(['title' => $request->input('title')]);
             $fragment->fragmentgable->update(['content' => $request->input('content')]);
@@ -52,6 +52,10 @@ class FragmentController extends Controller
                 'message' => 'Фрагмент успешно обновлен',
             ], 200);
         }
+
+        return response()->json(print [
+            'message' => 'Произошла ошибка',
+        ], 400);
     }
 
 
