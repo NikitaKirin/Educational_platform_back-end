@@ -11,13 +11,32 @@ use App\Models\Article;
 use App\Models\Fragment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Utils;
 
 class FragmentController extends Controller
 {
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
-    public function index(): FragmentResourceCollection {
+    public function index( Request $request): FragmentResourceCollection {
+        $request->validate([
+            'title' => ['nullable', 'string'],
+            'type'  => ['nullable', 'string', 'in:article,test,video'],
+        ], [
+            'string' => 'Введены некорректные символы',
+            'in'     => 'Выбран несуществующий тип фрагмента',
+        ]);
+        if ( $title = $request->input('title') ) {
+            if ( $type = $request->input('type') ) {
+                $query = Fragment::where('title', 'LIKE', '%' . $title . '%')->where('fragmentgable_type', $type)
+                                 ->orderBy('title')->paginate(6);
+            }
+            else {
+                $query = Fragment::where('title', 'LIKE', '%' . $title . '%')->orderBy('title')->paginate(6);
+            }
+            return new FragmentResourceCollection($query);;
+        }
+        elseif ( $type = $request->input('type') ) {
+            return new FragmentResourceCollection(Fragment::where('fragmentgable_type', $type)->orderBy('title')
+                                                          ->paginate(6));
+        }
         return new FragmentResourceCollection(Fragment::orderBy('title', 'asc')->paginate(6));
     }
 
