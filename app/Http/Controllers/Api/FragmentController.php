@@ -31,7 +31,7 @@ class FragmentController extends Controller
             else {
                 $query = Fragment::where('title', 'LIKE', '%' . $title . '%')->orderBy('title')->paginate(6);
             }
-            return new FragmentResourceCollection($query);;
+            return new FragmentResourceCollection($query);
         }
         elseif ( $type = $request->input('type') ) {
             return new FragmentResourceCollection(Fragment::where('fragmentgable_type', $type)->orderBy('title')
