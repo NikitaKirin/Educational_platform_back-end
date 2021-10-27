@@ -18,6 +18,7 @@ class CreateFragmentRequest extends FormRequest
         return [
             'required' => 'Данное поле обязательно для заполнения',
             'string'   => 'Введены недопустимые символы',
+            'type.in'  => 'Поддерживаются следующие типы фрагментов: :values',
         ];
     }
 

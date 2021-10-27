@@ -8,6 +8,7 @@ use App\Http\Requests\Api\Fragment\UpdateFragmentRequest;
 use App\Http\Resources\FragmentResource;
 use App\Http\Resources\FragmentResourceCollection;
 use App\Models\Article;
+use App\Models\Test;
 use App\Models\Fragment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 class FragmentController extends Controller
 {
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
-    public function index( Request $request): FragmentResourceCollection {
+    public function index( Request $request ): FragmentResourceCollection {
         $request->validate([
             'title' => ['nullable', 'string'],
             'type'  => ['nullable', 'string', 'in:article,test,video'],
@@ -48,6 +49,18 @@ class FragmentController extends Controller
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
             $fragment->fragmentgable()->associate($article);
+            $fragment->save();
+            return response()->json([
+                'message' => 'Новый фрагмент успешно загружен!',
+            ], 201);
+        }
+
+        elseif ( $request->input('type') == 'test' ) {
+            $test = new Test(['content' => $request->input('content')]);
+            $test->save();
+            $fragment = new Fragment(['title' => $request->input('title')]);
+            $fragment->user()->associate(Auth::user());
+            $fragment->fragmentgable()->associate($test);
             $fragment->save();
             return response()->json([
                 'message' => 'Новый фрагмент успешно загружен!',

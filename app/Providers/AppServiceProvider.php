@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Resources\UserResource;
 use App\Models\Article;
+use App\Models\Test;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         UserResource::wrap('users');
         Relation::morphMap([
             'article' => Article::class,
+            'test'    => Test::class,
         ]);
     }
 }

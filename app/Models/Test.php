@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Test extends Model
 {
     protected $table = 'tests';
-
+    public $timestamps = false;
     protected $fillable = [
         'content',
     ];
