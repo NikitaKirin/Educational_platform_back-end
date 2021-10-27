@@ -21,7 +21,7 @@ class FragmentController extends Controller
             'type'  => ['nullable', 'string', 'in:article,test,video'],
         ], [
             'string' => 'Введены некорректные символы',
-            'in'     => 'Выбран несуществующий тип фрагмента',
+            'in'     => 'Выбран несуществующий тип фрагмента. Доступны следующие значения: :values',
         ]);
         if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {
@@ -43,7 +43,6 @@ class FragmentController extends Controller
     // Создать новый фрагмент. Функционал пользователя и администратора.
     public function store( CreateFragmentRequest $request ) {
         if ( $request->input('type') == 'article' ) {
-            $request->validate(['content' => 'json'], ['json' => 'Введен неверный формат']);
             $article = new Article(['content' => $request->input('content')]);
             $article->save();
             $fragment = new Fragment(['title' => $request->input('title')]);
@@ -64,7 +63,6 @@ class FragmentController extends Controller
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
     public function update( UpdateFragmentRequest $request, Fragment $fragment ) {
         if ( $fragment->fragmentgable_type == 'article' ) {
-            $request->validate(['content' => 'json'], ['json' => 'Введен неверный формат']);
             $fragment->update(['title' => $request->input('title')]);
             $fragment->fragmentgable->update(['content' => $request->input('content')]);
             return response()->json([
