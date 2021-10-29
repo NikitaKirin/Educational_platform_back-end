@@ -16,3 +16,4 @@ yarn-error.log
 /.rnd
 /avatars/
 /public/avatars/
+/public/fragments/
