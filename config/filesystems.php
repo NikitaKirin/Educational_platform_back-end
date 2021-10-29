@@ -60,6 +60,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'fragments' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/fragments'),
+            'url'        => env('APP_URL') . '/fragments',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*
@@ -76,6 +83,7 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
         public_path('avatars') => storage_path('app/user/avatars'),
+        public_path('fragments') => storage_path('app/fragments'),
     ],
 
 ];

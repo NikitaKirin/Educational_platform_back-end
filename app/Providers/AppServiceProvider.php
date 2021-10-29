@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Resources\UserResource;
 use App\Models\Article;
 use App\Models\Test;
+use App\Models\Video;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'article' => Article::class,
             'test'    => Test::class,
+            'video'   => Video::class,
         ]);
     }
 }
