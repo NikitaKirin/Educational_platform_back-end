@@ -27,11 +27,11 @@ class FragmentController extends Controller
         ]);
         if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {
-                $query = Fragment::where('title', 'LIKE', '%' . $title . '%')->where('fragmentgable_type', $type)
+                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->where('fragmentgable_type', $type)
                                  ->orderBy('title')->paginate(6);
             }
             else {
-                $query = Fragment::where('title', 'LIKE', '%' . $title . '%')->orderBy('title')->paginate(6);
+                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->orderBy('title')->paginate(6);
             }
             return new FragmentResourceCollection($query);
         }
