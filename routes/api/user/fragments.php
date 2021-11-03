@@ -8,5 +8,8 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
          ->name('fragments.update'); // Обновить данные фрагмента;
     Route::delete('/fragments/{fragment}', 'FragmentController@destroy')->middleware('can:delete,fragment')
          ->name('fragments.destroy'); // Удалить фрагмент;
-    Route::get('/fragments/{title?}/{type?}', 'FragmentController@index')->name('fragments.index'); // Посмотреть список всех фрагментов;
+    Route::get('/my-fragments/{title?}/{type?}', 'FragmentController@myIndex')
+         ->name('fragments.index.my'); // Посмотреть список фрагментов текущего пользователя;
+    Route::get('/fragments/{title?}/{type?}', 'FragmentController@index')
+         ->name('fragments.index'); // Посмотреть список всех фрагментов;
 });

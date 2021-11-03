@@ -16,6 +16,36 @@ use Illuminate\Support\Facades\Auth;
 
 class FragmentController extends Controller
 {
+    // Вывести список фрагментов текущего пользователя.
+    public function myIndex( Request $request ) {
+        $request->validate([
+            'title' => ['nullable', 'string'],
+            'type'  => ['nullable', 'string', 'in:article,test,video'],
+        ], [
+            'string' => 'Введены некорректные символы',
+            'in'     => 'Выбран несуществующий тип фрагмента. Доступны следующие значения: :values',
+        ]);
+
+        if ( $title = $request->input('title') ) {
+            if ( $type = $request->input('type') ) {
+                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->where('fragmentgable_type', $type)
+                                 ->where('user_id', '=', Auth::user()->id)->orderBy('title')->paginate(6);
+            }
+            else {
+                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->where('user_id', '=', Auth::user()->id)
+                                 ->orderBy('title')->paginate(6);
+            }
+            return new FragmentResourceCollection($query);
+        }
+        elseif ( $type = $request->input('type') ) {
+            return new FragmentResourceCollection(Fragment::where('fragmentgable_type', $type)
+                                                          ->where('user_id', '=', Auth::user()->id)->orderBy('title')
+                                                          ->paginate(6));
+        }
+        return new FragmentResourceCollection(Fragment::where('user_id', '=', Auth::user()->id)->orderBy('title', 'asc')
+                                                      ->paginate(6));
+    }
+
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
     public function index( Request $request ): FragmentResourceCollection {
         $request->validate([
