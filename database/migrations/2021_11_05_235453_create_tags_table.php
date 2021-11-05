@@ -9,7 +9,7 @@ class CreateTagsTable extends Migration
     public function up() {
         Schema::create('tags', function ( Blueprint $table ) {
             $table->id();
-            $table->string('value');
+            $table->string('value')->unique();
             $table->timestamps();
             $table->softDeletes();
         });
