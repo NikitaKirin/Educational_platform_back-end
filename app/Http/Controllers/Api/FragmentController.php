@@ -112,12 +112,12 @@ class FragmentController extends Controller
     public function update( UpdateFragmentRequest $request, Fragment $fragment ) {
         if ( $fragment->fragmentgable_type == 'video' ) {
             $fragment->update(['title' => $request->input('title')]);
-            $fragment->fragmentgable->clearMediaCollection('fragments_videos');
+            /*$fragment->fragmentgable->clearMediaCollection('fragments_videos');
             $fragment->fragmentgable->addMediaFromRequest('content')
                                     ->toMediaCollection('fragments_videos', 'fragments');
             $fragment->fragmentgable->refresh();
             $fragment->fragmentgable->content = $fragment->fragmentgable->getFirstMediaUrl('fragments_videos');
-            $fragment->fragmentgable->save();
+            $fragment->fragmentgable->save();*/
             return response()->json([
                 'message' => 'Фрагмент успешно обновлен',
             ], 200);
