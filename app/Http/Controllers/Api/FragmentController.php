@@ -13,6 +13,7 @@ use App\Models\Fragment;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FragmentController extends Controller
 {
@@ -117,29 +118,28 @@ class FragmentController extends Controller
 
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
     public function update( UpdateFragmentRequest $request, Fragment $fragment ) {
+        if ( $tags = $request->input('tags') ) {
+            foreach ( $tags as $tag ) {
+                if ( DB::table('fragment_tag')->where('tag_id', $tag)->where('fragment_id', $fragment->id)->exists() )
+                    continue;
+                $fragment->tags()->attach($tag);
+                $fragment->save();
+            }
+        }
         if ( $fragment->fragmentgable_type == 'video' ) {
             $fragment->update(['title' => $request->input('title')]);
-            /*$fragment->fragmentgable->clearMediaCollection('fragments_videos');
-            $fragment->fragmentgable->addMediaFromRequest('content')
-                                    ->toMediaCollection('fragments_videos', 'fragments');
-            $fragment->fragmentgable->refresh();
-            $fragment->fragmentgable->content = $fragment->fragmentgable->getFirstMediaUrl('fragments_videos');
-            $fragment->fragmentgable->save();*/
-            return response()->json([
-                'message' => 'Фрагмент успешно обновлен',
-            ], 200);
         }
         else {
             if ( $fragment->fragmentgable_type == 'article' )
                 $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
             if ( $fragment->fragmentgable_type == 'test' )
                 $request->validate(['content' => 'json'], ['json' => 'На вход ожидались данные в формате JSON']);
-            $fragment->update(['title' => $request->input('title')]);
-            $fragment->fragmentgable->update(['content' => $request->input('content')]);
-            return response()->json([
-                'message' => 'Фрагмент успешно обновлен',
-            ], 200);
+            $fragment->update($request->only('title'));
+            $fragment->fragmentgable->update($request->only('content'));
         }
+        return response()->json([
+            'message' => 'Фрагмент успешно обновлен',
+        ], 200);
 
         /*        return response()->json([
                     'message' => 'Произошла ошибка',

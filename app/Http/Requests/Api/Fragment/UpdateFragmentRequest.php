@@ -2,13 +2,17 @@
 
 namespace App\Http\Requests\Api\Fragment;
 
+use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateFragmentRequest extends FormRequest
 {
     public function rules(): array {
+        $tags = Tag::getValues();
         return [
-            'title' => 'required|string',
+            'title' => 'nullable|string',
+            'tags'  => ['nullable', 'array', Rule::in($tags)],
         ];
     }
 
@@ -16,6 +20,8 @@ class UpdateFragmentRequest extends FormRequest
         return [
             'required' => 'Данное поле обязательно для заполнения',
             'string'   => 'Введены недоступные символы',
+            'array'    => 'На вход ожидался массив',
+            'tags.in'  => 'Данное поле должно содержать только следующие значения: :values',
         ];
     }
 
@@ -26,13 +32,13 @@ class UpdateFragmentRequest extends FormRequest
     public function withValidator( $validator ) {
         $validator->after(function ( $validator ) {
             if ( $this->input('type') == 'article' ) {
-                $this->validate(['content' => 'required|string'], [
+                $this->validate(['content' => 'nullable|string'], [
                     'string'   => 'Введены недопустимые символы',
                     'required' => 'Данное поле обязательно для заполнения',
                 ]);
             }
             elseif ( $this->input('type') == 'test' ) {
-                $this->validate(['content' => 'required|json'], [
+                $this->validate(['content' => 'nullable|json'], [
                     'json'     => 'Ожидались данные в формате JSON',
                     'required' => 'Данное поле обязательно для заполнения',
                 ]);
