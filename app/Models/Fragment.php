@@ -27,4 +27,9 @@ class Fragment extends Model
         return $this->morphTo();
     }
 
+    // Устанавливаем связь "многие со многим" с таблицей "tags" через связующую таблицу "fragment_tag"
+    public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
+        return $this->belongsToMany(Tag::class);
+    }
+
 }
