@@ -2,15 +2,21 @@
 
 namespace App\Http\Requests\Api\Fragment;
 
+use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 
 class CreateFragmentRequest extends FormRequest
 {
+
     public function rules(): array {
+        $tags = Tag::getValues();
         return [
             'type'    => 'required|in:test,article,video|string',
             'title'   => 'required|string',
             'content' => 'required',
+            'tags'    => ['nullable', 'array', Rule::in($tags)],
         ];
     }
 
@@ -19,6 +25,8 @@ class CreateFragmentRequest extends FormRequest
             'required' => 'Данное поле обязательно для заполнения',
             'string'   => 'Введены недопустимые символы',
             'type.in'  => 'Поддерживаются следующие типы фрагментов: :values',
+            'array'    => 'На вход ожидался массив',
+            'tags.in'  => 'Данное поле должно содержать только следующие значения: :values',
         ];
     }
 

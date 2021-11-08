@@ -73,7 +73,7 @@ class FragmentController extends Controller
     }
 
     // Создать новый фрагмент. Функционал пользователя и администратора.
-    public function store( CreateFragmentRequest $request ) {
+    public function store( CreateFragmentRequest $request ): \Illuminate\Http\JsonResponse {
         if ( $request->input('type') == 'article' ) {
             $data = new Article(['content' => $request->input('content')]);
             $data->save();
@@ -94,6 +94,7 @@ class FragmentController extends Controller
         $fragment->user()->associate(Auth::user());
         $fragment->fragmentgable()->associate($data);
         if ( $fragment->save() ) {
+            $fragment->tags()->sync($request->input('tags'));
             return response()->json([
                 'message' => 'Новый фрагмент успешно загружен!',
             ], 201);
