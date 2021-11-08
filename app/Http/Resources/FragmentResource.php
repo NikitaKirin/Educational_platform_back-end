@@ -21,6 +21,9 @@ class FragmentResource extends JsonResource
             'user_name'  => $this->user->name,
             'user_id'    => $this->user_id,
             'content'    => $this->fragmentgable->content,
+
+            'tags_count' => $this->when($this->tags()->exists(), $this->tags()->count()),
+            'tags'       => $this->when($this->tags()->exists(), new TagResourceCollection($this->whenLoaded('tags'))),
         ];
     }
 }

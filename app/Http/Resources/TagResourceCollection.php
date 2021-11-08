@@ -8,11 +8,9 @@ use Illuminate\Http\Request;
 /** @see \App\Models\Tag */
 class TagResourceCollection extends ResourceCollection
 {
-    public static $wrap = 'tags';
-
     public function toArray( $request ): array {
         return [
-            'tags' => $this->collection,
+            'data' => $this->collection,
         ];
     }
 }

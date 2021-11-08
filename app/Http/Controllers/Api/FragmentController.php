@@ -28,21 +28,24 @@ class FragmentController extends Controller
 
         if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {
-                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->where('fragmentgable_type', $type)
-                                 ->where('user_id', '=', Auth::user()->id)->orderBy('title')->paginate(6);
+                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
+                                 ->where('fragmentgable_type', $type)->where('user_id', '=', Auth::user()->id)
+                                 ->orderBy('title')->paginate(6);
             }
             else {
-                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->where('user_id', '=', Auth::user()->id)
-                                 ->orderBy('title')->paginate(6);
+                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
+                                 ->where('user_id', '=', Auth::user()->id)->orderBy('title')->paginate(6);
             }
             return new FragmentResourceCollection($query);
         }
         elseif ( $type = $request->input('type') ) {
-            return new FragmentResourceCollection(Fragment::where('fragmentgable_type', $type)
+            return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
+                                                          ->where('fragmentgable_type', $type)
                                                           ->where('user_id', '=', Auth::user()->id)->orderBy('title')
                                                           ->paginate(6));
         }
-        return new FragmentResourceCollection(Fragment::where('user_id', '=', Auth::user()->id)->orderBy('title', 'asc')
+        return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
+                                                      ->where('user_id', '=', Auth::user()->id)->orderBy('title', 'asc')
                                                       ->paginate(6));
     }
 
@@ -57,19 +60,22 @@ class FragmentController extends Controller
         ]);
         if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {
-                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->where('fragmentgable_type', $type)
-                                 ->orderBy('title')->paginate(6);
+                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
+                                 ->where('fragmentgable_type', $type)->orderBy('title')->paginate(6);
             }
             else {
-                $query = Fragment::where('title', 'ILIKE', '%' . $title . '%')->orderBy('title')->paginate(6);
+                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
+                                 ->orderBy('title')->paginate(6);
             }
             return new FragmentResourceCollection($query);
         }
         elseif ( $type = $request->input('type') ) {
-            return new FragmentResourceCollection(Fragment::where('fragmentgable_type', $type)->orderBy('title')
+            return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
+                                                          ->where('fragmentgable_type', $type)->orderBy('title')
                                                           ->paginate(6));
         }
-        return new FragmentResourceCollection(Fragment::orderBy('title', 'asc')->paginate(6));
+        return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')->orderBy('title', 'asc')
+                                                      ->paginate(6));
     }
 
     // Создать новый фрагмент. Функционал пользователя и администратора.
@@ -106,7 +112,7 @@ class FragmentController extends Controller
 
     // Получить определенный фрагмент. Функционал пользователя и администратора.
     public function show( Fragment $fragment ): FragmentResource {
-        return new FragmentResource($fragment);
+        return new FragmentResource($fragment->load('tags')->loadCount('tags'));
     }
 
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
