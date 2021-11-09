@@ -4,30 +4,34 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Fragment\CreateFragmentRequest;
+use App\Http\Requests\Api\Fragment\IndexFragmentRequest;
 use App\Http\Requests\Api\Fragment\UpdateFragmentRequest;
 use App\Http\Resources\FragmentResource;
 use App\Http\Resources\FragmentResourceCollection;
 use App\Models\Article;
+use App\Models\Tag;
 use App\Models\Test;
 use App\Models\Fragment;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class FragmentController extends Controller
 {
     // Вывести список фрагментов текущего пользователя.
-    public function myIndex( Request $request ) {
-        $request->validate([
-            'title' => ['nullable', 'string'],
-            'type'  => ['nullable', 'string', 'in:article,test,video'],
-        ], [
-            'string' => 'Введены некорректные символы',
-            'in'     => 'Выбран несуществующий тип фрагмента. Доступны следующие значения: :values',
-        ]);
-
-        if ( $title = $request->input('title') ) {
+    public function myIndex( IndexFragmentRequest $request ): FragmentResourceCollection {
+        $title = $request->input('title');
+        $type = $request->input('type');
+        $tags = $request->input('tags');
+        $fragments = Fragment::with('tags')->withCount('tags')->where('user_id', Auth::id())
+                             ->when($title, function ( $query ) use ( $title ) {
+                                 return $query->where('title', 'ILIKE', '%' . $title . '%');
+                             })->when($type, function ( $query ) use ( $type ) {
+                return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+            });
+        /*if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {
                 $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
                                  ->where('fragmentgable_type', $type)->where('user_id', '=', Auth::user()->id)
@@ -44,22 +48,23 @@ class FragmentController extends Controller
                                                           ->where('fragmentgable_type', $type)
                                                           ->where('user_id', '=', Auth::user()->id)->orderBy('title')
                                                           ->paginate(6));
-        }
-        return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
-                                                      ->where('user_id', '=', Auth::user()->id)->orderBy('title', 'asc')
-                                                      ->paginate(6));
+        }*/
+
+        return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
+
     }
 
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
-    public function index( Request $request ): FragmentResourceCollection {
-        $request->validate([
-            'title' => ['nullable', 'string'],
-            'type'  => ['nullable', 'string', 'in:article,test,video'],
-        ], [
-            'string' => 'Введены некорректные символы',
-            'in'     => 'Выбран несуществующий тип фрагмента. Доступны следующие значения: :values',
-        ]);
-        if ( $title = $request->input('title') ) {
+    public function index( IndexFragmentRequest $request ): FragmentResourceCollection {
+        $title = $request->input('title');
+        $type = $request->input('type');
+        $tags = $request->input('tags');
+        $fragments = Fragment::with('tags')->withCount('tags')->when($title, function ( $query ) use ( $title ) {
+            return $query->where('title', 'ILIKE', '%' . $title . '%');
+        })->when($type, function ( $query ) use ( $type ) {
+            return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+        });
+        /*if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {
                 $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
                                  ->where('fragmentgable_type', $type)->orderBy('title')->paginate(6);
@@ -74,9 +79,8 @@ class FragmentController extends Controller
             return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
                                                           ->where('fragmentgable_type', $type)->orderBy('title')
                                                           ->paginate(6));
-        }
-        return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')->orderBy('title', 'asc')
-                                                      ->paginate(6));
+        }*/
+        return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
     }
 
     // Создать новый фрагмент. Функционал пользователя и администратора.
@@ -119,12 +123,8 @@ class FragmentController extends Controller
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
     public function update( UpdateFragmentRequest $request, Fragment $fragment ) {
         if ( $tags = $request->input('tags') ) {
-            foreach ( $tags as $tag ) {
-                if ( DB::table('fragment_tag')->where('tag_id', $tag)->where('fragment_id', $fragment->id)->exists() )
-                    continue;
-                $fragment->tags()->attach($tag);
-                $fragment->save();
-            }
+            $tags = array_unique($tags);
+            $fragment->tags()->sync($tags);
         }
         if ( $fragment->fragmentgable_type == 'video' ) {
             $fragment->update(['title' => $request->input('title')]);
