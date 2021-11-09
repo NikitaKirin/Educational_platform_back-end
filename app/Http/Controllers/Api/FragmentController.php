@@ -121,10 +121,13 @@ class FragmentController extends Controller
     }
 
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
-    public function update( UpdateFragmentRequest $request, Fragment $fragment ) {
+    public function update( UpdateFragmentRequest $request, Fragment $fragment ): \Illuminate\Http\JsonResponse {
         if ( $tags = $request->input('tags') ) {
             $tags = array_unique($tags);
             $fragment->tags()->sync($tags);
+        }
+        else {
+            DB::table('fragment_tag')->where('fragment_id', $fragment->id)->delete();
         }
         if ( $fragment->fragmentgable_type == 'video' ) {
             $fragment->update(['title' => $request->input('title')]);
