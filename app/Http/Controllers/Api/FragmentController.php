@@ -172,4 +172,19 @@ class FragmentController extends Controller
             Auth::user()->favouriteFragments()->attach($fragment->id);
         return response(['message' => 'Ok'], 200);
     }
+
+    // Получить список избранных фрагментов. Функционал пользователя и администратора.
+    public function likeIndex( Request $request ): FragmentResourceCollection {
+        $title = $request->input('title');
+        $type = $request->input('type');
+        $tags = $request->input('tags');
+        $fragments = Auth::user()->favouriteFragments()->withCount('tags')->with('tags')
+                         ->when($title, function ( $query ) use ( $title ) {
+                             return $query->where('title', 'ILIKE', '%' . $title . '%');
+                         })->when($type, function ( $query ) use ( $type ) {
+                return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+            });
+
+        return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
+    }
 }

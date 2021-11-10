@@ -1,6 +1,7 @@
 <?php
 
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
+    Route::get('/fragments/like/{title?}{type?}', 'FragmentController@likeIndex')->name('fragments.like.index');
     Route::post('/fragments', 'FragmentController@store')->name('fragments.store'); // Создать новый фрагмент;
     Route::get('/fragments/{fragment}', 'FragmentController@show')
          ->name('fragments.show'); // Получить данные об определенном фрагменте;

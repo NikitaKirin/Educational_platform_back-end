@@ -27,6 +27,8 @@ class FragmentResourceCollection extends ResourceCollection
         $all_count = 0;
         if ( $request->is('api/my-fragments*') )
             $all_count = DB::table('fragments')->where('user_id', Auth::id())->where('deleted_at', null)->count();
+        elseif ( $request->is('api/fragments/like*') )
+            $all_count = Auth::user()->favouriteFragments()->count();
         elseif ( $request->is('api/fragments*') )
             $all_count = DB::table('fragments')->where('deleted_at', '=', null)->count();
 
