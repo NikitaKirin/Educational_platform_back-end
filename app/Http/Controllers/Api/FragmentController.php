@@ -162,4 +162,14 @@ class FragmentController extends Controller
             'message' => 'Не удалось удалить фрагмент',
         ], 400);
     }
+
+    // Добавить/удалить фрагмент из избранного. Функционал пользователя и администратора.
+    public function like( Request $request, Fragment $fragment ) {
+        $query = DB::table('fragment_user')->where('fragment_id', $fragment->id)->where('user_id', Auth::id());
+        if ( $query->exists() )
+            $query->delete();
+        else
+            Auth::user()->favouriteFragments()->attach($fragment->id);
+        return response(['message' => 'Ok'], 200);
+    }
 }
