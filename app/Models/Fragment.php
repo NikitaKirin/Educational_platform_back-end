@@ -32,4 +32,9 @@ class Fragment extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    // Устанавливаем связь "многие со многим" с таблицей "users" через связующую таблицу "fragment_user"
+    // реализуем функцию добавить фрагмент в избранное
+    public function favouritableUsers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
+        return $this->belongsToMany(User::class, 'fragment_table');
+    }
 }
