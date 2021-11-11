@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    public function __invoke( LoginRequest $request ) {
+    public function __invoke( LoginRequest $request ): \Illuminate\Http\JsonResponse {
 
         if ( Auth::attempt($request->all()) && Auth::user()->role == 'admin' ) {
             $token = Auth::user()->createToken(config('app.name'));
@@ -20,7 +20,9 @@ class LoginController extends Controller
                 'token_type' => 'Bearer',
                 'token'      => $token->accessToken,
                 'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
-                'message' => 'Добро пожаловать, ' . Auth::user()->name . '!',
+                'message'    => 'Добро пожаловать, ' . Auth::user()->name . '!',
+                'user_id'    => Auth::id(),
+                'user_role'  => Auth::user()->role,
             ], 200);
         }
 
