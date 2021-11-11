@@ -148,7 +148,7 @@ class UserController extends Controller
     // Получить данные определенного учителя. Функционал любого пользователя.
     public function teacherShow( Request $request, User $user ) {
         if ( $user )
-            return new UserResource($user->load('fragments'));
+            return new UserResource($user->load('fragments')->loadCount('fragments'));
         return response(['message' => 'Такого пользователя не существует'], 404);
     }
 }

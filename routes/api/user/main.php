@@ -13,7 +13,8 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
     Route::post('/user/me/avatar', 'AvatarController@updateOwnAvatar'); // Загрузить новый аватар своего профиля;
     Route::delete('/user/me/avatar', 'AvatarController@destroyOwnAvatar'); // Удалить свой аватар;
     Route::patch('/user/me/password', 'PasswordController@passwordUpdate'); // Обновить свой пароль;
-    Route::get('/user/teachers/{user}', 'UserController@teacherShow')->name('user.teachers.show');
+    Route::get('/user/teachers/{user}', 'UserController@teacherShow')->middleware('can:view,user')
+         ->name('user.teachers.show'); // Вывести данные определенного учителя;
     Route::get('/user/teachers/{name?}', 'UserController@teachersIndex')
          ->name('user.teachers.index'); // Вывести список учителей;
 });

@@ -12,6 +12,8 @@ class UserPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ) {
+        if ( $operation == 'view' )
+            return null;
         return $user->role == 'admin' ? true : Response::deny('Forbidden', 403);
     }
 
@@ -38,13 +40,13 @@ class UserPolicy
     }
 
     // Просмотр списка пользователей
-    public function viewAny( User $user ) {
+    public function viewAny( User $user ): Response {
         return $user->role == 'admin' ? Response::allow() : Response::deny('Forbidden', 403);
     }
 
     // Просмотр профиля пользователя
     public function view( User $user, User $model ): bool {
-        return false;
+        return $model->role == 'creator';
     }
 
     public function create( User $user ): bool {

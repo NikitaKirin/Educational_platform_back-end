@@ -3,11 +3,9 @@
 namespace App\Http\Resources;
 
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
-use phpDocumentor\Reflection\Types\Self_;
 
-/** @mixin \App\Models\User */
+/** @mixin User */
 class UserResource extends JsonResource
 {
     public static $wrap = 'user';
