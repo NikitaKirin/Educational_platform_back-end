@@ -21,11 +21,11 @@ class UserController extends Controller
 {
     // Выводит список всех пользователей для администратора с пагинацией.
     public function index(): UserResourceCollection {
-        return new UserResourceCollection(DB::table('users')->orderBy('name', 'asc')->paginate(10));
+        return new UserResourceCollection(User::orderBy('name')->paginate(10));
     }
 
     // Вывод страницы мой профиль
-    public function me() {
+    public function me(): \Illuminate\Http\JsonResponse {
 
         $user = new UserResource(Auth::user());
         if ( $user->role == 'admin' ) {
@@ -54,7 +54,7 @@ class UserController extends Controller
     }
 
     // Выводит данные для страницы любого пользователя. Доступно только администраторам
-    public function show( User $user ) {
+    public function show( User $user ): \Illuminate\Http\JsonResponse {
         if ( $user ) {
             return response()->json([
                 'user' => $user,
@@ -94,7 +94,7 @@ class UserController extends Controller
     }
 
     // Заблокировать любого пользователя. Функционал администратора.
-    public function block( User $user ) {
+    public function block( User $user ): \Illuminate\Http\JsonResponse {
 
         if ( $user->blocked_at != null ) {
             return response()->json([
@@ -113,7 +113,7 @@ class UserController extends Controller
     }
 
     // Разблокировать любого пользователя. Функционал администратора.
-    public function unblock( User $user ) {
+    public function unblock( User $user ): \Illuminate\Http\JsonResponse {
         if ( $user->blocked_at == null )
             return response()->json([
                 'message' => 'Невозможно разблокировать незаблокированного пользователя',
@@ -131,7 +131,24 @@ class UserController extends Controller
     }
 
     // Вывести список заблокированных пользователей. Функционал администратора.
-    public function showBlocked() {
-return new UserResourceCollection(DB::table('users')->where('blocked_at', '!=', null)->orderBy('name', 'asc')->paginate(10));
+    public function showBlocked(): UserResourceCollection {
+        return new UserResourceCollection(User::where('blocked_at', '!=', null)->orderBy('name', 'asc')->paginate(10));
+    }
+
+    // Вывести список учителей. Функционал любого пользователя.
+    public function teachersIndex( Request $request ): UserResourceCollection {
+        $request->validate(['name' => 'string'], ['string' => 'Введены недопустимые символы']);
+        $name = $request->input('name');
+        return new UserResourceCollection(User::withCount('fragments')->where('role', 'creator')
+                                              ->when($name, function ( $query ) use ( $name ) {
+                                                  return $query->where('name', 'ILIKE', '%' . $name . '%');
+                                              })->orderBy('name')->paginate(10));
+    }
+
+    // Получить данные определенного учителя. Функционал любого пользователя.
+    public function teacherShow( Request $request, User $user ) {
+        if ( $user )
+            return new UserResource($user->load('fragments'));
+        return response(['message' => 'Такого пользователя не существует'], 404);
     }
 }

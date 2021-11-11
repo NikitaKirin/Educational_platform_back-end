@@ -30,6 +30,8 @@ class FragmentController extends Controller
                                  return $query->where('title', 'ILIKE', '%' . $title . '%');
                              })->when($type, function ( $query ) use ( $type ) {
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+            })->when($tags, function ( $query ) use ( $tags ) {
+
             });
         /*if ( $title = $request->input('title') ) {
             if ( $type = $request->input('type') ) {

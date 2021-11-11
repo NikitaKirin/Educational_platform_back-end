@@ -11,7 +11,7 @@ class UserResourceCollection extends ResourceCollection
     public static $wrap = 'users';
     public function toArray( $request ): array {
         return [
-            'users' => $this->collection,
+            'data' => $this->collection,
         ];
     }
 }
