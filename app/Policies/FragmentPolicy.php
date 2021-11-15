@@ -11,6 +11,8 @@ class FragmentPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ) {
+        if ( $operation == 'create' )
+            return null;
         if ( $user->role == 'admin' )
             return true;
     }
@@ -29,7 +31,7 @@ class FragmentPolicy
     }
 
     public function create( User $user ): bool {
-        return true;
+        return $user->role == 'creator';
     }
 
     public function update( User $user, Fragment $fragment ): bool {
