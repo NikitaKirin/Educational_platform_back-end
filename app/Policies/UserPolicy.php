@@ -12,13 +12,17 @@ class UserPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ) {
-        if ( $operation == 'view' )
+        if ( $operation == 'view' || $operation == 'viewTeacherFragments' )
             return null;
         return $user->role == 'admin' ? true : Response::deny('Forbidden', 403);
     }
 
     public function __construct() {
         //
+    }
+
+    public function viewTeacherFragments( User $user, User $model ): bool {
+        return $model->role == 'creator';
     }
 
     public function showBlocked( User $user ): bool {
