@@ -32,29 +32,11 @@ class FragmentController extends Controller
                              })->when($type, function ( $query ) use ( $type ) {
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
             })->when($tags, function ( $query ) use ( $tags ) {
-
+                return $query->whereHas('tags', function ( $query ) use ( $tags ) {
+                    $query->whereIn('tag_id', $tags);
+                });
             });
-        /*if ( $title = $request->input('title') ) {
-            if ( $type = $request->input('type') ) {
-                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
-                                 ->where('fragmentgable_type', $type)->where('user_id', '=', Auth::user()->id)
-                                 ->orderBy('title')->paginate(6);
-            }
-            else {
-                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
-                                 ->where('user_id', '=', Auth::user()->id)->orderBy('title')->paginate(6);
-            }
-            return new FragmentResourceCollection($query);
-        }
-        elseif ( $type = $request->input('type') ) {
-            return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
-                                                          ->where('fragmentgable_type', $type)
-                                                          ->where('user_id', '=', Auth::user()->id)->orderBy('title')
-                                                          ->paginate(6));
-        }*/
-
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
-
     }
 
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
@@ -66,23 +48,11 @@ class FragmentController extends Controller
             return $query->where('title', 'ILIKE', '%' . $title . '%');
         })->when($type, function ( $query ) use ( $type ) {
             return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+        })->when($tags, function ( $query ) use ( $tags ) {
+            return $query->whereHas('tags', function ( $query ) use ( $tags ) {
+                $query->whereIn('tag_id', $tags);
+            });
         });
-        /*if ( $title = $request->input('title') ) {
-            if ( $type = $request->input('type') ) {
-                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
-                                 ->where('fragmentgable_type', $type)->orderBy('title')->paginate(6);
-            }
-            else {
-                $query = Fragment::with('tags')->withCount('tags')->where('title', 'ILIKE', '%' . $title . '%')
-                                 ->orderBy('title')->paginate(6);
-            }
-            return new FragmentResourceCollection($query);
-        }
-        elseif ( $type = $request->input('type') ) {
-            return new FragmentResourceCollection(Fragment::with('tags')->withCount('tags')
-                                                          ->where('fragmentgable_type', $type)->orderBy('title')
-                                                          ->paginate(6));
-        }*/
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
     }
 
@@ -191,6 +161,10 @@ class FragmentController extends Controller
                              return $query->where('title', 'ILIKE', '%' . $title . '%');
                          })->when($type, function ( $query ) use ( $type ) {
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+            })->when($tags, function ( $query ) use ( $tags ) {
+                return $query->whereHas('tags', function ( $query ) use ( $tags ) {
+                    $query->whereIn('tag_id', $tags);
+                });
             });
 
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
