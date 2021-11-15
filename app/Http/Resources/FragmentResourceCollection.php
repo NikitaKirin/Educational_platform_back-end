@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Fragment;
 use App\Models\User;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 /** @see \App\Models\Fragment */
 class FragmentResourceCollection extends ResourceCollection
 {
-    public static $wrap = 'fragments';
+    public static $wrap = "fragments";
 
     public function toArray( $request ): array {
         /*        return [
@@ -32,7 +33,7 @@ class FragmentResourceCollection extends ResourceCollection
             $all_count = Auth::user()->favouriteFragments()->count();
         elseif ( $request->is('api/fragments*') )
             $all_count = DB::table('fragments')->where('deleted_at', '=', null)->count();
-        elseif ( $request->route()->named('user.teachers.show') )
+        elseif ( $request->route()->named('fragments.teacher.index') )
             $all_count = $request->user->fragments()->count();
 
         return [

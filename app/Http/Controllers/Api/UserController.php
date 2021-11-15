@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Admin\Auth\RegisterRequest;
 use App\Http\Requests\Api\Admin\Profile\UpdateSomeOneProfileRequest;
 use App\Http\Requests\Api\User\Profile\UpdateOwnProfileRequest;
+use App\Http\Resources\CreatorResource;
+use App\Http\Resources\CreatorResourceCollection;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResourceCollection;
 use App\Mail\RegisterNewUserMail;
@@ -136,19 +138,19 @@ class UserController extends Controller
     }
 
     // Вывести список учителей. Функционал любого пользователя.
-    public function teachersIndex( Request $request ): UserResourceCollection {
+    public function teachersIndex( Request $request ): CreatorResourceCollection {
         $request->validate(['name' => 'string'], ['string' => 'Введены недопустимые символы']);
         $name = $request->input('name');
-        return new UserResourceCollection(User::withCount('fragments')->where('role', 'creator')
-                                              ->when($name, function ( $query ) use ( $name ) {
-                                                  return $query->where('name', 'ILIKE', '%' . $name . '%');
-                                              })->orderBy('name')->paginate(10));
+        return new CreatorResourceCollection(User::withCount('fragments')->where('role', 'creator')
+                                                 ->when($name, function ( $query ) use ( $name ) {
+                                                     return $query->where('name', 'ILIKE', '%' . $name . '%');
+                                                 })->orderBy('name')->paginate(10));
     }
 
     // Получить данные определенного учителя. Функционал любого пользователя.
     public function teacherShow( Request $request, User $user ) {
         if ( $user )
-            return new UserResource($user->load('fragments')->loadCount('fragments'));
+            return new CreatorResource($user->load('fragments')->loadCount('fragments'));
         return response(['message' => 'Такого пользователя не существует'], 404);
     }
 }

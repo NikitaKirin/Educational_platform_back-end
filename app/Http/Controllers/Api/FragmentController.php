@@ -12,6 +12,7 @@ use App\Models\Article;
 use App\Models\Tag;
 use App\Models\Test;
 use App\Models\Fragment;
+use App\Models\User;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -193,5 +194,10 @@ class FragmentController extends Controller
             });
 
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
+    }
+
+    // Получить список фрагментов текущего учителя.
+    public function fragmentsTeacherIndex( Request $request, User $user ): FragmentResourceCollection {
+        return new FragmentResourceCollection($user->fragments()->paginate(6));
     }
 }

@@ -1,6 +1,9 @@
 <?php
 
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
+    Route::get('/teacher/fragments/{user}', 'FragmentController@fragmentsTeacherIndex')
+         ->middleware('can:viewTeacherFragments,user')
+         ->name('fragments.teacher.index'); // Получить список фрагментов определённого учителя;
     Route::get('/fragments/like/{title?}{type?}', 'FragmentController@likeIndex')->name('fragments.like.index');
     Route::post('/fragments', 'FragmentController@store')->name('fragments.store'); // Создать новый фрагмент;
     Route::get('/fragments/{fragment}', 'FragmentController@show')
