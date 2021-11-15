@@ -87,34 +87,37 @@ class FragmentController extends Controller
 
     // Создать новый фрагмент. Функционал пользователя и администратора.
     public function store( CreateFragmentRequest $request ): \Illuminate\Http\JsonResponse {
-        if ( $request->input('type') == 'article' ) {
-            $data = new Article(['content' => $request->input('content')]);
-            $data->save();
-        }
-        elseif ( $request->input('type') == 'test' ) {
-            $data = new Test(['content' => $request->input('content')]);
-            $data->save();
-        }
-        elseif ( $request->input('type') == 'video' ) {
-            $data = new Video();
-            $data->content = '1';
-            $data->save();
-            $data->addMediaFromRequest('content')->toMediaCollection('fragments_videos', 'fragments');
-            $data->content = $data->getFirstMediaUrl('fragments_videos');
-            $data->save();
-        }
-        $fragment = new Fragment(['title' => $request->input('title')]);
-        $fragment->user()->associate(Auth::user());
-        $fragment->fragmentgable()->associate($data);
-        if ( $fragment->save() ) {
+        DB::transaction(function () use ( $request ) {
+            if ( $request->input('type') == 'article' ) {
+                $data = new Article(['content' => $request->input('content')]);
+                $data->save();
+            }
+            elseif ( $request->input('type') == 'test' ) {
+                $data = new Test(['content' => $request->input('content')]);
+                $data->save();
+            }
+            elseif ( $request->input('type') == 'video' ) {
+                $data = new Video();
+                $data->content = '1';
+                $data->save();
+                $data->addMediaFromRequest('content')->toMediaCollection('fragments_videos', 'fragments');
+                $data->content = $data->getFirstMediaUrl('fragments_videos');
+                $data->save();
+            }
+            $fragment = new Fragment(['title' => $request->input('title')]);
+            $fragment->user()->associate(Auth::user());
+            $fragment->fragmentgable()->associate($data);
+            $fragment->save();
+            //if ( $fragment->save() ) {
             $fragment->tags()->sync($request->input('tags'));
-            return response()->json([
-                'message' => 'Новый фрагмент успешно загружен!',
-            ], 201);
-        }
+            //}
+            /*return response()->json([
+                'message' => 'Произошла ошибка при создании фрагмента',
+            ], 400);*/
+        });
         return response()->json([
-            'message' => 'Произошла ошибка при создании фрагмента',
-        ], 400);
+            'message' => 'Новый фрагмент успешно загружен!',
+        ], 201);
     }
 
     // Получить определенный фрагмент. Функционал пользователя и администратора.
@@ -124,24 +127,26 @@ class FragmentController extends Controller
 
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
     public function update( UpdateFragmentRequest $request, Fragment $fragment ): \Illuminate\Http\JsonResponse {
-        if ( $tags = $request->input('tags') ) {
-            $tags = array_unique($tags);
-            $fragment->tags()->sync($tags);
-        }
-        else {
-            DB::table('fragment_tag')->where('fragment_id', $fragment->id)->delete();
-        }
-        if ( $fragment->fragmentgable_type == 'video' ) {
-            $fragment->update(['title' => $request->input('title')]);
-        }
-        else {
-            if ( $fragment->fragmentgable_type == 'article' )
-                $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
-            if ( $fragment->fragmentgable_type == 'test' )
-                $request->validate(['content' => 'json'], ['json' => 'На вход ожидались данные в формате JSON']);
-            $fragment->update($request->only('title'));
-            $fragment->fragmentgable->update($request->only('content'));
-        }
+        DB::transaction(function () use ( $request, $fragment ) {
+            if ( $tags = $request->input('tags') ) {
+                $tags = array_unique($tags);
+                $fragment->tags()->sync($tags);
+            }
+            else {
+                DB::table('fragment_tag')->where('fragment_id', $fragment->id)->delete();
+            }
+            if ( $fragment->fragmentgable_type == 'video' ) {
+                $fragment->update(['title' => $request->input('title')]);
+            }
+            else {
+                if ( $fragment->fragmentgable_type == 'article' )
+                    $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
+                if ( $fragment->fragmentgable_type == 'test' )
+                    $request->validate(['content' => 'json'], ['json' => 'На вход ожидались данные в формате JSON']);
+                $fragment->update($request->only('title'));
+                $fragment->fragmentgable->update($request->only('content'));
+            }
+        });
         return response()->json([
             'message' => 'Фрагмент успешно обновлен',
         ], 200);
