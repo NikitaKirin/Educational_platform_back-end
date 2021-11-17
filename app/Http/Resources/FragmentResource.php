@@ -22,6 +22,7 @@ class FragmentResource extends JsonResource
             'updated_at' => $this->updated_at,
             'user_name'  => $this->user->name,
             'user_id'    => $this->user_id,
+            'avatar'     => User::getAvatar($this->user),
             'content'    => $this->fragmentgable->content,
             'favourite'  => $this->when(Auth::user()->favouriteFragments()->where('fragment_id', $this->id)
                                             ->exists(), true, false),
