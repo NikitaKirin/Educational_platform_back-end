@@ -106,4 +106,9 @@ class User extends Authenticatable implements HasMedia
     public function favouriteFragments(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
         return $this->belongsToMany(Fragment::class, 'fragment_user');
     }
+
+    // Устанавливаем прямую связь "один со многим" с таблицей "lessons"
+    public function lessons(): \Illuminate\Database\Eloquent\Relations\HasMany {
+        return $this->hasMany(Lesson::class);
+    }
 }
