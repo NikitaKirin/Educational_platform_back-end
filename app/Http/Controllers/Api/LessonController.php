@@ -40,7 +40,7 @@ class LessonController extends Controller
 
         return response([
             'messages' => 'Урок успешно создан!',
-        ]);
+        ], 201);
     }
 
     // Обновить данные урока. Функционал любого пользователя.
@@ -59,4 +59,12 @@ class LessonController extends Controller
             'messages' => 'Урок успешно обновлен!',
         ]);
     }
+
+    public function destroy( Request $request, Lesson $lesson ) {
+        if ( $lesson->delete() )
+            return response(['message' => 'Урок успешно удалён']);
+        return response(['message' => 'Произошла ошибка при удалении'], 400);
+    }
 }
+
+
