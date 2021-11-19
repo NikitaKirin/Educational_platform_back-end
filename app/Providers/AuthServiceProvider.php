@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Fragment;
+use App\Models\Lesson;
 use App\Models\User;
 use App\Policies\FragmentPolicy;
+use App\Policies\LessonPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -20,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [// 'App\Models\Model' => 'App\Policies\ModelPolicy',
                            User::class     => UserPolicy::class,
                            Fragment::class => FragmentPolicy::class,
+                           Lesson::class   => LessonPolicy::class,
     ];
 
     /**
