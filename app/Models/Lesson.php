@@ -13,6 +13,7 @@ class Lesson extends Model
         'id',
         'title',
         'annotation',
+        'user_id',
     ];
 
     // Устанавливаем обратную связь "один ко многим" с таблицей 'users'
@@ -27,6 +28,6 @@ class Lesson extends Model
 
     // Устанавливаем связь "многие со многим" с таблицей "lesson_fragment" через связующую таблицу "fragment_tag"
     public function fragments(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
-        return $this->belongsToMany(Fragment::class);
+        return $this->belongsToMany(Fragment::class)->using(FragmentLesson::class)->withPivot('order');
     }
 }

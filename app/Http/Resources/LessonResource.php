@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 /** @mixin \App\Models\Lesson */
 class LessonResource extends JsonResource
 {
+    public static $wrap = 'lesson';
+
     public function toArray( $request ): array {
         return [
             'id'         => $this->id,
