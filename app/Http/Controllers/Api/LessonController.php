@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Fragment\CreateFragmentRequest;
 use App\Http\Requests\Api\Lesson\CreateLessonRequest;
+use App\Http\Requests\Api\Lesson\UpdateLessonRequest;
 use App\Http\Resources\LessonResourceCollection;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
@@ -34,13 +35,28 @@ class LessonController extends Controller
                 $lesson->fragments()->attach($fragments[$i], ['order' => $i + 1]);
             }
             $lesson->tags()->sync($request->input('tags'));
-            if ( !$lesson->save() ) {
-                return response(['messages' => 'Произошла ошибка при создании урока'], 400);
-            }
+            $lesson->save();
         });
 
         return response([
             'messages' => 'Урок успешно создан!',
+        ]);
+    }
+
+    // Обновить данные урока. Функционал любого пользователя.
+    public function update( UpdateLessonRequest $request, Lesson $lesson ) {
+        DB::transaction(function () use ( $request, $lesson ) {
+            $lesson->update(['title' => $request->input('title'), 'annotation' => $request->input('annotation')]);
+            $lesson->fragments()->sync([]);
+            $fragments = $request->input('fragments');
+            for ( $i = 0; $i < count($fragments); $i++ ) {
+                if ( $lesson->fragments()->where('id', $fragments[$i])->exists() )
+                    continue;
+                $lesson->fragments()->attach($fragments[$i], ['order' => $i + 1]);
+            }
+        });
+        return response([
+            'messages' => 'Урок успешно обновлен!',
         ]);
     }
 }
