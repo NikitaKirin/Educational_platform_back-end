@@ -172,6 +172,6 @@ class FragmentController extends Controller
 
     // Получить список фрагментов текущего учителя.
     public function fragmentsTeacherIndex( Request $request, User $user ): FragmentResourceCollection {
-        return new FragmentResourceCollection($user->fragments()->paginate(6));
+        return new FragmentResourceCollection($user->fragments()->with('tags')->paginate(6));
     }
 }
