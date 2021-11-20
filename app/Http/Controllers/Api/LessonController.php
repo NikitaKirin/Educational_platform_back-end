@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Fragment\CreateFragmentRequest;
 use App\Http\Requests\Api\Lesson\CreateLessonRequest;
 use App\Http\Requests\Api\Lesson\UpdateLessonRequest;
+use App\Http\Resources\FragmentResourceCollection;
 use App\Http\Resources\LessonResourceCollection;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
 {
-    // Вывести список всех уроков. Функционал любого пользователя.
+    // Вывести список всех уроков. Функционал пользователя и администратора.
     public function index(): LessonResourceCollection {
         return new LessonResourceCollection(Lesson::withCount('fragments')->paginate(6));
     }
@@ -43,7 +44,7 @@ class LessonController extends Controller
         ], 201);
     }
 
-    // Обновить данные урока. Функционал любого пользователя.
+    // Обновить данные урока. Функционал пользователя и администратора.
     public function update( UpdateLessonRequest $request, Lesson $lesson ) {
         DB::transaction(function () use ( $request, $lesson ) {
             $lesson->update(['title' => $request->input('title'), 'annotation' => $request->input('annotation')]);
@@ -60,10 +61,37 @@ class LessonController extends Controller
         ]);
     }
 
+    // Удалить фрагмент (мягкое удаление). Функционал пользователя и администратора.
     public function destroy( Request $request, Lesson $lesson ) {
         if ( $lesson->delete() )
             return response(['message' => 'Урок успешно удалён']);
         return response(['message' => 'Произошла ошибка при удалении'], 400);
+    }
+
+    // Добавить/удалить фрагмент из избранного. Функционал пользователя и администратора.
+    public function like( Request $request, Lesson $lesson ) {
+        $query = DB::table('lesson_user')->where('lesson_id', $lesson->id)->where('user_id', Auth::id());
+        if ( $query->exists() )
+            $query->delete();
+        else
+            Auth::user()->favouriteLessons()->attach($lesson->id);
+        return response(['message' => 'Ok'], 200);
+    }
+
+    // Получить список избранных фрагментов. Функционал пользователя и администратора.
+    public function likeIndex( Request $request ): LessonResourceCollection {
+        $title = $request->input('title');
+        $tags = $request->input('tags');
+        $lessons = Auth::user()->favouriteLessons()->withCount(['tags', 'fragments'])->with('tags')
+                       ->when($title, function ( $query ) use ( $title ) {
+                           return $query->where('title', 'ILIKE', '%' . $title . '%');
+                       })->when($tags, function ( $query ) use ( $tags ) {
+                return $query->whereHas('tags', function ( $query ) use ( $tags ) {
+                    $query->whereIn('tag_id', $tags);
+                });
+            });
+
+        return new LessonResourceCollection($lessons->orderBy('title')->paginate(6));
     }
 }
 
