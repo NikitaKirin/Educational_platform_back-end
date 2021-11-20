@@ -33,4 +33,10 @@ class Lesson extends Model
     public function fragments(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
         return $this->belongsToMany(Fragment::class)->using(FragmentLesson::class)->withPivot('order');
     }
+
+    // Устанавливаем связь "многие со многим" с таблицей "users" через связующую таблицу "fragment_user"
+    // реализуем функцию добавить фрагмент в избранное
+    public function favouritableUsers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
+        return $this->belongsToMany(User::class, 'fragment_table');
+    }
 }

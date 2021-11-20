@@ -111,4 +111,10 @@ class User extends Authenticatable implements HasMedia
     public function lessons(): \Illuminate\Database\Eloquent\Relations\HasMany {
         return $this->hasMany(Lesson::class);
     }
+
+    // Устанавливаем связь многие ко многим через промежуточные таблицу "lesson_user" с сущностью "lesson"
+    // реализуем функцию добавить урок в избранное
+    public function favouriteLessons(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
+        return $this->belongsToMany(Lesson::class, 'lesson_user');
+    }
 }
