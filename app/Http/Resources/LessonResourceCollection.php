@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Lesson;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,11 @@ class LessonResourceCollection extends ResourceCollection
 
     public function toArray( $request ): array {
         return [
-            'all_count' => Auth::user()->favouriteLessons()->count(),
+            'all_count' => $this->when(true, function () use ( $request ) {
+                if ( $request->is('api/lessons/like*') )
+                    return Auth::user()->favouriteLessons()->count();
+                return Lesson::all()->count();
+            }),
             'data'      => $this->collection,
         ];
     }

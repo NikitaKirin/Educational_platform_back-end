@@ -17,7 +17,7 @@ class LessonController extends Controller
 {
     // Вывести список всех уроков. Функционал пользователя и администратора.
     public function index(): LessonResourceCollection {
-        return new LessonResourceCollection(Lesson::withCount('fragments')->paginate(6));
+        return new LessonResourceCollection(Lesson::withCount(['fragments', 'tags'])->with('tags')->paginate(6));
     }
 
     // Создать урок. Функционал учителя и ученика.
