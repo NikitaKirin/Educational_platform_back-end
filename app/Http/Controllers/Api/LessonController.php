@@ -24,7 +24,7 @@ class LessonController extends Controller
                              return $query->where('title', 'ILIKE', $title);
                          })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
-                    $query->whereIn($tags);
+                    $query->whereIntegerInRaw('tag_id', $tags);
                 });
             });
         return new LessonResourceCollection($lessons->paginate(6));
@@ -99,7 +99,7 @@ class LessonController extends Controller
                            return $query->where('title', 'ILIKE', '%' . $title . '%');
                        })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
-                    $query->whereIn('tag_id', $tags);
+                    $query->whereIntegerInRaw('tag_id', $tags);
                 });
             });
 

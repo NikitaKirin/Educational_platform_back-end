@@ -33,7 +33,7 @@ class FragmentController extends Controller
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
             })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
-                    $query->whereIn('tag_id', $tags);
+                    $query->whereIntegerInRaw('tag_id', $tags);
                 });
             });
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
@@ -50,7 +50,7 @@ class FragmentController extends Controller
             return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
         })->when($tags, function ( $query ) use ( $tags ) {
             return $query->whereHas('tags', function ( $query ) use ( $tags ) {
-                $query->whereIn('tag_id', $tags);
+                $query->whereIntegerInRaw('tag_id', $tags);
             });
         });
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
@@ -163,7 +163,7 @@ class FragmentController extends Controller
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
             })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
-                    $query->whereIn('tag_id', $tags);
+                    $query->whereIntegerInRaw('tag_id', $tags);
                 });
             });
 
