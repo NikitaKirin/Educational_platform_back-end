@@ -11,7 +11,7 @@ class LessonPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ): ?bool {
-        if ( $operation != 'create' && $user->role == 'admin' )
+        if ( $operation != 'create' && $operation != 'like' && $user->role == 'admin' )
             return true;
         return null;
     }
@@ -48,5 +48,11 @@ class LessonPolicy
 
     public function forceDelete( User $user, Lesson $lesson ): bool {
         //
+    }
+
+    public function like( User $user, Lesson $lesson ): bool {
+        if ($user->role == 'creator' || $user->role == 'student')
+            return true;
+        return false;
     }
 }
