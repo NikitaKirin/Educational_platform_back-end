@@ -16,8 +16,18 @@ use Illuminate\Support\Facades\DB;
 class LessonController extends Controller
 {
     // Вывести список всех уроков. Функционал пользователя и администратора.
-    public function index(): LessonResourceCollection {
-        return new LessonResourceCollection(Lesson::withCount(['fragments', 'tags'])->with('tags')->paginate(6));
+    public function index( Request $request ): LessonResourceCollection {
+        $title = $request->input('title');
+        $tags = $request->input('tags');
+        $lessons = Lesson::with('tags')->withCount(['tags', 'fragments'])
+                         ->when($title, function ( $query ) use ( $title ) {
+                             return $query->where('title', 'ILIKE', $title);
+                         })->when($tags, function ( $query ) use ( $tags ) {
+                return $query->whereHas('tags', function ( $query ) use ( $tags ) {
+                    $query->whereIn($tags);
+                });
+            });
+        return new LessonResourceCollection($lessons->paginate(6));
     }
 
     // Создать урок. Функционал учителя и ученика.
