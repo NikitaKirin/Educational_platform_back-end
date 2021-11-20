@@ -50,11 +50,13 @@ class LessonController extends Controller
             $lesson->update(['title' => $request->input('title'), 'annotation' => $request->input('annotation')]);
             $lesson->fragments()->sync([]);
             $fragments = $request->input('fragments');
+            $tags = $request->input('tags');
             for ( $i = 0; $i < count($fragments); $i++ ) {
                 if ( $lesson->fragments()->where('id', $fragments[$i])->exists() )
                     continue;
                 $lesson->fragments()->attach($fragments[$i], ['order' => $i + 1]);
             }
+            $lesson->tags()->sync($tags);
         });
         return response([
             'messages' => 'Урок успешно обновлен!',
