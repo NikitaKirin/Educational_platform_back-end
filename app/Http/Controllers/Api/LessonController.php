@@ -73,6 +73,11 @@ class LessonController extends Controller
         ]);
     }
 
+    // Посмотреть текущий урок. Функционал любого пользователя.
+    public function show( Request $request, Lesson $lesson ): FragmentResourceCollection {
+        return new FragmentResourceCollection($lesson->fragments()->orderBy('order')->paginate(1));
+    }
+
     // Удалить фрагмент (мягкое удаление). Функционал пользователя и администратора.
     public function destroy( Request $request, Lesson $lesson ) {
         if ( $lesson->delete() )

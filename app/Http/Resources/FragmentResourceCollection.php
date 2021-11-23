@@ -35,10 +35,16 @@ class FragmentResourceCollection extends ResourceCollection
             $all_count = DB::table('fragments')->where('deleted_at', '=', null)->count();
         elseif ( $request->route()->named('fragments.teacher.index') )
             $all_count = $request->user->fragments()->count();
+        elseif ( $request->route()->named('lesson.show') ) {
+            $all_count = $request->lesson->fragments()->count();
+            $fragments_title = $request->lesson->fragments()->orderBy('order')->get(['title', 'fragmentgable_type']);
+        }
+
 
         return [
-            'all_count' => $all_count,
-            'data'      => $this->collection,
+            'all_count'       => $all_count,
+            'fragments_title' => $this->when(isset($fragments_title), $fragments_title),
+            'data'            => $this->collection,
         ];
     }
 }
