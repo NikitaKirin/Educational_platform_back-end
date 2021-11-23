@@ -11,7 +11,7 @@ class FragmentPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ) {
-        if ( $operation == 'create' )
+        if ( $operation == 'create' || $operation == 'like' )
             return null;
         if ( $user->role == 'admin' )
             return true;
@@ -40,6 +40,12 @@ class FragmentPolicy
 
     public function delete( User $user, Fragment $fragment ): bool {
         return $user->id == $fragment->user_id;
+    }
+
+    public function like( User $user ): bool {
+        if ( $user->role == 'creator' || $user->role == 'student' )
+            return true;
+        return false;
     }
 
     public function restore( User $user, Fragment $fragment ): bool {

@@ -18,6 +18,6 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
          ->name('fragments.index.my'); // Посмотреть список фрагментов текущего пользователя;
     Route::get('/fragments/{title?}/{type?}/{tags?}', 'FragmentController@index')
          ->name('fragments.index'); // Посмотреть список всех фрагментов;
-    Route::put('/fragments/{fragment}', 'FragmentController@like')
+    Route::put('/fragments/{fragment}', 'FragmentController@like')->middleware('can:like,App\\Models\\Fragment')
          ->name('fragments.like'); // Добавить/удалить фрагмент из избранного;
 });
