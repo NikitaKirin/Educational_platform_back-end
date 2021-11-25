@@ -44,6 +44,12 @@ class FragmentResourceCollection extends ResourceCollection
 
         return [
             'all_count'       => $all_count,
+            'lesson_title'    => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+                return $request->lesson->title;
+            }),
+            'user_id'         => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+                return $request->lesson->user_id;
+            }),
             'fragments_title' => $this->when(isset($fragments_title), $fragments_title),
             'data'            => $this->collection,
         ];
