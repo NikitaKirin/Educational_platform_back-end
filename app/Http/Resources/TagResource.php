@@ -14,7 +14,7 @@ class TagResource extends JsonResource
         return [
             'id'              => $this->id,
             'value'           => $this->value,
-            'fragments_count' => $this->when($this->fragments()->exists(), $this->fragments()->count()),
+            //'fragments_count' => $this->when($this->fragments()->exists(), $this->fragments()->count()),
 
             'fragments' => new FragmentResourceCollection($this->whenLoaded('fragments')),
         ];
