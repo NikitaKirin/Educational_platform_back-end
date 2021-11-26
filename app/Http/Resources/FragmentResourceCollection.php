@@ -47,6 +47,9 @@ class FragmentResourceCollection extends ResourceCollection
             'lesson_title'     => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return $request->lesson->title;
             }),
+            'lesson_tags'      => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+                return new TagResourceCollection($request->lesson->tags()->get());
+            }),
             'lesson_favourite' => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return Auth::user()->favouriteLessons()->where('lesson_id', $request->lesson->id)->exists();
             }),
