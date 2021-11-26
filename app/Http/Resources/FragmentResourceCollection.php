@@ -43,21 +43,24 @@ class FragmentResourceCollection extends ResourceCollection
 
 
         return [
-            'all_count'        => $all_count,
-            'lesson_title'     => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+            'all_count'         => $all_count,
+            'lesson_title'      => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return $request->lesson->title;
             }),
-            'lesson_tags'      => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+            'lesson_annotation' => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+                return $request->lesson->annotation;
+            }),
+            'lesson_tags'       => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return new TagResourceCollection($request->lesson->tags()->get());
             }),
-            'lesson_favourite' => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+            'lesson_favourite'  => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return Auth::user()->favouriteLessons()->where('lesson_id', $request->lesson->id)->exists();
             }),
-            'user_id'          => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+            'user_id'           => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return $request->lesson->user_id;
             }),
-            'fragments_title'  => $this->when(isset($fragments_title), $fragments_title),
-            'data'             => $this->collection,
+            'fragments_title'   => $this->when(isset($fragments_title), $fragments_title),
+            'data'              => $this->collection,
         ];
     }
 }
