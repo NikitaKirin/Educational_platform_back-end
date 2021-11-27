@@ -14,7 +14,7 @@ class FragmentSeeder extends Seeder
     public function run() {
         for ( $i = 0; $i <= 200; $i++ ) {
             $user = User::find(rand(1, 100));
-            $article = new Article(['content' => Str::random(450)]);
+            $article = new Article(['content' => '<p>' . Str::random(450) . '</p>']);
             $article->save();
             $fragment = new Fragment(['title' => Str::random(10)]);
             $fragment->user()->associate($user);

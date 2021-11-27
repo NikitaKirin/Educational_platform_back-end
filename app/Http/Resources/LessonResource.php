@@ -20,9 +20,12 @@ class LessonResource extends JsonResource
             'user_id'         => $this->user_id,
             'user_name'       => $this->user->name,
             'user_avatar'     => User::getAvatar($this->user),
-            'favourite'       => $this->when(Auth::user()->favouriteLessons()
-                                                 ->where('lesson_id', $this->id)->exists(), true, false),
-            'fragments_count' => $this->fragments_count,
+            'favourite'       => $this->when(Auth::user()->favouriteLessons()->where('lesson_id', $this->id)
+                                                 ->exists(), true, false),
+            'fragments_count' => $this->when($this->fragments()->exists(), $this->fragments()->count(), 0),
+            'fragments'       => $this->whenLoaded('fragments', function () {
+                return new FragmentResourceCollection($this->fragments->load('tags'));
+            }),
             'tags_count'      => $this->when($this->tags()->exists(), $this->tags()->count()),
             'tags'            => $this->when($this->tags()
                                                   ->exists(), new TagResourceCollection($this->whenLoaded('tags'))),

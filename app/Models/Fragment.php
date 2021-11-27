@@ -40,6 +40,6 @@ class Fragment extends Model
 
     // Устанавливаем связь "многие со многим" с таблицей "lessons" через связующую таблицу "lesson_fragment"
     public function lessons(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
-        return $this->belongsToMany(Tag::class)->using(FragmentLesson::class)->withPivot('order');
+        return $this->belongsToMany(Tag::class)->withPivot('order');
     }
 }

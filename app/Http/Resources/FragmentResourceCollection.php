@@ -44,7 +44,7 @@ class FragmentResourceCollection extends ResourceCollection
 
         return [
             'all_count'         => $all_count,
-            'lesson_title'      => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
+           /* 'lesson_title'      => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return $request->lesson->title;
             }),
             'lesson_annotation' => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
@@ -59,7 +59,7 @@ class FragmentResourceCollection extends ResourceCollection
             'user_id'           => $this->when($request->routeIs('lesson.show'), function () use ( $request ) {
                 return $request->lesson->user_id;
             }),
-            'fragments_title'   => $this->when(isset($fragments_title), $fragments_title),
+            'fragments_title'   => $this->when(isset($fragments_title), $fragments_title),*/
             'data'              => $this->collection,
         ];
     }

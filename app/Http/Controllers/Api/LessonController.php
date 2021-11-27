@@ -7,6 +7,7 @@ use App\Http\Requests\Api\Fragment\CreateFragmentRequest;
 use App\Http\Requests\Api\Lesson\CreateLessonRequest;
 use App\Http\Requests\Api\Lesson\UpdateLessonRequest;
 use App\Http\Resources\FragmentResourceCollection;
+use App\Http\Resources\LessonResource;
 use App\Http\Resources\LessonResourceCollection;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
@@ -74,8 +75,12 @@ class LessonController extends Controller
     }
 
     // Посмотреть текущий урок. Функционал любого пользователя.
-    public function show( Request $request, Lesson $lesson ): FragmentResourceCollection {
+    /*public function show( Request $request, Lesson $lesson ): FragmentResourceCollection {
         return new FragmentResourceCollection($lesson->fragments()->with('tags')->orderBy('order')->paginate(1));
+    }*/
+
+    public function show( Request $request, Lesson $lesson ): LessonResource {
+        return new LessonResource($lesson->load('fragments')->load('tags'));
     }
 
     // Удалить фрагмент (мягкое удаление). Функционал пользователя и администратора.

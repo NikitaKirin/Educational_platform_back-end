@@ -31,7 +31,7 @@ class Lesson extends Model
 
     // Устанавливаем связь "многие со многим" с таблицей "lesson_fragment" через связующую таблицу "fragment_tag"
     public function fragments(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
-        return $this->belongsToMany(Fragment::class)->using(FragmentLesson::class)->withPivot('order');
+        return $this->belongsToMany(Fragment::class)->withPivot('order');
     }
 
     // Устанавливаем связь "многие со многим" с таблицей "users" через связующую таблицу "fragment_user"
