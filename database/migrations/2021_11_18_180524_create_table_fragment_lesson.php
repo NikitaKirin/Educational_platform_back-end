@@ -11,8 +11,6 @@ class CreateTableFragmentLesson extends Migration
             $table->foreignId('lesson_id')->constrained()->cascadeOnDelete();
             $table->foreignId('fragment_id')->constrained()->cascadeOnDelete();
             $table->integer('order');
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 

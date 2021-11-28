@@ -10,8 +10,6 @@ class CreateTableLessonTag extends Migration
         Schema::create('lesson_tag', function ( Blueprint $table ) {
             $table->foreignId('lesson_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 

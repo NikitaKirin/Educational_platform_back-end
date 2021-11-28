@@ -10,8 +10,6 @@ class CreateFragmentTagTable extends Migration
         Schema::create('fragment_tag', function ( Blueprint $table ) {
             $table->foreignId('fragment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 

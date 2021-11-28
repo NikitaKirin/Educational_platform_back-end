@@ -11,8 +11,6 @@ class CreateFragmentUser extends Migration
             $table->id();
             $table->foreignId('fragment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 
