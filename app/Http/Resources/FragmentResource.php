@@ -23,9 +23,7 @@ class FragmentResource extends JsonResource
             'user_name'   => $this->user->name,
             'user_id'     => $this->user_id,
             'user_avatar' => User::getAvatar($this->user),
-            'content'     => $this->when(!$request->routeIs('lesson.show'), function () {
-                return $this->fragmentgable->content;
-            }),
+            'content'     => $this->fragmentgable->content,
             'favourite'   => $this->when(Auth::user()->favouriteFragments()->where('fragment_id', $this->id)
                                              ->exists(), true, false),
             'order'       => $this->whenPivotLoaded('fragment_lesson', function () {
