@@ -19,11 +19,16 @@ class LessonController extends Controller
     // Вывести список всех уроков. Функционал пользователя и администратора.
     public function index( Request $request ): LessonResourceCollection {
         $title = $request->input('title');
+        $creator = $request->input('creator');
         $tags = $request->input('tags');
         $lessons = Lesson::with('tags')->withCount(['tags', 'fragments'])
                          ->when($title, function ( $query ) use ( $title ) {
-                             return $query->where('title', 'ILIKE', $title);
-                         })->when($tags, function ( $query ) use ( $tags ) {
+                             return $query->where('title', 'ILIKE', "%{$title}%");
+                         })->when($creator, function ( $query ) use ( $creator ) {
+                return $query->whereHas('user', function ( $query ) use ( $creator ) {
+                    $query->where('name', 'ILIKE', "%{$creator}%");
+                });
+            })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
                 });
@@ -103,11 +108,16 @@ class LessonController extends Controller
     // Получить список избранных фрагментов. Функционал пользователя и администратора.
     public function likeIndex( Request $request ): LessonResourceCollection {
         $title = $request->input('title');
+        $creator = $request->input('creator');
         $tags = $request->input('tags');
         $lessons = Auth::user()->favouriteLessons()->withCount(['tags', 'fragments'])->with('tags')
                        ->when($title, function ( $query ) use ( $title ) {
-                           return $query->where('title', 'ILIKE', '%' . $title . '%');
-                       })->when($tags, function ( $query ) use ( $tags ) {
+                           return $query->where('title', 'ILIKE', "%{$title}%");
+                       })->when($creator, function ( $query ) use ( $creator ) {
+                return $query->whereHas('user', function ( $query ) use ( $creator ) {
+                    $query->where('name', 'ILIKE', "%{$creator}%");
+                });
+            })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
                 });
