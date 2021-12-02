@@ -18,6 +18,7 @@ class CreatorResource extends JsonResource
             'name'            => $this->name,
             'avatar'          => User::getAvatar(User::find($this->id)),
             'fragments_count' => $this->fragments_count,
+            'lessons_count'   => $this->lessons_count
             //'fragments'       => new FragmentResourceCollection($this->fragments()->paginate(6)),
         ];
     }

@@ -141,7 +141,7 @@ class UserController extends Controller
     public function teachersIndex( Request $request ): CreatorResourceCollection {
         $request->validate(['name' => 'string'], ['string' => 'Введены недопустимые символы']);
         $name = $request->input('name');
-        return new CreatorResourceCollection(User::withCount('fragments')->where('role', 'creator')
+        return new CreatorResourceCollection(User::withCount(['fragments', 'lessons'])->where('role', 'creator')
                                                  ->when($name, function ( $query ) use ( $name ) {
                                                      return $query->where('name', 'ILIKE', '%' . $name . '%');
                                                  })->orderBy('name')->paginate(10));
