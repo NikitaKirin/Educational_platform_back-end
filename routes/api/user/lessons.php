@@ -7,6 +7,10 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
          ->name('lesson.like.index'); // Получить список избранных уроков текущего пользователя;
     Route::get('/lessons/{title?}/{tags?}/{creator?}', 'LessonController@index')
          ->name('lesson.index'); // Получить список всех уроков;
+    Route::get('my-lessons', 'LessonController@myIndex')
+         ->name('lesson.index.my'); //Получить список уроков текущего авторизованного пользователя;
+    Route::get('teacher/lessons/{user}', 'LessonController@lessonsTeacherIndex')->name('lesson.teacher.index')
+         ->middleware('can:viewTeacherLessons,user'); // Получить список уроков определенного учителя;
     Route::post('/lessons', 'LessonController@store')->middleware('can:create,App\\Models\\Lesson')
          ->name('lesson.store'); // Создать новый урок;
     Route::patch('/lessons/{lesson}', 'LessonController@update')->middleware('can:update,lesson')

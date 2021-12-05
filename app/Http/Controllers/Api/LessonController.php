@@ -10,6 +10,7 @@ use App\Http\Resources\FragmentResourceCollection;
 use App\Http\Resources\LessonResource;
 use App\Http\Resources\LessonResourceCollection;
 use App\Models\Lesson;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -124,6 +125,27 @@ class LessonController extends Controller
             });
 
         return new LessonResourceCollection($lessons->orderBy('title')->paginate(6));
+    }
+
+    // Получить список уроков текущего авторизованного пользователя.
+    public function myIndex( Request $request ): LessonResourceCollection {
+        $title = $request->input('title');
+        $tags = $request->input('tags');
+        $lessons = Auth::user()->lessons()->with('tags')->withCount(['tags', 'fragments'])
+                       ->when($title, function ( $query ) use ( $title ) {
+                           return $query->where('title', $title);
+                       })->when($tags, function ( $query ) use ( $tags ) {
+                return $query->whereHas('tags', function ( $query ) use ( $tags ) {
+                    $query->whereIntegerInRaw('tag_id', $tags);
+                });
+            });
+        return new LessonResourceCollection($lessons->orderBy('title')->paginate(6));
+    }
+
+    // Получить список уроков определенного преподавателя.
+    public function lessonsTeacherIndex( Request $request, User $user ): LessonResourceCollection {
+        return new LessonResourceCollection($user->lessons()->with('tags')->withCount(['tags', 'fragments'])
+                                                 ->paginate(6));
     }
 }
 

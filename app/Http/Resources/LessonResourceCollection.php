@@ -17,6 +17,10 @@ class LessonResourceCollection extends ResourceCollection
             'all_count' => $this->when(true, function () use ( $request ) {
                 if ( $request->is('api/lessons/like*') )
                     return Auth::user()->favouriteLessons()->count();
+                elseif ( $request->routeIs('lesson.index.my') )
+                    return Auth::user()->lessons()->count();
+                elseif ( $request->routeIs('lesson.teacher.index') )
+                    return $this->when($request->user->lessons()->exists(), $request->user->lessons()->count(), 0);
                 return Lesson::all()->count();
             }),
             'data'      => $this->collection,
