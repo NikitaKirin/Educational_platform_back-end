@@ -79,12 +79,10 @@ class FragmentController extends Controller
             $fragment->user()->associate(Auth::user());
             $fragment->fragmentgable()->associate($data);
             $fragment->save();
-            //if ( $fragment->save() ) {
             $fragment->tags()->sync($request->input('tags'));
-            //}
-            /*return response()->json([
-                'message' => 'Произошла ошибка при создании фрагмента',
-            ], 400);*/
+            if ( isset($request->fon) )
+                $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+
         });
         return response()->json([
             'message' => 'Новый фрагмент успешно загружен!',
@@ -116,6 +114,15 @@ class FragmentController extends Controller
                     $request->validate(['content' => 'json'], ['json' => 'На вход ожидались данные в формате JSON']);
                 $fragment->update($request->only('title'));
                 $fragment->fragmentgable->update($request->only('content'));
+
+                if ( isset($request->fon) ) {
+                    if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
+                        $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+                    else {
+                        $fragment->clearMediaCollection('fragments_fons');
+                        $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+                    }
+                }
             }
         });
         return response()->json([
