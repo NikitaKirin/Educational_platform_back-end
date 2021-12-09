@@ -20,7 +20,7 @@ class LessonResource extends JsonResource
             'user_id'         => $this->user_id,
             'user_name'       => $this->user->name,
             'user_avatar'     => User::getAvatar($this->user),
-            'fon'             => $this->when(empty($this->getFirstMediaUrl('lessons_fons')), $this->getFirstMediaUrl('lessons_fons'), null),
+            'fon'             => $this->when(!empty($this->getFirstMediaUrl('lessons_fons')), $this->getFirstMediaUrl('lessons_fons'), null),
             'favourite'       => $this->when(Auth::user()->favouriteLessons()->where('lesson_id', $this->id)
                                                  ->exists(), true, false),
             'fragments_count' => $this->when($this->fragments()->exists(), $this->fragments()->count(), 0),
