@@ -22,6 +22,7 @@ class UpdateLessonRequest extends FormRequest
             'annotation' => ['required', 'string'],
             'fragments'  => ['required', 'array', Rule::in($fragments_id)],
             'tags'       => ['nullable', 'array', Rule::in($tags)],
+            'fon'        => ['nullable', 'image', 'mimes:jpg,png,jpeg,gif'],
         ];
     }
 
@@ -31,6 +32,8 @@ class UpdateLessonRequest extends FormRequest
             'string'       => 'Значение должно быть строкой',
             'fragments.in' => 'Переданы фрагменты, которые нельзя добавить в урок',
             'tags.in'      => 'Переданы не существующие теги: :values',
+            'fon.image'    => 'На вход ожидалось изображение',
+            'fon.mimes'    => 'Доступны файлы только следующего расширения :values',
         ];
     }
 
