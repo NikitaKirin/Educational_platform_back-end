@@ -67,6 +67,20 @@ return [
             'visibility' => 'public',
         ],
 
+        'fragments_fons' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/fragments/fons'),
+            'url'        => env('APP_URL') . '/fragments/fons',
+            'visibility' => 'public',
+        ],
+
+        'lessons_fons' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/lessons/fons'),
+            'url'        => env('APP_URL') . '/lessons/fons',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*
@@ -81,9 +95,11 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public'),
-        public_path('avatars') => storage_path('app/user/avatars'),
-        public_path('fragments') => storage_path('app/fragments'),
+        public_path('storage')        => storage_path('app/public'),
+        public_path('avatars')        => storage_path('app/user/avatars'),
+        public_path('fragments')      => storage_path('app/fragments'),
+        public_path('fragments/fons') => storage_path('app/fragments/fons'),
+        public_path('lessons/fons')   => storage_path('app/lessons/fons'),
     ],
 
 ];
