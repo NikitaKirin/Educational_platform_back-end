@@ -54,6 +54,8 @@ class LessonController extends Controller
             }
             $lesson->tags()->sync($request->input('tags'));
             $lesson->save();
+            if ( isset($request->fon) )
+                $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
         });
 
         return response([
@@ -74,6 +76,15 @@ class LessonController extends Controller
                 $lesson->fragments()->attach($fragments[$i], ['order' => $i + 1]);
             }
             $lesson->tags()->sync($tags);
+
+            if ( isset($request->fon) ) {
+                if ( empty($lesson->getFirstMediaUrl('lessons_fons')) )
+                    $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
+                else {
+                    $lesson->clearMediaCollection('lessons_fons');
+                    $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
+                }
+            }
         });
         return response([
             'messages' => 'Урок успешно обновлен!',
