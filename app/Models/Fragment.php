@@ -25,7 +25,7 @@ class Fragment extends Model implements HasMedia
         return $this->belongsTo(User::class);
     }
 
-    // Устанавливаем обратную связь "один с одним" с первичными таблицами: "articles", "tests", ...
+    // Устанавливаем обратную связь "один с одним" с первичными таблицами: "articles", "tests", "videos", "images"
     public function fragmentgable(): MorphTo {
         return $this->morphTo();
     }
