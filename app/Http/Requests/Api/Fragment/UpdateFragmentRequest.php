@@ -46,13 +46,19 @@ class UpdateFragmentRequest extends FormRequest
                     'required' => 'Данное поле обязательно для заполнения',
                 ]);
             }
-            /*elseif ( $this->input('type') == 'video' ) {
+            elseif ( $this->input('type') == 'video' ) {
                 $this->validate(['content' => 'file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'], [
                     'file'      => 'На вход ожидался файл',
                     'mimes'     => 'Поддерживаются файлы со следующими расширениями: :values',
                     'mimetypes' => 'Поддерживаются файлы следующего формата :values',
                 ]);
-            }*/
+            }
+            elseif ( $this->input('type') == 'image' ) {
+                $this->validate(['content' => 'file|mimes:png,jpg,jpeg,gif'], [
+                    'file'  => 'На вход ожидался файл',
+                    'mimes' => 'Поддерживаются файлы со следующими расширениями: :values',
+                ]);
+            }
         });
     }
 }
