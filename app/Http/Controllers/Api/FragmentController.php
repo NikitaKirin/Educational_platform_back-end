@@ -9,6 +9,7 @@ use App\Http\Requests\Api\Fragment\UpdateFragmentRequest;
 use App\Http\Resources\FragmentResource;
 use App\Http\Resources\FragmentResourceCollection;
 use App\Models\Article;
+use App\Models\Image;
 use App\Models\Tag;
 use App\Models\Test;
 use App\Models\Fragment;
@@ -75,6 +76,14 @@ class FragmentController extends Controller
                 $data->content = $data->getFirstMediaUrl('fragments_videos');
                 $data->save();
             }
+            elseif ( $request->input('type') == 'image' ) {
+                $data = new Image();
+                $data->content = '1';
+                $data->save();
+                $data->addMediaFromRequest('content')->toMediaCollection('fragments_images', 'fragments');
+                $data->content = $data->getFirstMediaUrl('fragments_images');
+                $data->save();
+            }
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
             $fragment->fragmentgable()->associate($data);
@@ -104,7 +113,7 @@ class FragmentController extends Controller
             else {
                 DB::table('fragment_tag')->where('fragment_id', $fragment->id)->delete();
             }
-            if ( $fragment->fragmentgable_type == 'video' ) {
+            if ( $fragment->fragmentgable_type == 'video' || $fragment->fragmentgable_type == 'image' ) {
                 $fragment->update(['title' => $request->input('title')]);
             }
             else {
