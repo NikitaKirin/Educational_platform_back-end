@@ -9,6 +9,7 @@ class CreateTableImages extends Migration
     public function up() {
         Schema::create('images', function ( Blueprint $table ) {
             $table->id();
+            $table->string('annotation')->nullable();
             $table->string('content');
         });
     }

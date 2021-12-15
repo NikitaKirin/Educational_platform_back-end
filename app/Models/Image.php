@@ -14,6 +14,7 @@ class Image extends Model implements HasMedia
     protected $table = 'images';
     public $timestamps = false;
     protected $fillable = [
+        'annotation',
         'content',
     ];
 

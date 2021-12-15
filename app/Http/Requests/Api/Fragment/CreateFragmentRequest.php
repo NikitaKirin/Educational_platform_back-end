@@ -53,7 +53,7 @@ class CreateFragmentRequest extends FormRequest
                 ]);
             }
             elseif ( $this->input('type') == 'image' ) {
-                $this->validate(['content' => 'file|mimes:png,jpg,jpeg,gif'], [
+                $this->validate(['content' => 'file|mimes:png,jpg,jpeg,gif', 'annotation' => 'nullable|string'], [
                     'file'  => 'На вход ожидался файл',
                     'mimes' => 'Поддерживаются файлы со следующими расширениями: :values',
                 ]);

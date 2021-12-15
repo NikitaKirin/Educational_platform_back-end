@@ -78,6 +78,7 @@ class FragmentController extends Controller
             }
             elseif ( $request->input('type') == 'image' ) {
                 $data = new Image();
+                $data->annotation = $request->input('annotation');
                 $data->content = '1';
                 $data->save();
                 $data->addMediaFromRequest('content')->toMediaCollection('fragments_images', 'fragments');
@@ -115,6 +116,8 @@ class FragmentController extends Controller
             }
             if ( $fragment->fragmentgable_type == 'video' || $fragment->fragmentgable_type == 'image' ) {
                 $fragment->update(['title' => $request->input('title')]);
+                if ( $fragment->fragmentgable_type == 'image' )
+                    $fragment->update(['annotation' => $request->input('annotation')]);
             }
             else {
                 if ( $fragment->fragmentgable_type == 'article' )
