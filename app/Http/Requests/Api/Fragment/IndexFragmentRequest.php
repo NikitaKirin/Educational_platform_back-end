@@ -12,7 +12,7 @@ class IndexFragmentRequest extends FormRequest
         $tags = Tag::getValues();
         return [
             'title' => ['nullable', 'string'],
-            'type'  => ['nullable', 'string', 'in:article,test,video'],
+            'type'  => ['nullable', 'string', 'in:article,test,video,image'],
             'tags'  => ['nullable', 'array', Rule::in($tags)],
         ];
     }
