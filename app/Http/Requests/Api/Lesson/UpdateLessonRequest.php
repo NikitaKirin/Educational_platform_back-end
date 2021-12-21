@@ -14,7 +14,7 @@ class UpdateLessonRequest extends FormRequest
     public function rules(): array {
         $user = Auth::user();
         //$lesson = Lesson::where('id', $this->input('lesson'));
-        $fragments_id = $user->role == 'student' ? $user->favouriteFragments()->pluck('id') : $user->fragments()
+        $fragments_id = $user->role == 'student' ? $user->favouriteFragments()->pluck('fragments.id') : $user->fragments()
                                                                                                    ->pluck('id');
         $tags = Tag::all()->pluck('id');
         return [
