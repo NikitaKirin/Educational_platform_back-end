@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Lesson;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,9 @@ class LessonResourceCollection extends ResourceCollection
                     return Auth::user()->lessons()->count();
                 elseif ( $request->routeIs('lesson.teacher.index') )
                     return $this->when($request->user->lessons()->exists(), $request->user->lessons()->count(), 0);
-                return Lesson::all()->count();
+                return Lesson::whereHas('user', function ( Builder $query ) {
+                    $query->where('role', '=', 'creator');
+                })->count();
             }),
             'data'      => $this->collection,
         ];
