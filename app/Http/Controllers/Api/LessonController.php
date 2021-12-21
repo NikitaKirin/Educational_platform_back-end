@@ -11,6 +11,7 @@ use App\Http\Resources\LessonResource;
 use App\Http\Resources\LessonResourceCollection;
 use App\Models\Lesson;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,9 +24,11 @@ class LessonController extends Controller
         $creator = $request->input('creator');
         $tags = $request->input('tags');
         $lessons = Lesson::with('tags')->withCount(['tags', 'fragments'])
-                         ->when($title, function ( $query ) use ( $title ) {
-                             return $query->where('title', 'ILIKE', "%{$title}%");
-                         })->when($creator, function ( $query ) use ( $creator ) {
+                         ->whereHas('user', function ( Builder $query ) {
+                             $query->where('role', '<>', 'student');
+                         })->when($title, function ( $query ) use ( $title ) {
+                return $query->where('title', 'ILIKE', "%{$title}%");
+            })->when($creator, function ( $query ) use ( $creator ) {
                 return $query->whereHas('user', function ( $query ) use ( $creator ) {
                     $query->where('name', 'ILIKE', "%{$creator}%");
                 });
