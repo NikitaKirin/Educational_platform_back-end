@@ -41,8 +41,8 @@ class Fragment extends Model implements HasMedia
         return $this->belongsToMany(User::class, 'fragment_table');
     }
 
-    // Устанавливаем связь "многие со многим" с таблицей "lessons" через связующую таблицу "lesson_fragment"
+    // Устанавливаем связь "многие со многим" с таблицей "lessons" через связующую таблицу "fragment_lesson"
     public function lessons(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
-        return $this->belongsToMany(Tag::class)->withPivot('order');
+        return $this->belongsToMany(Lesson::class)->withPivot('order');
     }
 }

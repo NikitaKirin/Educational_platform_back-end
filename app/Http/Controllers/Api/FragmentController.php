@@ -15,6 +15,7 @@ use App\Models\Test;
 use App\Models\Fragment;
 use App\Models\User;
 use App\Models\Video;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -149,6 +150,23 @@ class FragmentController extends Controller
 
     // Удалить фрагмент. Функционал пользователя и администратора. Мягкое удаление.
     public function destroy( Fragment $fragment ): \Illuminate\Http\JsonResponse {
+
+        if ( $fragment->loadCount('lessons')->lessons_count > 0 ) {
+            $lessons = $fragment->lessons()->whereHas('user', function ( Builder $query ) {
+                $query->where('role', '<>', 'student');
+            })->orderBy('title')->get(['id', 'title']);
+
+            if ( Auth::user()->role == 'admin' ) {
+                return response()->json([
+                    'message' => "Невозможно удалить фрагмент, так как он принадлежит следующему количеству уроков: {$fragment->lessons_count}, из которых преподавателю принадлежит {$lessons->count()}",
+                    'lessons' => $lessons,
+                ], 400);
+            }
+            return response()->json([
+                'message' => "Не удалось удалить фрагмент, так как он принадлежит следующему количеству уроков: {$fragment->lessons_count}, из которых Вам принадлежит: {$lessons->count()} ",
+                'lessons' => $lessons,
+            ], 400);
+        }
         if ( $fragment->delete() ) {
             return response()->json([
                 'message' => 'Фрагмент успешно удалён!',
