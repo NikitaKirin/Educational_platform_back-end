@@ -2,27 +2,30 @@
 
 namespace App\Http\Requests\Api\User\Auth;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterRequest extends FormRequest
 {
-    public function rules() {
+    public function rules(): array {
+        $today = Carbon::today()->format('d.m.Y');
         return [
             'name'     => 'required|string',
-            'birthday' => 'nullable|date',
+            'birthday' => ['nullable', 'date', "before:{$today}"],
             'role'     => 'required|in:creator,student',
             'email'    => 'required|email|unique:users',
             'password' => 'required|string',
         ];
     }
 
-    public function messages() {
+    public function messages(): array {
         return [
-            'email'        => 'Вы ввели некорректный email',
-            'required'     => 'Данное поле обязательно для заполнения',
-            'string'       => 'Вы ввели недоступные символы',
-            'email.unique' => 'Данный email уже занят',
-            'date'         => 'Введены недоступные символы',
+            'email'           => 'Вы ввели некорректный email',
+            'required'        => 'Данное поле обязательно для заполнения',
+            'string'          => 'Вы ввели недоступные символы',
+            'email.unique'    => 'Данный email уже занят',
+            'date'            => 'Введены недоступные символы',
+            'birthday.before' => "Дата не может быть позднее, чем сегодня",
         ];
     }
 
@@ -34,7 +37,7 @@ class RegisterRequest extends FormRequest
             }
         }*/
 
-    public function authorize() {
+    public function authorize(): bool {
         return true;
     }
 }
