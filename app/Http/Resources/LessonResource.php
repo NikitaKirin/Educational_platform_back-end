@@ -25,7 +25,8 @@ class LessonResource extends JsonResource
                                                  ->exists(), true, false),
             'fragments_count' => $this->when($this->fragments()->exists(), $this->fragments()->count(), 0),
             'fragments'       => $this->whenLoaded('fragments', function () {
-                return new FragmentResourceCollection($this->fragments->load('tags'));
+                return new FragmentResourceCollection($this->fragments()->orderBy('fragment_lesson.order')->with('tags')
+                                                           ->get());
             }),
             'tags_count'      => $this->when($this->tags()->exists(), $this->tags()->count()),
             'tags'            => $this->when($this->tags()
