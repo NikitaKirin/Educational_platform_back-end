@@ -116,9 +116,18 @@ class FragmentController extends Controller
                 DB::table('fragment_tag')->where('fragment_id', $fragment->id)->delete();
             }
             if ( $fragment->fragmentgable_type == 'video' || $fragment->fragmentgable_type == 'image' ) {
-                $fragment->update(['title' => $request->input('title')]);
-                if ( $fragment->fragmentgable_type == 'image' )
+                if ( $request->input('title') )
+                    $fragment->update(['title' => $request->input('title')]);
+                if ( $request->hasFile('content') ) {
+                    $fragment->fragmentgable->clearMediaCollection("fragments_{$fragment->fragmentgable_type}s");
+                    $fragment->fragmentgable->addMediaFromRequest('content')
+                                            ->toMediaCollection("fragments_{$fragment->fragmentgable_type}s", 'fragments');
+                    $fragment->fragmentgable->update(['content' => $fragment->fragmentgable->getFirstMediaUrl("fragments_{$fragment->fragmentgable_type}s")]);
+                }
+
+                if ( $fragment->fragmentgable_type == 'image' ) {
                     $fragment->update(['annotation' => $request->input('annotation')]);
+                }
             }
             else {
                 if ( $fragment->fragmentgable_type == 'article' )
