@@ -126,7 +126,7 @@ class FragmentController extends Controller
                 }
 
                 if ( $fragment->fragmentgable_type == 'image' ) {
-                    $fragment->update(['annotation' => $request->input('annotation')]);
+                    $fragment->fragmentgable->update(['annotation' => $request->input('annotation')]);
                 }
             }
             else {
