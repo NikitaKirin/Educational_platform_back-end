@@ -137,7 +137,7 @@ class FragmentController extends Controller
                 $fragment->update($request->only('title'));
                 $fragment->fragmentgable->update($request->only('content'));
 
-                if ( isset($request->fon) ) {
+                if ( $request->hasFile('fon') ) {
                     if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
                         $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
                     else {

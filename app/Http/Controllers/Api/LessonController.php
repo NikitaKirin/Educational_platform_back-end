@@ -80,7 +80,7 @@ class LessonController extends Controller
             }
             $lesson->tags()->sync($tags);
 
-            if ( isset($request->fon) ) {
+            if ( $request->hasFile('fon') ) {
                 if ( empty($lesson->getFirstMediaUrl('lessons_fons')) )
                     $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
                 else {
