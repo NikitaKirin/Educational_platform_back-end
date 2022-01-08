@@ -136,14 +136,13 @@ class FragmentController extends Controller
                     $request->validate(['content' => 'json'], ['json' => 'На вход ожидались данные в формате JSON']);
                 $fragment->update($request->only('title'));
                 $fragment->fragmentgable->update($request->only('content'));
-
-                if ( $request->hasFile('fon') ) {
-                    if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
-                        $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
-                    else {
-                        $fragment->clearMediaCollection('fragments_fons');
-                        $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
-                    }
+            }
+            if ( $request->hasFile('fon') ) {
+                if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
+                    $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+                else {
+                    $fragment->clearMediaCollection('fragments_fons');
+                    $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
                 }
             }
         });
