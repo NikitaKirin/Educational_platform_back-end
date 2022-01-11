@@ -34,27 +34,31 @@ class UpdateFragmentRequest extends FormRequest
 
     public function withValidator( $validator ) {
         $validator->after(function ( $validator ) {
-            if ( $this->input('type') == 'article' ) {
+            $fragmentgable_type = $this->fragment->fragmentgable_type;
+            if ( $fragmentgable_type == 'article' ) {
                 $this->validate(['content' => 'nullable|string'], [
                     'string'   => 'Введены недопустимые символы',
                     'required' => 'Данное поле обязательно для заполнения',
                 ]);
             }
-            elseif ( $this->input('type') == 'test' ) {
+            elseif ( $fragmentgable_type == 'test' ) {
                 $this->validate(['content' => 'nullable|json'], [
                     'json'     => 'Ожидались данные в формате JSON',
                     'required' => 'Данное поле обязательно для заполнения',
                 ]);
             }
-            elseif ( $this->input('type') == 'video' ) {
-                $this->validate(['content' => 'file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'], [
+            elseif ( $fragmentgable_type == 'video' ) {
+                $this->validate(['content' => 'nullable|file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'], [
                     'file'      => 'На вход ожидался файл',
                     'mimes'     => 'Поддерживаются файлы со следующими расширениями: :values',
-                    'mimetypes' => 'Поддерживаются файлы следующего формата :values',
+                    'mimetypes' => 'Поддерживаются файлы следующего формата: :values',
                 ]);
             }
-            elseif ( $this->input('type') == 'image' ) {
-                $this->validate(['content' => 'file|mimes:png,jpg,jpeg,gif', 'annotation' => 'nullable|string'], [
+            elseif ( $fragmentgable_type == 'image' ) {
+                $this->validate([
+                    'content'    => 'nullable|file|mimes:png,jpg,jpeg,gif',
+                    'annotation' => 'nullable|string',
+                ], [
                     'file'  => 'На вход ожидался файл',
                     'mimes' => 'Поддерживаются файлы со следующими расширениями: :values',
                 ]);
