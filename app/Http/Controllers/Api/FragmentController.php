@@ -164,15 +164,19 @@ class FragmentController extends Controller
                 $query->where('role', '<>', 'student');
             })->orderBy('title')->get(['id', 'title']);
 
-            if ( Auth::user()->role == 'admin' ) {
+            /*if ( Auth::user()->role == 'admin' ) {
                 return response()->json([
-                    'message' => "Невозможно удалить фрагмент, так как он принадлежит следующему количеству уроков: {$fragment->lessons_count}, из которых преподавателю принадлежит {$lessons->count()}",
-                    'lessons' => $lessons,
+                    'message'               => "Невозможно удалить фрагмент",
+                    'all_lessons_count'     => $fragment->lessons_count,
+                    'teacher_lessons_count' => $lessons->count(),
+                    'lessons'               => $lessons,
                 ], 400);
-            }
+            }*/
             return response()->json([
-                'message' => "Не удалось удалить фрагмент, так как он принадлежит следующему количеству уроков: {$fragment->lessons_count}, из которых Вам принадлежит: {$lessons->count()} ",
-                'lessons' => $lessons,
+                'message'               => "Не удалось удалить фрагмент",
+                "all_lessons_count"     => $fragment->lessons_count,
+                "teacher_lessons_count" => $lessons->count(),
+                'lessons'               => $lessons,
             ], 400);
         }
         if ( $fragment->delete() ) {
