@@ -142,6 +142,7 @@ class UserController extends Controller
         $request->validate(['name' => 'string'], ['string' => 'Введены недопустимые символы']);
         $name = $request->input('name');
         return new CreatorResourceCollection(User::withCount(['fragments', 'lessons'])->where('role', 'creator')
+                                                 ->where('blocked_at', null)
                                                  ->when($name, function ( $query ) use ( $name ) {
                                                      return $query->where('name', 'ILIKE', '%' . $name . '%');
                                                  })->orderBy('name')->paginate(10));
