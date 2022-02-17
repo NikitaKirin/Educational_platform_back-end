@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
     Route::get('/teacher/fragments/{user}', 'FragmentController@fragmentsTeacherIndex')
          ->middleware('can:viewTeacherFragments,user')

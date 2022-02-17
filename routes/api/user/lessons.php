@@ -1,5 +1,8 @@
 <?php
 
+
+use Illuminate\Support\Facades\Route;
+
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
     Route::get('/lessons/{lesson}', 'LessonController@show')->name('lesson.show')
          ->where('lesson', '[0-9]+'); // Посмотреть текущий урок;
