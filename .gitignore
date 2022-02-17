@@ -17,3 +17,7 @@ yarn-error.log
 /avatars/
 /public/avatars/
 /public/fragments/
+/public/avatars
+/public/fragments
+/public/fragments-fons
+/public/lessons-fons
