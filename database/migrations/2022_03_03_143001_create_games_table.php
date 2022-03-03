@@ -11,8 +11,6 @@ class CreateGamesTable extends Migration
             $table->id();
             $table->string('type');
             $table->json('content');
-            $table->timestamps();
-            $table->softDeletes();
         });
     }
 
