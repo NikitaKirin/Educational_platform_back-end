@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class FragmentController extends Controller
@@ -94,8 +96,9 @@ class FragmentController extends Controller
                 $content = [];
                 $data->content = json_encode($content);
                 $data->save();
-                $data->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user ) {
-                    $file_adder->toMediaCollection('fragments_games', 'fragments');
+                $data->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $data ) {
+                    $file_adder->usingFileName("$user->name-" . "$data->type-" . Str::random('5'))
+                               ->toMediaCollection('fragments_games', 'fragments');
                 });
                 $data_images = $data->getMedia('fragments_games');
                 foreach ( $data_images as $data_image ) {
