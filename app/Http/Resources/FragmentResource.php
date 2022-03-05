@@ -18,13 +18,13 @@ class FragmentResource extends JsonResource
             'id'          => $this->id,
             'type'        => $this->fragmentgable_type,
             'title'       => $this->title,
-            /*'created_at'  => $this->created_at,
+/*            'created_at'  => $this->created_at,
             'updated_at'  => $this->updated_at,*/
             'user_name'   => $this->user->name,
             'user_id'     => $this->user_id,
             'user_avatar' => User::getAvatar($this->user),
             'fon'         => $this->when(!empty($this->getFirstMediaUrl('fragments_fons')), $this->getFirstMediaUrl('fragments_fons'), null),
-            'content'     => $this->fragmentgable->content,
+            'content'     => $this->when($this->fragmentgable_type === 'game', json_decode($this->fragmentgable->content), $this->fragmentgable->content),
             'annotation'  => $this->when($this->fragmentgable_type == 'image', $this->fragmentgable->annotation, null),
             'favourite'   => $this->when(Auth::user()->favouriteFragments()->where('fragment_id', $this->id)
                                              ->exists(), true, false),
