@@ -9,6 +9,7 @@ use App\Http\Requests\Api\Fragment\UpdateFragmentRequest;
 use App\Http\Resources\FragmentResource;
 use App\Http\Resources\FragmentResourceCollection;
 use App\Models\Article;
+use App\Models\Game;
 use App\Models\Image;
 use App\Models\Tag;
 use App\Models\Test;
@@ -60,7 +61,8 @@ class FragmentController extends Controller
 
     // Создать новый фрагмент. Функционал пользователя и администратора.
     public function store( CreateFragmentRequest $request ): \Illuminate\Http\JsonResponse {
-        DB::transaction(function () use ( $request ) {
+        $user = Auth::user();
+        DB::transaction(function () use ( $request, $user ) {
             if ( $request->input('type') == 'article' ) {
                 $data = new Article(['content' => $request->input('content')]);
                 $data->save();
@@ -86,6 +88,22 @@ class FragmentController extends Controller
                 $data->content = $data->getFirstMediaUrl('fragments_images');
                 $data->save();
             }
+            elseif ( $request->input('type') == 'game' ) {
+                $data = new Game();
+                $data->type = $request->input('game_type');
+                $content = [];
+                $data->content = json_encode($content);
+                $data->save();
+                $data->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user ) {
+                    $file_adder->toMediaCollection('fragments_games', 'fragments');
+                });
+                $data_images = $data->getMedia('fragments_games');
+                foreach ( $data_images as $data_image ) {
+                    $content[] = $data_image->getFullUrl();
+                }
+                $data->content = json_encode($content, JSON_UNESCAPED_SLASHES);
+                $data->save();
+            }
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
             $fragment->fragmentgable()->associate($data);
@@ -93,7 +111,6 @@ class FragmentController extends Controller
             $fragment->tags()->sync($request->input('tags'));
             if ( isset($request->fon) )
                 $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
-
         });
         return response()->json([
             'message' => 'Новый фрагмент успешно загружен!',

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Resources\UserResource;
 use App\Models\Article;
+use App\Models\Game;
 use App\Models\Image;
 use App\Models\Test;
 use App\Models\Video;
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             'test'    => Test::class,
             'video'   => Video::class,
             'image'   => Image::class,
+            'game'    => Game::class,
         ]);
     }
 }

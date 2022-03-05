@@ -13,7 +13,7 @@ class CreateFragmentRequest extends FormRequest
     public function rules(): array {
         $tags = Tag::getValues();
         return [
-            'type'    => 'required|in:test,article,video,image|string',
+            'type'    => 'required|in:test,article,video,image,game|string',
             'title'   => 'required|string',
             'content' => 'required',
             'tags'    => ['nullable', 'array', Rule::in($tags)],
@@ -57,6 +57,9 @@ class CreateFragmentRequest extends FormRequest
                     'file'  => 'На вход ожидался файл',
                     'mimes' => 'Поддерживаются файлы со следующими расширениями: :values',
                 ]);
+            }
+            elseif ( $this->input('type') == 'game' ) {
+                $this->validate(['content' => 'array']);
             }
         });
     }
