@@ -17,12 +17,15 @@ use App\Models\Fragment;
 use App\Models\User;
 use App\Models\Video;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class FragmentController extends Controller
 {
@@ -61,55 +64,30 @@ class FragmentController extends Controller
         return new FragmentResourceCollection($fragments->orderBy('title')->paginate(6));
     }
 
-    // Создать новый фрагмент. Функционал пользователя и администратора.
-    public function store( CreateFragmentRequest $request ): \Illuminate\Http\JsonResponse {
+    /**
+     * Create new fragment
+     * Создать новый фрагмент
+     * @param CreateFragmentRequest $request
+     * @return JsonResponse
+     */
+    public function store( CreateFragmentRequest $request ): JsonResponse {
         $user = Auth::user();
         DB::transaction(function () use ( $request, $user ) {
             if ( $request->input('type') == 'article' ) {
-                $data = new Article(['content' => $request->input('content')]);
-                $data->save();
-            }
-            elseif ( $request->input('type') == 'test' ) {
-                $data = new Test(['content' => $request->input('content')]);
-                $data->save();
+                $fragmentData = $this->createFragmentArticle($request);
             }
             elseif ( $request->input('type') == 'video' ) {
-                $data = new Video();
-                $data->content = '1';
-                $data->save();
-                $data->addMediaFromRequest('content')->toMediaCollection('fragments_videos', 'fragments');
-                $data->content = $data->getFirstMediaUrl('fragments_videos');
-                $data->save();
+                $fragmentData = $this->createFragmentVideo($request);
             }
             elseif ( $request->input('type') == 'image' ) {
-                $data = new Image();
-                $data->annotation = $request->input('annotation');
-                $data->content = '1';
-                $data->save();
-                $data->addMediaFromRequest('content')->toMediaCollection('fragments_images', 'fragments');
-                $data->content = $data->getFirstMediaUrl('fragments_images');
-                $data->save();
+                $fragmentData = $this->createFragmentImage($request);
             }
             elseif ( $request->input('type') == 'game' ) {
-                $data = new Game();
-                $data->type = $request->input('game_type');
-                $content = [];
-                $data->content = json_encode($content);
-                $data->save();
-                $data->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $data ) {
-                    $file_adder->usingFileName("$user->name-" . "$data->type-" . Str::random('5'))
-                               ->toMediaCollection('fragments_games', 'fragments');
-                });
-                $data_images = $data->getMedia('fragments_games');
-                foreach ( $data_images as $data_image ) {
-                    $content[] = $data_image->getFullUrl();
-                }
-                $data->content = json_encode($content, JSON_UNESCAPED_SLASHES);
-                $data->save();
+                $fragmentData = $this->createFragmentGame($request, $user);
             }
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
-            $fragment->fragmentgable()->associate($data);
+            $fragment->fragmentgable()->associate($fragmentData);
             $fragment->save();
             $fragment->tags()->sync($request->input('tags'));
             if ( isset($request->fon) )
@@ -126,7 +104,7 @@ class FragmentController extends Controller
     }
 
     // Обновить содержимое фрагмента. Функционал пользователя и администратора.
-    public function update( UpdateFragmentRequest $request, Fragment $fragment ): \Illuminate\Http\JsonResponse {
+    public function update( UpdateFragmentRequest $request, Fragment $fragment ): JsonResponse {
         DB::transaction(function () use ( $request, $fragment ) {
             if ( $tags = $request->input('tags') ) {
                 $tags = array_unique($tags);
@@ -177,7 +155,7 @@ class FragmentController extends Controller
 
 
     // Удалить фрагмент. Функционал пользователя и администратора. Мягкое удаление.
-    public function destroy( Fragment $fragment ): \Illuminate\Http\JsonResponse {
+    public function destroy( Fragment $fragment ): JsonResponse {
 
         if ( $fragment->loadCount('lessons')->lessons_count > 0 ) {
             $lessons = $fragment->lessons()->whereHas('user', function ( Builder $query ) {
@@ -243,4 +221,84 @@ class FragmentController extends Controller
     public function fragmentsTeacherIndex( Request $request, User $user ): FragmentResourceCollection {
         return new FragmentResourceCollection($user->fragments()->with('tags')->paginate(6));
     }
+
+    /**
+     * Create fragment of type "article"
+     * Создать фрагмент типа "Статья"
+     * @param Request $request Объект запроса
+     * @return Article
+     */
+    private function createFragmentArticle( Request $request ): Article {
+        $fragmentData = new Article(['content' => $request->input('content')]);
+        $fragmentData->save();
+        return $fragmentData;
+    }
+
+    /**
+     * Create fragment of type "video"
+     * Создать фрагмент типа "Видео"
+     * @param Request $request Объект запроса
+     * @return Video
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     */
+    private function createFragmentVideo( Request $request ): Video {
+        $fragmentData = new Video();
+        $fragmentData->content = '1';
+        $fragmentData->save();
+        $fragmentData->addMediaFromRequest('content')->toMediaCollection('fragments_videos', 'fragments');
+        $fragmentData->content = $fragmentData->getFirstMediaUrl('fragments_videos');
+        $fragmentData->save();
+        return $fragmentData;
+    }
+
+    /**
+     * Create fragment of type "image"
+     * Создать фрагмент типа "изображение"
+     * @param Request $request Объект запроса
+     * @return Image
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     */
+    private function createFragmentImage( Request $request ): Image {
+        $fragmentData = new Image();
+        $fragmentData->annotation = $request->input('annotation');
+        $fragmentData->content = '1';
+        $fragmentData->save();
+        $fragmentData->addMediaFromRequest('content')->toMediaCollection('fragments_images', 'fragments');
+        $fragmentData->content = $fragmentData->getFirstMediaUrl('fragments_images');
+        $fragmentData->save();
+        return $fragmentData;
+    }
+
+    /**
+     * Create fragment of type "Game"
+     * Создать фрагмент типа "игра"
+     * @param Request $request Объект запроса
+     * @param User $user - Пользователь, создающий игру
+     * @return Game
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     */
+    private function createFragmentGame( Request $request, User $user ): Game {
+        $fragmentData = new Game();
+        $fragmentData->type = $request->input('gameType');
+        $content = [];
+        $fragmentData->content = json_encode($content);
+        $fragmentData->save();
+        $fragmentData->addMultipleMediaFromRequest(['content'])
+                     ->each(function ( $file_adder ) use ( $user, $fragmentData ) {
+                         $file_adder->usingFileName("$user->name-" . "$fragmentData->type-" . Str::random('5'))
+                                    ->toMediaCollection('fragments_games', 'fragments');
+                     });
+        $dataImages = $fragmentData->getMedia('fragments_games');
+        foreach ( $dataImages as $dataImage ) {
+            $content[] = $dataImage->getFullUrl();
+        }
+        $fragmentData->content = json_encode($content, JSON_UNESCAPED_SLASHES);
+        $fragmentData->save();
+        return $fragmentData;
+    }
+
+
 }
