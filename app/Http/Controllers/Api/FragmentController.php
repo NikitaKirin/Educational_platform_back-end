@@ -288,7 +288,7 @@ class FragmentController extends Controller
         $fragmentData->save();
         $fragmentData->addMultipleMediaFromRequest(['content'])
                      ->each(function ( $file_adder ) use ( $user, $fragmentData ) {
-                         $file_adder->usingFileName("$user->name-" . "$fragmentData->type-" . Str::random('5'))
+                         $file_adder->usingFileName("$user->name-" . "$fragmentData->type-" . Str::random('5') . '.jpg')
                                     ->toMediaCollection('fragments_games', 'fragments');
                      });
         $dataImages = $fragmentData->getMedia('fragments_games');
