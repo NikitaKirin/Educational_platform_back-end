@@ -103,7 +103,13 @@ class FragmentController extends Controller
         return new FragmentResource($fragment->load('tags')->loadCount('tags'));
     }
 
-    // Обновить содержимое фрагмента. Функционал пользователя и администратора.
+    /**
+     * Update fragment
+     * Обновить содержимое фрагмента. Функционал пользователя и администратора.
+     * @param UpdateFragmentRequest $request
+     * @param Fragment $fragment
+     * @return JsonResponse
+     */
     public function update( UpdateFragmentRequest $request, Fragment $fragment ): JsonResponse {
         DB::transaction(function () use ( $request, $fragment ) {
             if ( $tags = $request->input('tags') ) {
@@ -113,27 +119,11 @@ class FragmentController extends Controller
             else {
                 DB::table('fragment_tag')->where('fragment_id', $fragment->id)->delete();
             }
-            if ( $fragment->fragmentgable_type == 'video' || $fragment->fragmentgable_type == 'image' ) {
-                if ( $request->input('title') )
-                    $fragment->update(['title' => $request->input('title')]);
-                if ( $request->hasFile('content') ) {
-                    $fragment->fragmentgable->clearMediaCollection("fragments_{$fragment->fragmentgable_type}s");
-                    $fragment->fragmentgable->addMediaFromRequest('content')
-                                            ->toMediaCollection("fragments_{$fragment->fragmentgable_type}s", 'fragments');
-                    $fragment->fragmentgable->update(['content' => $fragment->fragmentgable->getFirstMediaUrl("fragments_{$fragment->fragmentgable_type}s")]);
-                }
-
-                if ( $fragment->fragmentgable_type == 'image' ) {
-                    $fragment->fragmentgable->update(['annotation' => $request->input('annotation')]);
-                }
+            if ( $fragment->fragmentgable_type === 'video' || $fragment->fragmentgable_type === 'image' ) {
+                $this->updateFragmentVideoOrImage($request, $fragment);
             }
-            else {
-                if ( $fragment->fragmentgable_type == 'article' )
-                    $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
-                if ( $fragment->fragmentgable_type == 'test' )
-                    $request->validate(['content' => 'json'], ['json' => 'На вход ожидались данные в формате JSON']);
-                $fragment->update($request->only('title'));
-                $fragment->fragmentgable->update($request->only('content'));
+            elseif ( $fragment->fragmentgable_type == 'article' ) {
+                $this->updateFragmentArticle($request, $fragment);
             }
             if ( $request->hasFile('fon') ) {
                 if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
@@ -147,10 +137,6 @@ class FragmentController extends Controller
         return response()->json([
             'message' => 'Фрагмент успешно обновлен',
         ], 200);
-
-        /*        return response()->json([
-                    'message' => 'Произошла ошибка',
-                ], 400);*/
     }
 
 
@@ -300,5 +286,36 @@ class FragmentController extends Controller
         return $fragmentData;
     }
 
+    /**
+     * Update fragment of types: video or image
+     * Обновить фрагмент типа видеоролик или изображение
+     * @param Request $request
+     * @param Fragment $fragment
+     */
+    private function updateFragmentVideoOrImage( Request $request, Fragment $fragment ): void {
+        if ( $request->input('title') )
+            $fragment->update(['title' => $request->input('title')]);
+        if ( $request->hasFile('content') ) {
+            $fragment->fragmentgable->clearMediaCollection("fragments_{$fragment->fragmentgable_type}s");
+            $fragment->fragmentgable->addMediaFromRequest('content')
+                                    ->toMediaCollection("fragments_{$fragment->fragmentgable_type}s", 'fragments');
+            $fragment->fragmentgable->update(['content' => $fragment->fragmentgable->getFirstMediaUrl("fragments_{$fragment->fragmentgable_type}s")]);
+        }
 
+        if ( $fragment->fragmentgable_type == 'image' ) {
+            $fragment->fragmentgable->update(['annotation' => $request->input('annotation')]);
+        }
+    }
+
+    /**
+     * Update fragment of types article
+     * Обновить фрагмент типа статья
+     * @param Request $request
+     * @param Fragment $fragment
+     */
+    private function updateFragmentArticle( Request $request, Fragment $fragment ): void {
+        $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
+        $fragment->update($request->only('title'));
+        $fragment->fragmentgable->update($request->only('content'));
+    }
 }
