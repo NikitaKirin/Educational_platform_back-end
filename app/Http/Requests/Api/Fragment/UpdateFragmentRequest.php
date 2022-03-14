@@ -63,6 +63,13 @@ class UpdateFragmentRequest extends FormRequest
                     'mimes' => 'Поддерживаются файлы со следующими расширениями: :values',
                 ]);
             }
+            elseif ( $fragmentgable_type === 'game' ) {
+                $this->validate([
+                    'content' => 'array',
+                ], [
+                    'array' => 'На вход ожидался массив',
+                ]);
+            }
         });
     }
 }

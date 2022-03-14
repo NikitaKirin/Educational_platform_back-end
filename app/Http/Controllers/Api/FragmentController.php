@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class FragmentController extends Controller
 {
@@ -125,6 +126,9 @@ class FragmentController extends Controller
             elseif ( $fragment->fragmentgable_type == 'article' ) {
                 $this->updateFragmentArticle($request, $fragment);
             }
+            elseif ( $fragment->fragmentgable_type == 'game' ) {
+                $this->updateFragmentGame($request, $fragment);
+            }
             if ( $request->hasFile('fon') ) {
                 if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
                     $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
@@ -211,10 +215,10 @@ class FragmentController extends Controller
     /**
      * Create fragment of type "article"
      * Создать фрагмент типа "Статья"
-     * @param Request $request Объект запроса
+     * @param CreateFragmentRequest $request Объект запроса
      * @return Article
      */
-    private function createFragmentArticle( Request $request ): Article {
+    private function createFragmentArticle( CreateFragmentRequest $request ): Article {
         $fragmentData = new Article(['content' => $request->input('content')]);
         $fragmentData->save();
         return $fragmentData;
@@ -223,12 +227,12 @@ class FragmentController extends Controller
     /**
      * Create fragment of type "video"
      * Создать фрагмент типа "Видео"
-     * @param Request $request Объект запроса
+     * @param CreateFragmentRequest $request Объект запроса
      * @return Video
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */
-    private function createFragmentVideo( Request $request ): Video {
+    private function createFragmentVideo( CreateFragmentRequest $request ): Video {
         $fragmentData = new Video();
         $fragmentData->content = '1';
         $fragmentData->save();
@@ -241,12 +245,12 @@ class FragmentController extends Controller
     /**
      * Create fragment of type "image"
      * Создать фрагмент типа "изображение"
-     * @param Request $request Объект запроса
+     * @param CreateFragmentRequest $request Объект запроса
      * @return Image
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */
-    private function createFragmentImage( Request $request ): Image {
+    private function createFragmentImage( CreateFragmentRequest $request ): Image {
         $fragmentData = new Image();
         $fragmentData->annotation = $request->input('annotation');
         $fragmentData->content = '1';
@@ -292,7 +296,7 @@ class FragmentController extends Controller
      * @param Request $request
      * @param Fragment $fragment
      */
-    private function updateFragmentVideoOrImage( Request $request, Fragment $fragment ): void {
+    private function updateFragmentVideoOrImage( UpdateFragmentRequest $request, Fragment $fragment ): void {
         if ( $request->input('title') )
             $fragment->update(['title' => $request->input('title')]);
         if ( $request->hasFile('content') ) {
@@ -310,12 +314,42 @@ class FragmentController extends Controller
     /**
      * Update fragment of types article
      * Обновить фрагмент типа статья
-     * @param Request $request
+     * @param UpdateFragmentRequest $request
      * @param Fragment $fragment
      */
-    private function updateFragmentArticle( Request $request, Fragment $fragment ): void {
+    private function updateFragmentArticle( UpdateFragmentRequest $request, Fragment $fragment ): void {
         $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
         $fragment->update($request->only('title'));
         $fragment->fragmentgable->update($request->only('content'));
+    }
+
+    private function updateFragmentGame( UpdateFragmentRequest $request, Fragment $fragment ) {
+        $user = Auth::user();
+        $game = $fragment->fragmentgable;
+        $requestFragmentDataLinks = collect($request->input('old_links')); // Обновленный контент: старые ссылки;
+        $currentFragmentDataLinks = collect(json_decode($fragment->fragmentgable->content)); // Текущий контент - ссылки;
+        $updatedFragmentDataLinks = $currentFragmentDataLinks->filter(function ( $link ) use ( $requestFragmentDataLinks ) {
+            return $requestFragmentDataLinks->contains($link);
+        });
+        $game->getMedia('fragments_games')->each(function ( $image ) use ( $updatedFragmentDataLinks, $game ) {
+            if ( !$updatedFragmentDataLinks->contains($image->getFullUrl()) ) {
+                Media::whereId($image->id)->delete();
+            }
+        });
+        $game->refresh();
+        if ( $request->file('content') ) {
+            $game->addMultipleMediaFromRequest(['content'])->each(function ( $image ) use ( $user, $game ) {
+                $image->usingFileName("$user->name-" . "$game->type-" . Str::random('5') . '.jpg')
+                      ->toMediaCollection('fragments_games', 'fragments');
+            });
+        }
+        $game->refresh();
+        $fragmentDataImages = $game->getMedia('fragments_games');
+        foreach ( $fragmentDataImages as $gameImage ) {
+            if ( !$updatedFragmentDataLinks->contains($gameImage->getFullUrl()) ) {
+                $updatedFragmentDataLinks[] = $gameImage->getFullUrl();
+            }
+        }
+        $game->update(['content' => json_encode($updatedFragmentDataLinks, JSON_UNESCAPED_SLASHES)]);
     }
 }
