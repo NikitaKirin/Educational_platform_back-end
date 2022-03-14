@@ -272,7 +272,7 @@ class FragmentController extends Controller
      */
     private function createFragmentGame( Request $request, User $user ): Game {
         $fragmentData = new Game();
-        $fragmentData->type = $request->input('gameType');
+        $fragmentData->type = $request->input('game_type');
         $content = [];
         $fragmentData->content = json_encode($content);
         $fragmentData->save();
