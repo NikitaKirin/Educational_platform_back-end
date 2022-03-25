@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
+    Route::get('/teacher/fragments/games/types', 'GameTypeController@index')->name('fragments.games.types');
+    //Получить список типов игр;
     Route::get('/teacher/fragments/{user}', 'FragmentController@fragmentsTeacherIndex')
          ->middleware('can:viewTeacherFragments,user')
          ->name('fragments.teacher.index'); // Получить список фрагментов определённого учителя;

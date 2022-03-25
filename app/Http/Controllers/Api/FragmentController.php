@@ -10,6 +10,7 @@ use App\Http\Resources\FragmentResource;
 use App\Http\Resources\FragmentResourceCollection;
 use App\Models\Article;
 use App\Models\Game;
+use App\Models\GameType;
 use App\Models\Image;
 use App\Models\Tag;
 use App\Models\Test;
@@ -271,23 +272,32 @@ class FragmentController extends Controller
      * @throws FileIsTooBig
      */
     private function createFragmentGame( Request $request, User $user ): Game {
-        $fragmentData = new Game();
-        $fragmentData->type = $request->input('game_type');
+        $game = new Game();
+        $gameType = GameType::where('title', $request->input('gameType'))->get()->first();
+        $game->game_type_id = $gameType->id;
+        $gameTask = $request->input('task');
         $content = [];
-        $fragmentData->content = json_encode($content);
-        $fragmentData->save();
-        $fragmentData->addMultipleMediaFromRequest(['content'])
-                     ->each(function ( $file_adder ) use ( $user, $fragmentData ) {
-                         $file_adder->usingFileName("$user->name-" . "$fragmentData->type-" . Str::random('5') . '.jpg')
-                                    ->toMediaCollection('fragments_games', 'fragments');
-                     });
-        $dataImages = $fragmentData->getMedia('fragments_games');
-        foreach ( $dataImages as $dataImage ) {
-            $content[] = $dataImage->getFullUrl();
+        if ( $gameTask !== null ) {
+            $content['task']['text'] = $gameTask;
         }
-        $fragmentData->content = json_encode($content, JSON_UNESCAPED_SLASHES);
-        $fragmentData->save();
-        return $fragmentData;
+        else {
+            $content['task']['text'] = $gameType->description;
+        }
+        $content['task']['mediaUrl'] = "";
+        $content['images'] = [];
+        $game->content = json_encode($content);
+        $game->save();
+        $game->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $gameType ) {
+            $fileName = str_slug("$user->name-" . "$gameType->title-" . Str::random(10)) . '.jpg';
+            $file_adder->usingFileName($fileName)->toMediaCollection('fragments_games', 'fragments');
+        });
+        $dataImages = $game->getMedia('fragments_games');
+        foreach ( $dataImages as $dataImage ) {
+            $content['images'][] = $dataImage->getFullUrl();
+        }
+        $game->content = json_encode($content, JSON_UNESCAPED_SLASHES);
+        $game->save();
+        return $game;
     }
 
     /**
