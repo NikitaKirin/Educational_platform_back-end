@@ -336,6 +336,7 @@ class FragmentController extends Controller
     private function updateFragmentGame( UpdateFragmentRequest $request, Fragment $fragment ): void {
         $user = Auth::user();
         $game = $fragment->fragmentgable;
+        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
         $gameContent = json_decode($game->content, true);
         $requestFragmentDataLinks = collect($request->input('old_links')); // Обновленный контент: старые ссылки;
         $currentFragmentDataLinks = collect(json_decode($fragment->fragmentgable->content, true)['images']); // Текущий
@@ -351,9 +352,9 @@ class FragmentController extends Controller
         $game->clearMediaCollectionExcept('fragments_games', $updatedFragmentDataImages);
         $game->refresh();
         if ( $request->file('content') ) {
-            $game->addMultipleMediaFromRequest(['content'])->each(function ( $image ) use ( $user, $game ) {
-                $image->usingFileName("$user->name-" . "$game->type-" . Str::random('5') . '.jpg')
-                      ->toMediaCollection('fragments_games', 'fragments');
+            $game->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $gameType ) {
+                $fileName = str_slug("$user->name-" . "$gameType->title-" . Str::random(10)) . '.jpg';
+                $file_adder->usingFileName($fileName)->toMediaCollection('fragments_games', 'fragments');
             });
         }
         $game->refresh();
