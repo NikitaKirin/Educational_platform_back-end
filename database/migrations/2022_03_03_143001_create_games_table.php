@@ -9,7 +9,7 @@ class CreateGamesTable extends Migration
     public function up() {
         Schema::create('games', function ( Blueprint $table ) {
             $table->id();
-            $table->string('type');
+            $table->foreignId('game_type_id')->constrained('game_types')->cascadeOnDelete();
             $table->json('content');
         });
     }
