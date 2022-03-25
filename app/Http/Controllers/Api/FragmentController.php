@@ -276,7 +276,7 @@ class FragmentController extends Controller
         $gameType = GameType::where('title', $request->input('gameType'))->get()->first();
         $game->game_type_id = $gameType->id;
         $gameTask = $request->input('task');
-        $content = [];
+        $content = ['gameType' => $gameType->title];
         if ( $gameTask !== null ) {
             $content['task']['text'] = $gameTask;
         }
@@ -285,7 +285,7 @@ class FragmentController extends Controller
         }
         $content['task']['mediaUrl'] = "";
         $content['images'] = [];
-        $game->content = json_encode($content);
+        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
         $game->save();
         $game->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $gameType ) {
             $fileName = str_slug("$user->name-" . "$gameType->title-" . Str::random(10)) . '.jpg';
@@ -295,7 +295,7 @@ class FragmentController extends Controller
         foreach ( $dataImages as $dataImage ) {
             $content['images'][] = $dataImage->getFullUrl();
         }
-        $game->content = json_encode($content, JSON_UNESCAPED_SLASHES);
+        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $game->save();
         return $game;
     }
@@ -333,19 +333,22 @@ class FragmentController extends Controller
         $fragment->fragmentgable->update($request->only('content'));
     }
 
-    private function updateFragmentGame( UpdateFragmentRequest $request, Fragment $fragment ) {
+    private function updateFragmentGame( UpdateFragmentRequest $request, Fragment $fragment ): void {
         $user = Auth::user();
         $game = $fragment->fragmentgable;
+        $gameContent = json_decode($game->content, true);
         $requestFragmentDataLinks = collect($request->input('old_links')); // Обновленный контент: старые ссылки;
-        $currentFragmentDataLinks = collect(json_decode($fragment->fragmentgable->content)); // Текущий контент - ссылки;
+        $currentFragmentDataLinks = collect(json_decode($fragment->fragmentgable->content, true)['images']); // Текущий
+        // контент -
+        // ссылки;
         $updatedFragmentDataLinks = $currentFragmentDataLinks->filter(function ( $link ) use ( $requestFragmentDataLinks ) {
             return $requestFragmentDataLinks->contains($link);
         });
-        $game->getMedia('fragments_games')->each(function ( $image ) use ( $updatedFragmentDataLinks, $game ) {
-            if ( !$updatedFragmentDataLinks->contains($image->getFullUrl()) ) {
-                Media::whereId($image->id)->delete();
-            }
-        });
+        $updatedFragmentDataImages = $game->getMedia('fragments_games')
+                                          ->filter(function ( $image ) use ( $updatedFragmentDataLinks ) {
+                                              return $updatedFragmentDataLinks->contains($image->getFullUrl());
+                                          });
+        $game->clearMediaCollectionExcept('fragments_games', $updatedFragmentDataImages);
         $game->refresh();
         if ( $request->file('content') ) {
             $game->addMultipleMediaFromRequest(['content'])->each(function ( $image ) use ( $user, $game ) {
@@ -360,6 +363,10 @@ class FragmentController extends Controller
                 $updatedFragmentDataLinks[] = $gameImage->getFullUrl();
             }
         }
-        $game->update(['content' => json_encode($updatedFragmentDataLinks, JSON_UNESCAPED_SLASHES)]);
+        $gameContent['images'] = $updatedFragmentDataLinks;
+        if ( $task = $request->input('task') ) {
+            $gameContent['task']['text'] = $task;
+        }
+        $game->update(['content' => json_encode($gameContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
     }
 }
