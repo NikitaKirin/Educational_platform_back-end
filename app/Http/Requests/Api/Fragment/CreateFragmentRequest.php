@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Fragment;
 
+use App\Models\GameType;
 use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
@@ -59,7 +60,14 @@ class CreateFragmentRequest extends FormRequest
                 ]);
             }
             elseif ( $this->input('type') == 'game' ) {
-                $this->validate(['content' => 'array']);
+                $this->validate([
+                    'content'  => 'array',
+                    'gameType' => ['string', Rule::in(GameType::getTitlesTypes())],
+                ], [
+                    'string'      => 'На вход ожидалась строка',
+                    'array'       => 'На вход ожидался массив',
+                    'gameType.in' => 'Ожидаются только следующие типы игр: :values',
+                ]);
             }
         });
     }

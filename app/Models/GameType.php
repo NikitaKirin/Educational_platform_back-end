@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 
 class GameType extends Model
 {
@@ -20,5 +21,14 @@ class GameType extends Model
      */
     public function games(): BelongsToMany {
         return $this->belongsToMany(Game::class);
+    }
+
+    /**
+     * Get titles of games' types
+     * Получить названия типов игр
+     * @return Collection
+     */
+    public static function getTitlesTypes(): Collection {
+        return GameType::pluck('title');
     }
 }
