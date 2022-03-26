@@ -338,17 +338,17 @@ class FragmentController extends Controller
         $game = $fragment->fragmentgable;
         $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
         $gameContent = json_decode($game->content, true);
-        $requestFragmentDataLinks = collect($request->input('old_links')); // Обновленный контент: старые ссылки;
+        $requestFragmentDataLinks = collect($request->input('oldLinks')); // Обновленный контент: старые ссылки;
         $currentFragmentDataLinks = collect(json_decode($fragment->fragmentgable->content, true)['images']); // Текущий
         // контент -
         // ссылки;
         $updatedFragmentDataLinks = $currentFragmentDataLinks->filter(function ( $link ) use ( $requestFragmentDataLinks ) {
             return $requestFragmentDataLinks->contains($link);
-        });
+        })->values();
         $updatedFragmentDataImages = $game->getMedia('fragments_games')
                                           ->filter(function ( $image ) use ( $updatedFragmentDataLinks ) {
                                               return $updatedFragmentDataLinks->contains($image->getFullUrl());
-                                          });
+                                          })->values();
         $game->clearMediaCollectionExcept('fragments_games', $updatedFragmentDataImages);
         $game->refresh();
         if ( $request->file('content') ) {
