@@ -29,6 +29,6 @@ class GameType extends Model
      * @return Collection
      */
     public static function getTitlesTypes(): Collection {
-        return GameType::pluck('title');
+        return GameType::pluck('type');
     }
 }

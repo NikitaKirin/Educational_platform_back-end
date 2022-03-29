@@ -273,10 +273,10 @@ class FragmentController extends Controller
      */
     private function createFragmentGame( Request $request, User $user ): Game {
         $game = new Game();
-        $gameType = GameType::where('title', $request->input('gameType'))->get()->first();
+        $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
         $game->game_type_id = $gameType->id;
         $gameTask = $request->input('task');
-        $content = ['gameType' => $gameType->title];
+        $content = ['gameType' => $gameType->type];
         if ( $gameTask !== null ) {
             $content['task']['text'] = $gameTask;
         }
@@ -288,7 +288,7 @@ class FragmentController extends Controller
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
         $game->save();
         $game->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $gameType ) {
-            $fileName = str_slug("$user->name-" . "$gameType->title-" . Str::random(10)) . '.jpg';
+            $fileName = str_slug("$user->name-" . "$gameType->type-" . Str::random(10)) . '.jpg';
             $file_adder->usingFileName($fileName)->toMediaCollection('fragments_games', 'fragments');
         });
         $dataImages = $game->getMedia('fragments_games');
@@ -353,7 +353,7 @@ class FragmentController extends Controller
         $game->refresh();
         if ( $request->file('content') ) {
             $game->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $gameType ) {
-                $fileName = str_slug("$user->name-" . "$gameType->title-" . Str::random(10)) . '.jpg';
+                $fileName = str_slug("$user->name-" . "$gameType->type-" . Str::random(10)) . '.jpg';
                 $file_adder->usingFileName($fileName)->toMediaCollection('fragments_games', 'fragments');
             });
         }

@@ -8,9 +8,13 @@ use Illuminate\Database\Seeder;
 class GameTypeSeeder extends Seeder
 {
     public function run() {
-        $gameType = new GameType(['title' => 'pairs', 'description' => 'Какое-то описание']);
+        $gameType = new GameType(['type' => 'pairs', 'title' => 'Парочки', 'description' => 'Какое-то описание']);
         $gameType->save();
-        $gameTypeSecond = new GameType(['title' => 'matchmaking', 'description' => 'Какое-то описание']);
+        $gameTypeSecond = new GameType([
+            'type'        => 'matchmaking',
+            'title'       => 'Ассоциации',
+            'description' => 'Какое-то описание',
+        ]);
         $gameTypeSecond->save();
     }
 }
