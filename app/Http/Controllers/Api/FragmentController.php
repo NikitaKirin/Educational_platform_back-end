@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use JetBrains\PhpStorm\NoReturn;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -75,17 +76,22 @@ class FragmentController extends Controller
     public function store( CreateFragmentRequest $request ): JsonResponse {
         $user = Auth::user();
         DB::transaction(function () use ( $request, $user ) {
-            if ( $request->input('type') == 'article' ) {
+            if ( $request->input('type') === 'article' ) {
                 $fragmentData = $this->createFragmentArticle($request);
             }
-            elseif ( $request->input('type') == 'video' ) {
+            elseif ( $request->input('type') === 'video' ) {
                 $fragmentData = $this->createFragmentVideo($request);
             }
-            elseif ( $request->input('type') == 'image' ) {
+            elseif ( $request->input('type') === 'image' ) {
                 $fragmentData = $this->createFragmentImage($request);
             }
-            elseif ( $request->input('type') == 'game' ) {
-                $fragmentData = $this->createFragmentGame($request, $user);
+            elseif ( $request->input('type') === 'game' ) {
+                if ( $request->input('gameType') === 'pairs' ) {
+                    $fragmentData = $this->createFragmentGamePairs($request, $user);
+                }
+                elseif ( $request->input('gameType') === 'matchmaking' ) {
+                    $fragmentData = $this->createFragmentGameMatchmaking($request, $user);
+                }
             }
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
@@ -271,7 +277,7 @@ class FragmentController extends Controller
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */
-    private function createFragmentGame( Request $request, User $user ): Game {
+    private function createFragmentGamePairs( Request $request, User $user ): Game {
         $game = new Game();
         $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
         $game->game_type_id = $gameType->id;
@@ -294,6 +300,36 @@ class FragmentController extends Controller
         $dataImages = $game->getMedia('fragments_games');
         foreach ( $dataImages as $dataImage ) {
             $content['images'][] = $dataImage->getFullUrl();
+        }
+        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $game->save();
+        return $game;
+    }
+
+    /**
+     * Create fragment of type "Game" - "matchmaking"
+     * Создать фрагмента типа "игра" - подтип - "ассоциация"
+     * @param CreateFragmentRequest $request Объект запроса
+     * @return Game Игра
+     */
+    private function createFragmentGameMatchmaking( CreateFragmentRequest $request, $user ): Game {
+        $game = new Game();
+        $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
+        $game->game_type_id = $gameType->id;
+        $gameTask = $request->input('task') ?? $gameType->description;
+        $content = ['gameType' => $gameType->type];
+        $content['task']['text'] = $gameTask;
+        $content['task']['url'] = "";
+        $content['images'] = [];
+        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
+        $game->save();
+        $imagesCollection = collect(collect($request->allFiles())->only(['content'])->values()[0]);
+        foreach ( $imagesCollection as $pair ) {
+            $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
+                $filepath = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
+                return $game->addMedia($image)->usingFileName($filepath)
+                            ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
+            })->toArray();
         }
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $game->save();
