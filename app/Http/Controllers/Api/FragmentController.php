@@ -98,8 +98,9 @@ class FragmentController extends Controller
             $fragment->fragmentgable()->associate($fragmentData);
             $fragment->save();
             $fragment->tags()->sync($request->input('tags'));
-            if ( isset($request->fon) )
+            if ( isset($request->fon) ) {
                 $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+            }
         });
         return response()->json([
             'message' => 'Новый фрагмент успешно загружен!',
@@ -120,6 +121,9 @@ class FragmentController extends Controller
      */
     public function update( UpdateFragmentRequest $request, Fragment $fragment ): JsonResponse {
         DB::transaction(function () use ( $request, $fragment ) {
+            if ( $title = $request->input('title') ) {
+                $fragment->update(['title' => $title]);
+            }
             if ( $tags = $request->input('tags') ) {
                 $tags = array_unique($tags);
                 $fragment->tags()->sync($tags);
@@ -134,7 +138,13 @@ class FragmentController extends Controller
                 $this->updateFragmentArticle($request, $fragment);
             }
             elseif ( $fragment->fragmentgable_type == 'game' ) {
-                $this->updateFragmentGame($request, $fragment);
+                $gameType = GameType::where('id', $fragment->fragmentgable->game_type_id)->get()->first();
+                if ( $gameType->type === 'pairs' ) {
+                    $this->updateFragmentGamePairs($request, $fragment);
+                }
+                elseif ( $gameType->type === 'matchmaking' ) {
+                    $this->updateFragmentGameMatchmaking($request, $fragment);
+                }
             }
             if ( $request->hasFile('fon') ) {
                 if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
@@ -326,11 +336,12 @@ class FragmentController extends Controller
         $imagesCollection = collect(collect($request->allFiles())->only(['content'])->values()[0]);
         foreach ( $imagesCollection as $pair ) {
             $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
-                $filepath = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
-                return $game->addMedia($image)->usingFileName($filepath)
+                $fileName = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
+                return $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
                             ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
             })->toArray();
         }
+        $game->refresh();
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $game->save();
         return $game;
@@ -343,8 +354,6 @@ class FragmentController extends Controller
      * @param Fragment $fragment
      */
     private function updateFragmentVideoOrImage( UpdateFragmentRequest $request, Fragment $fragment ): void {
-        if ( $request->input('title') )
-            $fragment->update(['title' => $request->input('title')]);
         if ( $request->hasFile('content') ) {
             $fragment->fragmentgable->clearMediaCollection("fragments_{$fragment->fragmentgable_type}s");
             $fragment->fragmentgable->addMediaFromRequest('content')
@@ -365,11 +374,16 @@ class FragmentController extends Controller
      */
     private function updateFragmentArticle( UpdateFragmentRequest $request, Fragment $fragment ): void {
         $request->validate(['content' => 'string'], ['string' => 'На вход ожидалась строка']);
-        $fragment->update($request->only('title'));
         $fragment->fragmentgable->update($request->only('content'));
     }
 
-    private function updateFragmentGame( UpdateFragmentRequest $request, Fragment $fragment ): void {
+    /**
+     * Update fragment game - pairs
+     * Обновить фрагмент типа игра - парочки
+     * @param UpdateFragmentRequest $request Объект запроса
+     * @param Fragment $fragment Фрагмент
+     */
+    private function updateFragmentGamePairs( UpdateFragmentRequest $request, Fragment $fragment ): void {
         $user = Auth::user();
         $game = $fragment->fragmentgable;
         $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
@@ -405,5 +419,29 @@ class FragmentController extends Controller
             $gameContent['task']['text'] = $task;
         }
         $game->update(['content' => json_encode($gameContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+    }
+
+    private function updateFragmentGameMatchmaking( UpdateFragmentRequest $request, Fragment $fragment ) {
+        $user = $fragment->user;
+        $game = $fragment->fragmentgable;
+        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
+        $imagesCollection = collect(collect($request->allFiles())->only(['content'])->values()[0]);
+        $content = ['gameType' => $gameType->type];
+        $content['task']['text'] = $request->input('task') ?? $gameType->description;
+        $content['task']['url'] = "";
+        foreach ( $imagesCollection as $pair ) {
+            $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
+                $fileName = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
+                return $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
+                            ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
+            })->toArray();
+        }
+        $updatedLinks = collect($content['images'])->collapse();
+        $updatedGameImages = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $updatedLinks ) {
+            return $updatedLinks->contains($image->getFullUrl());
+        })->values();
+        $game->clearMediaCollectionExcept('fragments_games', $updatedGameImages);
+        $game->refresh();
+        $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
     }
 }
