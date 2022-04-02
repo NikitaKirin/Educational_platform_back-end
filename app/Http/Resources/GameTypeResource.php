@@ -9,6 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class GameTypeResource extends JsonResource
 {
     public static $wrap = 'gameType';
+
     /**
      * @param Request $request
      * @return array
@@ -17,6 +18,7 @@ class GameTypeResource extends JsonResource
         return [
             'id'          => $this->id,
             'title'       => $this->title,
+            'type'        => $this->type,
             'description' => $this->description,
         ];
     }
