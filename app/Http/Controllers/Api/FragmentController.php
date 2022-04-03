@@ -425,12 +425,15 @@ class FragmentController extends Controller
         $user = $fragment->user;
         $game = $fragment->fragmentgable;
         $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
-        $imagesCollection = collect(collect($request->allFiles())->only(['content'])->values()[0]);
+        $imagesCollection = collect(collect($request->only(['content']))->values()[0]);
         $content = ['gameType' => $gameType->type];
         $content['task']['text'] = $request->input('task') ?? $gameType->description;
         $content['task']['url'] = "";
         foreach ( $imagesCollection as $pair ) {
             $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
+                if ( gettype($image) === 'string' ) {
+                    return $image;
+                }
                 $fileName = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
                 return $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
                             ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
