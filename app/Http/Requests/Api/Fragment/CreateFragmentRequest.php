@@ -47,11 +47,12 @@ class CreateFragmentRequest extends FormRequest
                 $this->validate(['content' => 'json'], ['json' => 'Ожидались данные в формате JSON']);
             }
             elseif ( $this->input('type') == 'video' ) {
-                $this->validate(['content' => 'file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'], [
-                    'file'      => 'На вход ожидался файл',
-                    'mimes'     => 'Поддерживаются файлы со следующими расширениями: :values',
-                    'mimetypes' => 'Поддерживаются файлы следующего формата :values',
-                ]);
+                $this->validate(['content' => 'file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'],
+                    [
+                        'file'      => 'На вход ожидался файл',
+                        'mimes'     => 'Поддерживаются файлы со следующими расширениями: :values',
+                        'mimetypes' => 'Поддерживаются файлы следующего формата :values',
+                    ]);
             }
             elseif ( $this->input('type') == 'image' ) {
                 $this->validate(['content' => 'file|mimes:png,jpg,jpeg,gif', 'annotation' => 'nullable|string'], [
@@ -61,14 +62,38 @@ class CreateFragmentRequest extends FormRequest
             }
             elseif ( $this->input('type') == 'game' ) {
                 $this->validate([
-                    'content'  => 'required|array',
                     'gameType' => ['required', 'string', Rule::in(GameType::getTitlesTypes())],
                 ], [
                     'string'      => 'На вход ожидалась строка',
-                    'array'       => 'На вход ожидался массив',
-                    'gameType.in' => 'Ожидаются только следующие типы игр: :values',
                     'required'    => 'Данное поле обязательно для заполнения',
+                    'gameType.in' => 'Ожидаются только следующие типы игр: :values',
                 ]);
+                if ( $this->input('gameType') === 'pairs' ) {
+                    $this->validate([
+                        'content'   => 'required|array',
+                        'content.*' => 'file|mimes:png,jpg,jpeg,gif',
+                    ], [
+                        'string'      => 'На вход ожидалась строка',
+                        'array'       => 'На вход ожидался массив',
+                        'required'    => 'Данное поле обязательно для заполнения',
+                        'file'        => "На вход ожидался набор файлов",
+                        'mimes'       => 'Поддерживаются файлы со следующими расширениями: :values',
+                    ]);
+                }
+                elseif ( $this->input('gameType') === 'matchmaking' ) {
+                    $this->validate([
+                        'content'     => 'required|array',
+                        'content.*'   => 'required|array',
+                        'content.*.*' => 'file|mimes:png,jpg,jpeg,gif',
+                    ],
+                        [
+                            'string'      => 'На вход ожидалась строка',
+                            'array'       => 'На вход ожидался массив',
+                            'required'    => 'Данное поле обязательно для заполнения',
+                            'file'        => "На вход ожидался набор файлов",
+                            'mimes'       => 'Поддерживаются файлы со следующими расширениями: :values',
+                        ]);
+                }
             }
         });
     }
