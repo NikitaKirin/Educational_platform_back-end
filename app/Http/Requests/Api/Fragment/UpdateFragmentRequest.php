@@ -2,13 +2,29 @@
 
 namespace App\Http\Requests\Api\Fragment;
 
+use App\Models\Fragment;
+use App\Models\GameType;
 use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateFragmentRequest extends FormRequest
 {
+    /**
+     * @var Fragment $fragment Текущий объект фрагмента
+     */
+    private Fragment $fragment;
+
+    /**
+     * @var string $gameType тип игры, если имеется
+     */
+    private string $gameType;
+
     public function rules(): array {
+        $this->fragment = $this->route('fragment');
+        if ( $this->fragment->fragmentgable_type === 'game' ) {
+            $this->gameType = GameType::find($this->fragment->fragmentgable->game_type_id)->type ?? null;
+        }
         $tags = Tag::getValues();
         return [
             'title' => 'nullable|string',
@@ -48,11 +64,12 @@ class UpdateFragmentRequest extends FormRequest
                 ]);
             }
             elseif ( $fragmentgable_type == 'video' ) {
-                $this->validate(['content' => 'nullable|file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'], [
-                    'file'      => 'На вход ожидался файл',
-                    'mimes'     => 'Поддерживаются файлы со следующими расширениями: :values',
-                    'mimetypes' => 'Поддерживаются файлы следующего формата: :values',
-                ]);
+                $this->validate(['content' => 'nullable|file|mimes:mp4,ogx,oga,ogv,ogg,webm,qt,mov|mimetypes:video/avi,video/mpeg,video/quicktime,video/mp4'],
+                    [
+                        'file'      => 'На вход ожидался файл',
+                        'mimes'     => 'Поддерживаются файлы со следующими расширениями: :values',
+                        'mimetypes' => 'Поддерживаются файлы следующего формата: :values',
+                    ]);
             }
             elseif ( $fragmentgable_type == 'image' ) {
                 $this->validate([
@@ -64,11 +81,32 @@ class UpdateFragmentRequest extends FormRequest
                 ]);
             }
             elseif ( $fragmentgable_type === 'game' ) {
-                $this->validate([
-                    'content' => 'array',
-                ], [
-                    'array' => 'На вход ожидался массив',
-                ]);
+                if ( $this->gameType === 'pairs' ) {
+                    $this->validate([
+                        'content'   => 'required|array',
+                        'content.*' => 'file|mimes:png,jpg,jpeg,gif',
+                    ], [
+                        'string'   => 'На вход ожидалась строка',
+                        'array'    => 'На вход ожидался массив',
+                        'required' => 'Данное поле обязательно для заполнения',
+                        'file'     => "На вход ожидался набор файлов",
+                        'mimes'    => 'Поддерживаются файлы со следующими расширениями: :values',
+                    ]);
+                }
+                elseif ( $this->gameType === 'matchmaking' ) {
+                    $this->validate([
+                        'content'     => 'required|array',
+                        'content.*'   => 'required|array',
+                        'content.*.*' => 'file|mimes:png,jpg,jpeg,gif',
+                    ],
+                        [
+                            'string'   => 'На вход ожидалась строка',
+                            'array'    => 'На вход ожидался массив',
+                            'required' => 'Данное поле обязательно для заполнения',
+                            'file'     => "На вход ожидался набор файлов",
+                            'mimes'    => 'Поддерживаются файлы со следующими расширениями: :values',
+                        ]);
+                }
             }
         });
     }
