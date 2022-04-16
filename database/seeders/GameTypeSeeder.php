@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Game;
 use App\Models\GameType;
 use Illuminate\Database\Seeder;
 
@@ -16,5 +17,11 @@ class GameTypeSeeder extends Seeder
             'description' => 'Какое-то описание',
         ]);
         $gameTypeSecond->save();
+        $gameTypeThird = new GameType([
+            'type'        => 'sequences',
+            'title'       => 'Последовательности',
+            'description' => 'Какое-то описание',
+        ]);
+        $gameTypeThird->save();
     }
 }
