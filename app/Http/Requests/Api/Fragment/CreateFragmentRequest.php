@@ -68,16 +68,16 @@ class CreateFragmentRequest extends FormRequest
                     'required'    => 'Данное поле обязательно для заполнения',
                     'gameType.in' => 'Ожидаются только следующие типы игр: :values',
                 ]);
-                if ( $this->input('gameType') === 'pairs' ) {
+                if ( $this->input('gameType') === 'pairs' || $this->input('gameType') === 'sequences' ) {
                     $this->validate([
                         'content'   => 'required|array',
                         'content.*' => 'file|mimes:png,jpg,jpeg,gif',
                     ], [
-                        'string'      => 'На вход ожидалась строка',
-                        'array'       => 'На вход ожидался массив',
-                        'required'    => 'Данное поле обязательно для заполнения',
-                        'file'        => "На вход ожидался набор файлов",
-                        'mimes'       => 'Поддерживаются файлы со следующими расширениями: :values',
+                        'string'   => 'На вход ожидалась строка',
+                        'array'    => 'На вход ожидался массив',
+                        'required' => 'Данное поле обязательно для заполнения',
+                        'file'     => "На вход ожидался набор файлов",
+                        'mimes'    => 'Поддерживаются файлы со следующими расширениями: :values',
                     ]);
                 }
                 elseif ( $this->input('gameType') === 'matchmaking' ) {
@@ -87,11 +87,11 @@ class CreateFragmentRequest extends FormRequest
                         'content.*.*' => 'file|mimes:png,jpg,jpeg,gif',
                     ],
                         [
-                            'string'      => 'На вход ожидалась строка',
-                            'array'       => 'На вход ожидался массив',
-                            'required'    => 'Данное поле обязательно для заполнения',
-                            'file'        => "На вход ожидался набор файлов",
-                            'mimes'       => 'Поддерживаются файлы со следующими расширениями: :values',
+                            'string'   => 'На вход ожидалась строка',
+                            'array'    => 'На вход ожидался массив',
+                            'required' => 'Данное поле обязательно для заполнения',
+                            'file'     => "На вход ожидался набор файлов",
+                            'mimes'    => 'Поддерживаются файлы со следующими расширениями: :values',
                         ]);
                 }
             }
