@@ -83,8 +83,8 @@ class UpdateFragmentRequest extends FormRequest
             elseif ( $fragmentgable_type === 'game' ) {
                 if ( $this->gameType === 'pairs' ) {
                     $this->validate([
-                        'content'   => 'required|array',
-                        'content.*' => 'file|mimes:png,jpg,jpeg,gif',
+                        'content'   => 'nullable|array',
+                        //'content.*' => 'string|file|mimes:png,jpg,jpeg,gif',
                     ], [
                         'string'   => 'На вход ожидалась строка',
                         'array'    => 'На вход ожидался массив',
@@ -95,9 +95,9 @@ class UpdateFragmentRequest extends FormRequest
                 }
                 elseif ( $this->gameType === 'matchmaking' ) {
                     $this->validate([
-                        'content'     => 'required|array',
-                        'content.*'   => 'required|array',
-                        'content.*.*' => 'file|mimes:png,jpg,jpeg,gif',
+                        'content'     => 'nullable|array',
+                        'content.*'   => 'nullable|array',
+                        //'content.*.*' => 'string|file|mimes:png,jpg,jpeg,gif',
                     ],
                         [
                             'string'   => 'На вход ожидалась строка',
