@@ -29,6 +29,7 @@ use JetBrains\PhpStorm\NoReturn;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use function GuzzleHttp\Promise\all;
 
 class FragmentController extends Controller
 {
@@ -86,8 +87,8 @@ class FragmentController extends Controller
                 $fragmentData = $this->createFragmentImage($request);
             }
             elseif ( $request->input('type') === 'game' ) {
-                if ( $request->input('gameType') === 'pairs' ) {
-                    $fragmentData = $this->createFragmentGamePairs($request, $user);
+                if ( $request->input('gameType') === 'pairs' || $request->input('gameType') === 'sequences' ) {
+                    $fragmentData = $this->createFragmentGamePairsOrSequences($request, $user);
                 }
                 elseif ( $request->input('gameType') === 'matchmaking' ) {
                     $fragmentData = $this->createFragmentGameMatchmaking($request, $user);
@@ -144,6 +145,9 @@ class FragmentController extends Controller
                 }
                 elseif ( $gameType->type === 'matchmaking' ) {
                     $this->updateFragmentGameMatchmaking($request, $fragment);
+                }
+                elseif ( $gameType->type === 'sequences' ) {
+                    $this->updateFragmentGameSequences($request, $fragment);
                 }
             }
             if ( $request->hasFile('fon') ) {
@@ -279,15 +283,15 @@ class FragmentController extends Controller
     }
 
     /**
-     * Create fragment of type "Game"
-     * Создать фрагмент типа "игра"
+     * Create fragment of type "Game" - "pairs" or "sequences"
+     * Создать фрагмент типа "игра" подтипа "парочки" или "последовательности"
      * @param Request $request Объект запроса
      * @param User $user - Пользователь, создающий игру
      * @return Game
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */
-    private function createFragmentGamePairs( Request $request, User $user ): Game {
+    private function createFragmentGamePairsOrSequences( Request $request, User $user ): Game {
         $game = new Game();
         $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
         $game->game_type_id = $gameType->id;
@@ -303,14 +307,13 @@ class FragmentController extends Controller
         $content['images'] = [];
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
         $game->save();
-        $game->addMultipleMediaFromRequest(['content'])->each(function ( $file_adder ) use ( $user, $gameType ) {
-            $fileName = str_slug("$user->name-" . "$gameType->type-" . Str::random(10)) . '.jpg';
-            $file_adder->usingFileName($fileName)->toMediaCollection('fragments_games', 'fragments');
-        });
-        $dataImages = $game->getMedia('fragments_games');
-        foreach ( $dataImages as $dataImage ) {
-            $content['images'][] = $dataImage->getFullUrl();
-        }
+        $imagesCollection = collect(collect($request->all())->get('content'));
+        $content['images'] = $imagesCollection->map(function ( $image ) use ( $game, $gameType, $user ) {
+            $fileName = $gameType->type . "-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' .
+                $image->extension();
+            return $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
+                        ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
+        })->values()->toArray();
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $game->save();
         return $game;
@@ -421,6 +424,45 @@ class FragmentController extends Controller
         $game->update(['content' => json_encode($gameContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
     }
 
+    /**
+     * Update fragment game - sequences
+     * Обновить фрагмент типа игра - последовательности
+     * @param UpdateFragmentRequest $request Объект запроса
+     * @param Fragment $fragment Фрагмент
+     */
+    private function updateFragmentGameSequences( UpdateFragmentRequest $request, Fragment $fragment ): void {
+        $user = Auth::user();
+        $game = $fragment->fragmentgable;
+        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
+        $content = ['gameType' => $gameType->type];
+        $content['task']['text'] = $request->input('task') ?? $gameType->description;
+        $content['task']['mediaUrl'] = "";
+        $updatedDataCollection = collect(collect($request->all())->get('content'));
+        $content['images'] = $updatedDataCollection->map(function ( $value ) use ( $gameType, $game, $user ) {
+            if ( gettype($value) === 'string' ) {
+                return $value;
+            }
+            $fileName = $gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) .
+                '.' . $value->extension();
+            return $game->addMedia($value)->usingFileName($fileName)->preservingOriginal()
+                        ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
+        });
+        $updatedContentUrls = collect($content['images']);
+        $updatedGameImages = $game->getMedia('fragments_games')
+                                  ->filter(function ( $image ) use ( $updatedContentUrls ) {
+                                      return $updatedContentUrls->contains($image->getFullUrl());
+                                  })->values();
+        $game->clearMediaCollectionExcept('fragments_games', $updatedGameImages);
+        $game->refresh();
+        $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+    }
+
+    /**
+     * Update fragment game - matchmaking
+     * Обновить фрагмент типа игра - ассоциации
+     * @param UpdateFragmentRequest $request Объект запроса
+     * @param Fragment $fragment Фрагмент
+     */
     private function updateFragmentGameMatchmaking( UpdateFragmentRequest $request, Fragment $fragment ) {
         $user = $fragment->user;
         $game = $fragment->fragmentgable;
@@ -428,7 +470,7 @@ class FragmentController extends Controller
         $imagesCollection = collect(collect($request->only(['content']))->values()[0]);
         $content = ['gameType' => $gameType->type];
         $content['task']['text'] = $request->input('task') ?? $gameType->description;
-        $content['task']['url'] = "";
+        $content['task']['mediaUrl'] = "";
         foreach ( $imagesCollection as $pair ) {
             $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
                 if ( gettype($image) === 'string' ) {
