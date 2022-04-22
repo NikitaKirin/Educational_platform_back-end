@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AgeLimitController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api', 'blockUser'])->group(function () {
@@ -8,6 +9,8 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
     Route::get('/teacher/fragments/{user}', 'FragmentController@fragmentsTeacherIndex')
          ->middleware('can:viewTeacherFragments,user')
          ->name('fragments.teacher.index'); // Получить список фрагментов определённого учителя;
+    Route::get('/fragments/age-limits', AgeLimitController::class)->name('age-limit.index'); // Получить список всех
+    // возрастных цензов
     Route::get('/fragments/like/{title?}/{type?}/{tags?}', 'FragmentController@likeIndex')
          ->name('fragments.like.index'); // Получить список избранных фрагментов (текущий пользователь);
     Route::post('/fragments', 'FragmentController@store')->middleware('can:create,App\\Models\\Fragment')
