@@ -8,6 +8,7 @@ use App\Http\Requests\Api\Fragment\IndexFragmentRequest;
 use App\Http\Requests\Api\Fragment\UpdateFragmentRequest;
 use App\Http\Resources\FragmentResource;
 use App\Http\Resources\FragmentResourceCollection;
+use App\Models\AgeLimit;
 use App\Models\Article;
 use App\Models\Game;
 use App\Models\GameType;
@@ -33,16 +34,26 @@ use function GuzzleHttp\Promise\all;
 
 class FragmentController extends Controller
 {
-    // Вывести список фрагментов текущего пользователя.
+    /**
+     * Get auth user`s fragments
+     * Получить фрагменты текущего авторизованного пользователя
+     * @param IndexFragmentRequest $request
+     * @return FragmentResourceCollection
+     */
     public function myIndex( IndexFragmentRequest $request ): FragmentResourceCollection {
         $title = $request->input('title');
         $type = $request->input('type');
         $tags = $request->input('tags');
+        $ageLimit = $request->input('ageLimit') ?? null;
         $fragments = Fragment::with('tags')->withCount('tags')->where('user_id', Auth::id())
                              ->when($title, function ( $query ) use ( $title ) {
                                  return $query->where('title', 'ILIKE', '%' . $title . '%');
                              })->when($type, function ( $query ) use ( $type ) {
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+            })->when($ageLimit, function ( $query ) use ( $ageLimit ) {
+                return $query->whereHas('ageLimit', function ( $query ) use ( $ageLimit ) {
+                    return $query->where('id', 'LIKE', $ageLimit);
+                });
             })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
@@ -52,14 +63,26 @@ class FragmentController extends Controller
     }
 
     // Вывести список всех фрагментов. Функционал пользователя и администратора.
+
+    /**
+     * Get all fragments
+     * Получить список всех фрагментов на платформе
+     * @param IndexFragmentRequest $request
+     * @return FragmentResourceCollection
+     */
     public function index( IndexFragmentRequest $request ): FragmentResourceCollection {
         $title = $request->input('title');
         $type = $request->input('type');
         $tags = $request->input('tags');
+        $ageLimit = $request->input('ageLimit') ?? null;
         $fragments = Fragment::with('tags')->withCount('tags')->when($title, function ( $query ) use ( $title ) {
             return $query->where('title', 'ILIKE', '%' . $title . '%');
         })->when($type, function ( $query ) use ( $type ) {
             return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+        })->when($ageLimit, function ( $query ) use ( $ageLimit ) {
+            return $query->whereHas('ageLimit', function ( $query ) use ( $ageLimit ) {
+                return $query->where('id', 'LIKE', $ageLimit);
+            });
         })->when($tags, function ( $query ) use ( $tags ) {
             return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                 $query->whereIntegerInRaw('tag_id', $tags);
@@ -94,9 +117,15 @@ class FragmentController extends Controller
                     $fragmentData = $this->createFragmentGameMatchmaking($request, $user);
                 }
             }
-            $fragment = new Fragment(['title' => $request->input('title')]);
+            $fragment = new Fragment([
+                'title'     => $request->input('title'),
+                'age_limit' => $request->input
+                    ('ageLimit') ?? null,
+            ]);
             $fragment->user()->associate(Auth::user());
             $fragment->fragmentgable()->associate($fragmentData);
+            $ageLimitId = $request->input('age_limit') ?? null;
+            $fragment->ageLimit()->associate(AgeLimit::find($ageLimitId));
             $fragment->save();
             $fragment->tags()->sync($request->input('tags'));
             if ( isset($request->fon) ) {
@@ -125,6 +154,9 @@ class FragmentController extends Controller
             if ( $title = $request->input('title') ) {
                 $fragment->update(['title' => $title]);
             }
+            $ageLimitId = $request->input('ageLimit') ?? null;
+            $fragment->ageLimit()->associate(AgeLimit::find($ageLimitId));
+            $fragment->save();
             if ( $tags = $request->input('tags') ) {
                 $tags = array_unique($tags);
                 $fragment->tags()->sync($tags);

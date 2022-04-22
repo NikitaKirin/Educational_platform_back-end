@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 class AgeLimitSeeder extends Seeder
 {
     private array $data = [
+        '0+' => 0,
         '3+' => 3,
         '5+' => 5,
         '7+' => 7,
