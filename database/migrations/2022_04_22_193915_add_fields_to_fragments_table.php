@@ -8,13 +8,13 @@ class AddFieldsToFragmentsTable extends Migration
 {
     public function up() {
         Schema::table('fragments', function ( Blueprint $table ) {
-            $table->string('age_limit')->nullable();
+            $table->foreignId('age_limit_id')->nullable()->constrained('age_limits')->nullOnDelete();
         });
     }
 
     public function down() {
         Schema::table('fragments', function ( Blueprint $table ) {
-            $table->dropColumn('age_limit');
+            $table->dropConstrainedForeignId('age_limit_id');
         });
     }
 }

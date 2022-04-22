@@ -46,4 +46,13 @@ class Fragment extends Model implements HasMedia
     public function lessons(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
         return $this->belongsToMany(Lesson::class)->withPivot('order');
     }
+
+    /**
+     * Set relation with AgeLimit
+     * Устанавливает связь с моделью AgeLimit
+     * @return BelongsTo
+     */
+    public function ageLimit(): BelongsTo {
+        return $this->belongsTo(AgeLimit::class, 'age_limit_id');
+    }
 }
