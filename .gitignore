@@ -21,3 +21,5 @@ yarn-error.log
 /public/fragments
 /public/fragments-fons
 /public/lessons-fons
+docker-compose.yml
+docker
