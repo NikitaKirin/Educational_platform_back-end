@@ -23,5 +23,11 @@ class GameTypeSeeder extends Seeder
             'description' => 'Какое-то описание',
         ]);
         $gameTypeThird->save();
+        $gameTypeFourth = new GameType([
+            'type'        => 'puzzles',
+            'title'       => 'Пазлы',
+            'description' => 'Какое-то описание',
+        ]);
+        $gameTypeFourth->save();
     }
 }
