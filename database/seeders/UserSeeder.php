@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class UserSeeder extends Seeder
 {
     public function run() {
-        for ( $i = 0; $i < 100; $i++ ) {
+        for ( $i = 0; $i < 10; $i++ ) {
             DB::table('users')->insert([
                 'name'     => Str::random(10),
                 'role'     => 'student',
@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]);
         }
-        for ( $i = 0; $i < 50; $i++ ) {
+        for ( $i = 0; $i < 10; $i++ ) {
             DB::table('users')->insert([
                 'name'       => Str::random(10),
                 'role'       => 'creator',

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AgeLimit;
 use App\Models\Fragment;
 use App\Models\Lesson;
 use App\Models\Tag;
@@ -15,22 +16,20 @@ class LessonSeeder extends Seeder
         $users = User::where('role', 'creator')->pluck('id');
         $fragments = Fragment::all()->pluck('id');
         $tags = Tag::all()->pluck('id');
-        for ( $i = 0; $i < 200; $i++ ) {
+        $ageLimits = AgeLimit::all()->pluck('id');
+        for ( $i = 0; $i < 10; $i++ ) {
             $lesson = new Lesson([
                 'title'      => Str::random(10),
                 'annotation' => Str::random(15),
-                'user_id'    => $users[rand(1, 40)],
+                'user_id'    => $users->random(),
             ]);
+            $lesson->ageLimit()->associate($ageLimits->random());
             $lesson->save();
-            $fragments_count = rand(3, 15);
-            $tags_count = rand(2, 10);
-            for ( $j = 0; $j < $fragments_count; $j++ ) {
-                $fragment = $fragments[rand(10, 400)];
-                if ( $lesson->fragments()->where('id', $fragment)->exists() )
-                    continue;
-                $lesson->fragments()->attach($fragment, ['order' => $j + 1]);
+            $rand = rand(2, 8);
+            for ( $j = 0; $j < $rand; $j++ ) {
+                $lesson->fragments()->attach($fragments->random(), ['order' => $j]);
             }
-            $lesson->tags()->sync($tags->random($tags_count));
+            $lesson->tags()->sync($tags->random(rand(2, 10)));
             $lesson->save();
         }
     }

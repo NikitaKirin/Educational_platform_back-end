@@ -41,4 +41,13 @@ class Lesson extends Model implements HasMedia
     public function favouritableUsers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany {
         return $this->belongsToMany(User::class, 'fragment_table');
     }
+
+    /**
+     * Set relation with AgeLimit
+     * Устанавливает связь с моделью AgeLimit
+     * @return BelongsTo
+     */
+    public function ageLimit(): BelongsTo {
+        return $this->belongsTo(AgeLimit::class, 'age_limit_id');
+    }
 }

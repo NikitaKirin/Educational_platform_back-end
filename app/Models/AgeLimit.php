@@ -26,4 +26,13 @@ class AgeLimit extends Model
     public function fragments(): HasMany {
         return $this->hasMany(Fragment::class);
     }
+
+    /**
+     * Set the relation with model Lesson
+     * Устанавливает связь с моделью Lesson
+     * @return HasMany
+     */
+    public function lessons(): HasMany {
+        return $this->hasMany(Lesson::class);
+    }
 }
