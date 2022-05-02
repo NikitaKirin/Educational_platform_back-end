@@ -9,6 +9,7 @@ use App\Http\Requests\Api\Lesson\UpdateLessonRequest;
 use App\Http\Resources\FragmentResourceCollection;
 use App\Http\Resources\LessonResource;
 use App\Http\Resources\LessonResourceCollection;
+use App\Models\AgeLimit;
 use App\Models\Lesson;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,11 +19,17 @@ use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
 {
-    // Вывести список всех уроков. Функционал пользователя и администратора.
+    /**
+     * Get all lessons
+     * Получить все уроки доступные на платформе
+     * @param Request $request
+     * @return LessonResourceCollection
+     */
     public function index( Request $request ): LessonResourceCollection {
         $title = $request->input('title');
         $creator = $request->input('creator');
         $tags = $request->input('tags');
+        $ageLimit = $request->input('ageLimit');
         $lessons = Lesson::with('tags')->withCount(['tags', 'fragments'])
                          ->whereHas('user', function ( Builder $query ) {
                              $query->where('role', '<>', 'student');
@@ -36,6 +43,10 @@ class LessonController extends Controller
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
                 });
+            })->when($ageLimit, function ( $query ) use ( $ageLimit ) {
+                return $query->whereHas('ageLimit', function ( $query ) use ( $ageLimit ) {
+                    $query->where('id', 'LIKE', $ageLimit);
+                });
             });
         return new LessonResourceCollection($lessons->paginate(6));
     }
@@ -48,6 +59,7 @@ class LessonController extends Controller
                 'annotation' => $request->input('annotation'),
                 'user_id'    => Auth::user()->id,
             ]);
+            $lesson->ageLimit()->associate(AgeLimit::find($request->input('ageLimit')));
             $lesson->save();
             $fragments = $request->input('fragments');
             for ( $i = 0; $i < count($fragments); $i++ ) {
@@ -71,6 +83,8 @@ class LessonController extends Controller
         DB::transaction(function () use ( $request, $lesson ) {
             $lesson->update(['title' => $request->input('title'), 'annotation' => $request->input('annotation')]);
             $lesson->fragments()->sync([]);
+            $lesson->ageLimit()->associate($request->input('ageLimit'));
+            $lesson->save();
             $fragments = $request->input('fragments');
             $tags = $request->input('tags');
             for ( $i = 0; $i < count($fragments); $i++ ) {
@@ -120,11 +134,17 @@ class LessonController extends Controller
         return response(['message' => 'Ok'], 200);
     }
 
-    // Получить список избранных фрагментов. Функционал пользователя и администратора.
+    /**
+     * Get fragments which has like
+     * Получить список избранных фрагментов
+     * @param Request $request
+     * @return LessonResourceCollection
+     */
     public function likeIndex( Request $request ): LessonResourceCollection {
         $title = $request->input('title');
         $creator = $request->input('creator');
         $tags = $request->input('tags');
+        $ageLimit = $request->input('ageLimit');
         $lessons = Auth::user()->favouriteLessons()->withCount(['tags', 'fragments'])->with('tags')
                        ->when($title, function ( $query ) use ( $title ) {
                            return $query->where('title', 'ILIKE', "%{$title}%");
@@ -136,21 +156,35 @@ class LessonController extends Controller
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
                 });
+            })->when($ageLimit, function ( $query ) use ( $ageLimit ) {
+                return $query->whereHas('ageLimit', function ( $query ) use ( $ageLimit ) {
+                    $query->where('id', 'LIKE', $ageLimit);
+                });
             });
 
         return new LessonResourceCollection($lessons->orderBy('title')->paginate(6));
     }
 
-    // Получить список уроков текущего авторизованного пользователя.
+    /**
+     * Get current auth user's lessons
+     * Получить список уроков текущего авторизованного пользователя
+     * @param Request $request
+     * @return LessonResourceCollection
+     */
     public function myIndex( Request $request ): LessonResourceCollection {
         $title = $request->input('title');
         $tags = $request->input('tags');
+        $ageLimit = $request->input('ageLimit');
         $lessons = Auth::user()->lessons()->with('tags')->withCount(['tags', 'fragments'])
                        ->when($title, function ( $query ) use ( $title ) {
                            return $query->where('title', $title);
                        })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
+                });
+            })->when($ageLimit, function ( $query ) use ( $ageLimit ) {
+                return $query->whereHas('ageLimit', function ( $query ) use ( $ageLimit ) {
+                    $query->where('id', 'LIKE', $ageLimit);
                 });
             });
         return new LessonResourceCollection($lessons->orderBy('title')->paginate(6));
