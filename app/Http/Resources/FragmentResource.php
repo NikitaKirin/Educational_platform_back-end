@@ -26,7 +26,7 @@ class FragmentResource extends JsonResource
             'content'     => $this->when($this->fragmentgable_type === 'game',
                 json_decode($this->fragmentgable->content), $this->fragmentgable->content),
             'annotation'  => $this->when($this->fragmentgable_type == 'image', $this->fragmentgable->annotation, null),
-            'age_limit'   => $this->age_limit,
+            'age_limit'   => $this->ageLimit->text_context,
             'favourite'   => $this->when(Auth::user()->favouriteFragments()->where('fragment_id', $this->id)
                                              ->exists(), true, false),
             'order'       => $this->whenPivotLoaded('fragment_lesson', function () {

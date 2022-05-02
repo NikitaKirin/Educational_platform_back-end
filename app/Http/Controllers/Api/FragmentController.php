@@ -45,7 +45,7 @@ class FragmentController extends Controller
         $title = $request->input('title');
         $type = $request->input('type');
         $tags = $request->input('tags');
-        $ageLimit = $request->input('ageLimit') ?? null;
+        $ageLimit = $request->input('ageLimit');
         $fragments = Fragment::with('tags')->withCount('tags')->where('user_id', Auth::id())
                              ->when($title, function ( $query ) use ( $title ) {
                                  return $query->where('title', 'ILIKE', '%' . $title . '%');
@@ -75,7 +75,7 @@ class FragmentController extends Controller
         $title = $request->input('title');
         $type = $request->input('type');
         $tags = $request->input('tags');
-        $ageLimit = $request->input('ageLimit') ?? null;
+        $ageLimit = $request->input('ageLimit');
         $fragments = Fragment::with('tags')->withCount('tags')->when($title, function ( $query ) use ( $title ) {
             return $query->where('title', 'ILIKE', '%' . $title . '%');
         })->when($type, function ( $query ) use ( $type ) {
@@ -121,14 +121,10 @@ class FragmentController extends Controller
                     $fragmentData = $this->createFragmentGamePuzzles($request, $user);
                 }
             }
-            $fragment = new Fragment([
-                'title'     => $request->input('title'),
-                'age_limit' => $request->input
-                    ('ageLimit') ?? null,
-            ]);
+            $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
             $fragment->fragmentgable()->associate($fragmentData);
-            $ageLimitId = $request->input('age_limit') ?? null;
+            $ageLimitId = $request->input('ageLimit');
             $fragment->ageLimit()->associate(AgeLimit::find($ageLimitId));
             $fragment->save();
             $fragment->tags()->sync($request->input('tags'));
@@ -158,8 +154,9 @@ class FragmentController extends Controller
             if ( $title = $request->input('title') ) {
                 $fragment->update(['title' => $title]);
             }
-            $ageLimitId = $request->input('ageLimit') ?? null;
-            $fragment->ageLimit()->associate(AgeLimit::find($ageLimitId));
+            if ( $ageLimitId = $request->input('ageLimit') ) {
+                $fragment->ageLimit()->associate($ageLimitId);
+            }
             $fragment->save();
             if ( $tags = $request->input('tags') ) {
                 $tags = array_unique($tags);
@@ -184,6 +181,9 @@ class FragmentController extends Controller
                 }
                 elseif ( $gameType->type === 'sequences' ) {
                     $this->updateFragmentGameSequences($request, $fragment);
+                }
+                elseif ( $gameType === 'puzzles' ) {
+                    $this->updateFragmentGamePuzzles($request, $fragment);
                 }
             }
             if ( $request->hasFile('fon') ) {
@@ -552,6 +552,32 @@ class FragmentController extends Controller
         })->values();
         $game->clearMediaCollectionExcept('fragments_games', $updatedGameImages);
         $game->refresh();
+        $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+    }
+
+    /**
+     * Update fragment game - puzzles
+     * Обновить фрагмент типа игра - пазлы
+     * @param UpdateFragmentRequest $request Объект запроса
+     * @param Fragment $fragment Фрагмент
+     */
+    private function updateFragmentGamePuzzles( UpdateFragmentRequest $request, Fragment $fragment ): void {
+        $user = Auth::user();
+        $game = $fragment->fragmentgable;
+        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
+        $content = ['gameType' => $gameType->type];
+        $content['task']['text'] = $request->input('task') ?? $gameType->description;
+        $content['task']['mediaUrl'] = "";
+        if ( $image = $request->file('content') ) {
+            $game->clearMediaCollection('fragments_games');
+            $fileName = $gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' .
+                $image->extension();
+            $fileName = $image->extension();
+            $game->addMediaFromRequest('content')->usingFileName($fileName)->toMediaCollection('fragments_games');
+        }
+        $game->refresh();
+        $content['images'][] = ['id' => 0, 'url' => $game->getFirstMediaUrl('fragments_games')];
+        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
     }
 }

@@ -11,7 +11,7 @@ class IndexFragmentRequest extends FormRequest
 {
     public function rules(): array {
         $tags = Tag::getValues();
-        $ageLimits = AgeLimit::all('id')->pluck('id')->toArray();
+        $ageLimits = AgeLimit::all()->pluck('id');
         return [
             'title'    => ['nullable', 'string'],
             'type'     => ['nullable', 'string', 'in:article,test,video,image, game'],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Fragment;
 
+use App\Models\AgeLimit;
 use App\Models\Fragment;
 use App\Models\GameType;
 use App\Models\Tag;
@@ -25,22 +26,26 @@ class UpdateFragmentRequest extends FormRequest
         if ( $this->fragment->fragmentgable_type === 'game' ) {
             $this->gameType = GameType::find($this->fragment->fragmentgable->game_type_id)->type ?? null;
         }
+        $ageLimits = AgeLimit::all()->pluck('id');
         $tags = Tag::getValues();
         return [
-            'title' => 'nullable|string',
-            'tags'  => ['nullable', 'array', Rule::in($tags)],
-            'fon'   => ['nullable', 'image', 'mimes:jpg,png,jpeg,gif'],
+            'title'    => 'nullable|string',
+            'tags'     => ['nullable', 'array', Rule::in($tags)],
+            'ageLimit' => ['nullable', 'numeric', Rule::in($ageLimits)],
+            'fon'      => ['nullable', 'image', 'mimes:jpg,png,jpeg,gif'],
         ];
     }
 
     public function messages(): array {
         return [
-            'required'  => 'Данное поле обязательно для заполнения',
-            'string'    => 'Введены недоступные символы',
-            'array'     => 'На вход ожидался массив',
-            'tags.in'   => 'Данное поле должно содержать только следующие значения: :values',
-            'fon.image' => 'На вход ожидалось изображение',
-            'fon.mimes' => 'Доступны файлы только следующего расширения :values',
+            'required'    => 'Данное поле обязательно для заполнения',
+            'string'      => 'Введены недоступные символы',
+            'numeric'     => 'На вход ожидалось число',
+            'array'       => 'На вход ожидался массив',
+            'tags.in'     => 'Данное поле должно содержать только следующие значения: :values',
+            'ageLimit.in' => 'На вход ожидалось одно из следующих значений: :values',
+            'fon.image'   => 'На вход ожидалось изображение',
+            'fon.mimes'   => 'Доступны файлы только следующего расширения :values',
         ];
     }
 

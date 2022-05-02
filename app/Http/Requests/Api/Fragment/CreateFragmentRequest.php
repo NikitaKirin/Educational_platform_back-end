@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Fragment;
 
+use App\Models\AgeLimit;
 use App\Models\GameType;
 use App\Models\Tag;
 use Illuminate\Foundation\Http\FormRequest;
@@ -13,24 +14,28 @@ class CreateFragmentRequest extends FormRequest
 
     public function rules(): array {
         $tags = Tag::getValues();
+        $ageLimits = AgeLimit::all()->pluck('id');
         return [
-            'type'    => 'required|in:test,article,video,image,game|string',
-            'title'   => 'required|string',
-            'content' => 'required',
-            'tags'    => ['nullable', 'array', Rule::in($tags)],
-            'fon'     => ['nullable', 'image', 'mimes:jpg,png,jpeg,gif'],
+            'type'     => 'required|in:test,article,video,image,game|string',
+            'title'    => 'required|string',
+            'content'  => 'required',
+            'tags'     => ['nullable', 'array', Rule::in($tags)],
+            'ageLimit' => ['required', 'numeric', Rule::in($ageLimits)],
+            'fon'      => ['nullable', 'image', 'mimes:jpg,png,jpeg,gif'],
         ];
     }
 
     public function messages(): array {
         return [
-            'required'  => 'Данное поле обязательно для заполнения',
-            'string'    => 'Введены недопустимые символы',
-            'type.in'   => 'Поддерживаются следующие типы фрагментов: :values',
-            'array'     => 'На вход ожидался массив',
-            'tags.in'   => 'Данное поле должно содержать только следующие значения: :values',
-            'fon.image' => 'На вход ожидалось изображение',
-            'fon.mimes' => 'Доступны файлы только следующего расширения :values',
+            'required'    => 'Данное поле обязательно для заполнения',
+            'string'      => 'Введены недопустимые символы',
+            'numeric'     => 'На вход ожидалось число',
+            'type.in'     => 'Поддерживаются следующие типы фрагментов: :values',
+            'array'       => 'На вход ожидался массив',
+            'tags.in'     => 'Данное поле должно содержать только следующие значения: :values',
+            'fon.image'   => 'На вход ожидалось изображение',
+            'fon.mimes'   => 'Доступны файлы только следующего расширения :values',
+            'ageLimit.in' => 'На вход ожидалось одно из следующих значений: :values',
         ];
     }
 
