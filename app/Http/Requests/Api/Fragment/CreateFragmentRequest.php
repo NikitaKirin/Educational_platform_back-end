@@ -99,6 +99,19 @@ class CreateFragmentRequest extends FormRequest
                             'mimes'    => 'Поддерживаются файлы со следующими расширениями: :values',
                         ]);
                 }
+                elseif ( $this->input('gameType') === 'puzzles' ) {
+                    $this->validate([
+                        'content' => 'required|image|mimes:png,jpg,jpeg,gif',
+                        'cols'    => 'required|numeric',
+                        'rows'    => 'required|numeric',
+                    ],
+                        [
+                            'required'      => 'Данное поле обязательно для заполнения',
+                            'image'         => 'На вход ожидалось изображение',
+                            'content.mimes' => 'Доступны только следующие типы изображений: :values',
+                            'numeric'       => 'На вход ожидалось число',
+                        ]);
+                }
             }
         });
     }

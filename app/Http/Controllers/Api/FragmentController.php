@@ -182,7 +182,7 @@ class FragmentController extends Controller
                 elseif ( $gameType->type === 'sequences' ) {
                     $this->updateFragmentGameSequences($request, $fragment);
                 }
-                elseif ( $gameType === 'puzzles' ) {
+                elseif ( $gameType->type === 'puzzles' ) {
                     $this->updateFragmentGamePuzzles($request, $fragment);
                 }
             }
@@ -400,16 +400,20 @@ class FragmentController extends Controller
         $content = ['gameType' => $gameType->type];
         $content['task']['text'] = $gameTask;
         $content['task']['url'] = "";
-        $content['images'] = [];
+        $content['image'] = [
+            'id'   => 0,
+            'url'  => '',
+            'rows' => (int)$request->input('rows'),
+            'cols' => (int)$request->input('cols'),
+        ];
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
-        $game->save();
         $image = $request->file('content');
         $fileName = $gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' .
             $image->extension();
         $game->addMediaFromRequest('content')->usingFileName($fileName)
              ->toMediaCollection('fragments_games', 'fragments');
-        $game->refresh();
-        $content['images'][] = ['id' => 0, 'url' => $game->getFirstMediaUrl('fragments_games')];
+        $game->save();
+        $content['image']['url'] = $game->getFirstMediaUrl('fragments_games');
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $game->save();
         return $game;
@@ -564,20 +568,23 @@ class FragmentController extends Controller
     private function updateFragmentGamePuzzles( UpdateFragmentRequest $request, Fragment $fragment ): void {
         $user = Auth::user();
         $game = $fragment->fragmentgable;
-        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
-        $content = ['gameType' => $gameType->type];
-        $content['task']['text'] = $request->input('task') ?? $gameType->description;
-        $content['task']['mediaUrl'] = "";
+        $currentContent = json_decode($game->content, true);
         if ( $image = $request->file('content') ) {
             $game->clearMediaCollection('fragments_games');
-            $fileName = $gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' .
-                $image->extension();
-            $fileName = $image->extension();
+            $fileName = $currentContent['gameType'] . '-' . $game->id . '-' . str_slug($user->name) . '-' .
+                Str::random(10) . '.' . $image->extension();
             $game->addMediaFromRequest('content')->usingFileName($fileName)->toMediaCollection('fragments_games');
         }
         $game->refresh();
-        $content['images'][] = ['id' => 0, 'url' => $game->getFirstMediaUrl('fragments_games')];
-        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+        $newContent = ['gameType' => $currentContent['gameType']];
+        $newContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
+        $newContent['task']['mediaUrl'] = "";
+        $newContent['image'] = [
+            'id'   => 0,
+            'url'  => $game->getFirstMediaUrl('fragments_games'),
+            'rows' => (int)$request->input('rows') ?? $newContent['image']['rows'],
+            'cols' => (int)$request->input('cols') ?? $newContent['image']['cols'],
+        ];
+        $game->update(['content' => json_encode($newContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
     }
 }
