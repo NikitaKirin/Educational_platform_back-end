@@ -14,7 +14,7 @@ class IndexFragmentRequest extends FormRequest
         $ageLimits = AgeLimit::all()->pluck('id');
         return [
             'title'    => ['nullable', 'string'],
-            'type'     => ['nullable', 'string', 'in:article,test,video,image, game'],
+            'type'     => ['nullable', 'string', 'in:article,test,video,image,game'],
             'tags'     => ['nullable', 'array', Rule::in($tags)],
             'ageLimit' => ['nullable', 'string', Rule::in($ageLimits)],
         ];
