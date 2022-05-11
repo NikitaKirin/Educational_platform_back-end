@@ -20,6 +20,7 @@ class GameTypeResource extends JsonResource
             'title'       => $this->title,
             'type'        => $this->type,
             'description' => $this->description,
+            'task'        => $this->task,
         ];
     }
 }

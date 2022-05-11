@@ -12,6 +12,7 @@ class GameType extends Model
     protected $fillable = [
         'title',
         'description',
+        'task',
     ];
 
     /**
