@@ -250,11 +250,16 @@ class FragmentController extends Controller
         $title = $request->input('title');
         $type = $request->input('type');
         $tags = $request->input('tags');
+        $ageLimit = $request->input('ageLimit');
         $fragments = Auth::user()->favouriteFragments()->withCount('tags')->with('tags')
                          ->when($title, function ( $query ) use ( $title ) {
                              return $query->where('title', 'ILIKE', '%' . $title . '%');
                          })->when($type, function ( $query ) use ( $type ) {
                 return $query->where('fragmentgable_type', 'ILIKE', '%' . $type . '%');
+            })->when($ageLimit, function ( $query ) use ( $ageLimit ) {
+                return $query->whereHas('ageLimit', function ( $query ) use ( $ageLimit ) {
+                    return $query->where('id', 'LIKE', $ageLimit);
+                });
             })->when($tags, function ( $query ) use ( $tags ) {
                 return $query->whereHas('tags', function ( $query ) use ( $tags ) {
                     $query->whereIntegerInRaw('tag_id', $tags);
@@ -331,19 +336,19 @@ class FragmentController extends Controller
         $game = new Game();
         $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
         $game->game_type_id = $gameType->id;
-        $gameTask = $request->input('task');
-        $content = ['gameType' => $gameType->type];
-        if ( $gameTask !== null ) {
-            $content['task']['text'] = $gameTask;
-        }
-        else {
-            $content['task']['text'] = $gameType->description;
-        }
-        $content['task']['mediaUrl'] = "";
-        $content['images'] = [];
-        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
+        $gameTask = $request->input('task') ?? $gameType->task;
+        $content = [
+            'gameType' => $gameType->type,
+            'task'     => [
+                'text'     => $gameTask,
+                'mediaUrl' => '',
+            ],
+            'images'   => [],
+        ];
+        $game->content = $content;
         $game->save();
-        $imagesCollection = collect(collect($request->all())->get('content'));
+        //dd($game->content);
+        /*$imagesCollection = collect(collect($request->all())->get('content'));
         $content['images'] = $imagesCollection->map(function ( $image ) use ( $game, $gameType, $user ) {
             $fileName = $gameType->type . "-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' .
                 $image->extension();
@@ -351,7 +356,7 @@ class FragmentController extends Controller
                         ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
         })->values()->toArray();
         $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $game->save();
+        $game->save();*/
         return $game;
     }
 
