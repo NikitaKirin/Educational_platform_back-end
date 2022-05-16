@@ -88,14 +88,16 @@ class UpdateFragmentRequest extends FormRequest
             elseif ( $fragmentgable_type === 'game' ) {
                 if ( $this->gameType === 'pairs' || $this->gameType === 'sequences' ) {
                     $this->validate([
-                        'content' => 'nullable|array',
-                        //'content.*' => 'string|file|mimes:png,jpg,jpeg,gif',
+                        'content'        => 'nullable|array',
+                        'content.*'      => 'file|mimes:png,jpg,jpeg,gif',
+                        'metaImagesData' => 'json',
                     ], [
                         'string'   => 'На вход ожидалась строка',
                         'array'    => 'На вход ожидался массив',
                         'required' => 'Данное поле обязательно для заполнения',
                         'file'     => "На вход ожидался набор файлов",
                         'mimes'    => 'Поддерживаются файлы со следующими расширениями: :values',
+                        'json'     => 'На вход ожидались данные в формате json',
                     ]);
                 }
                 elseif ( $this->gameType === 'matchmaking' ) {
