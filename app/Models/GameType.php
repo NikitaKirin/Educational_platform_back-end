@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 
 class GameType extends Model
@@ -18,10 +19,10 @@ class GameType extends Model
     /**
      * Take reverse one-to-many relation to Game
      * Обратная связь один-ко-многим с моделью Игра
-     * @return BelongsToMany
+     * @return HasMany
      */
-    public function games(): BelongsToMany {
-        return $this->belongsToMany(Game::class);
+    public function games(): HasMany {
+        return $this->hasMany(Game::class);
     }
 
     /**

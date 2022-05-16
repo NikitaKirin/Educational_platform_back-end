@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Spatie\MediaLibrary\HasMedia;
@@ -20,6 +21,10 @@ class Game extends Model implements HasMedia
         'content',
     ];
 
+    protected $casts = [
+        'content' => 'array',
+    ];
+
     /**
      * Take morphOne relation from Game to Fragment
      * Полиморфная связь один-с-один с таблицей фрагменты
@@ -32,9 +37,20 @@ class Game extends Model implements HasMedia
     /**
      * Take one-to-many relation from Game to gameType
      * Связь один-со-многим с таблицей gameType
-     * @return HasOne
+     * @return BelongsTo
      */
-    public function gameType(): HasOne {
-        return $this->hasOne(GameType::class);
+    public function gameType(): BelongsTo {
+        return $this->belongsTo(GameType::class, 'game_type_id');
+    }
+
+    /**
+     * Mutator for content attribute
+     * Мутатор
+     * @param $value
+     */
+    public function setContentAttribute( $value ) {
+        if ( isset($value) ) {
+            $this->attributes['content'] = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
     }
 }
