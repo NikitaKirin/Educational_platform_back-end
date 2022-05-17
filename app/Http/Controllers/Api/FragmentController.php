@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
@@ -508,35 +509,25 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
-        $currentImages = $fragment->fragmentgable->content['images'];
         $game = $fragment->fragmentgable;
-        // Формируем данные для новых картинок
-        $updatedImages = collect($newImages)->map(function ( $image ) use ( $metaImagesData, $game, $user ) {
-            $metaImage = collect($metaImagesData)->firstWhere('imageName', $image->getClientOriginalName());
-            $fileName = $game->gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) .
-                '.' . $image->extension();
-            return [
-                'id'  => $metaImage['id'],
-                'url' => $game->addMedia($image)->usingFileName($fileName)
-                              ->preservingOriginal()
-                              ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
-            ];
+        // Формируем новое поле content['images']
+        $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
+            if ( $imageName = collect($metaImageData)->get('imageName', false) ) {
+                $newImage = collect($newImages)->filter(function ( $image ) use ( $metaImageData, $imageName ) {
+                    return $image->getClientOriginalName() === $imageName;
+                })->first();
+                $fileName = $this->generateFileName($game, $user, $newImage);
+                return [
+                    'id'  => collect($metaImageData)->get('id'),
+                    'url' => $game->addMedia($newImage)->usingFileName($fileName)
+                                  ->preservingOriginal()
+                                  ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
+                ];
+            }
+            return $metaImageData;
         });
-        // Формируем полноценное поле content['images'], включая старые картинки
-        $newUpdatedImagesData = collect($currentImages)
-            ->map(function ( $currentImage ) use ( $updatedImages, $metaImagesData ) {
-                if ( $updatedNewImage = $updatedImages->firstWhere('id', $currentImage['id']) ) {
-                    return $updatedNewImage;
-                }
-                elseif ( $updatedCurrentImage = collect($metaImagesData)->firstWhere('id', $currentImage['id']) ) {
-                    return $updatedCurrentImage;
-                }
-                return false;
-            })
-            ->filter(fn( $imageData ) => $imageData !== false)
-            ->values();
-        $currentContent['images'] = $newUpdatedImagesData;
-        $newUpdatedImagesUrls = $newUpdatedImagesData->map(fn( $image ) => $image['url']);
+        $currentContent['images'] = $updatedContentImagesData;
+        $newUpdatedImagesUrls = $updatedContentImagesData->map(fn( $image ) => $image['url']);
         $newImagesGame = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $newUpdatedImagesUrls ) {
             return $newUpdatedImagesUrls->contains($image->getFullUrl());
         })->values();
@@ -660,5 +651,18 @@ class FragmentController extends Controller
             ],
             "images"   => [],
         ];
+    }
+
+    /**
+     * Generate filaName for new game's image
+     * Сгенерировать имя файлы для изображения внутри игры
+     * @param Game $game game
+     * @param User $user user
+     * @param UploadedFile $image image
+     * @return string
+     */
+    private function generateFileName( Game $game, User $user, UploadedFile $image ): string {
+        return $game->gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) .
+            '.' . $image->extension();
     }
 }
