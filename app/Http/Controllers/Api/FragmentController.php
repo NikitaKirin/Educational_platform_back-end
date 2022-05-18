@@ -178,7 +178,7 @@ class FragmentController extends Controller
             }
             elseif ( $fragment->fragmentgable_type == 'game' ) {
                 $gameType = $fragment->fragmentgable->gameType->type;
-                if ( $gameType === 'pairs' || $gameType === 'sequences') {
+                if ( $gameType === 'pairs' || $gameType === 'sequences' ) {
                     $this->updateFragmentGamePairsOrSequences($request, $fragment, $user);
                 }
                 elseif ( $gameType === 'matchmaking' ) {
@@ -365,26 +365,26 @@ class FragmentController extends Controller
      * @return Game Игра
      */
     private function createFragmentGameMatchmaking( CreateFragmentRequest $request, $user ): Game {
+        $images = $request->file('content');
         $game = new Game();
         $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
-        $game->game_type_id = $gameType->id;
-        $gameTask = $request->input('task') ?? $gameType->description;
-        $content = ['gameType' => $gameType->type];
-        $content['task']['text'] = $gameTask;
-        $content['task']['url'] = "";
-        $content['images'] = [];
-        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
+        $game->gameType()->associate($gameType);
+        $gameTask = $request->input('task') ?? $gameType->task;
+        $content = $this->generateGameContentField($gameType->type, $gameTask);
+        $game->content = $content;
         $game->save();
-        $imagesCollection = collect(collect($request->allFiles())->only(['content'])->values()[0]);
-        foreach ( $imagesCollection as $pair ) {
-            $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
-                $fileName = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
-                return $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
-                            ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
-            })->toArray();
-        }
-        $game->refresh();
-        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $content['images'] = collect($images)->map(function ( $imagesPair, $pairCount ) use ( $game, $user ) {
+            return collect($imagesPair)->map(function ( $image, $imageCount ) use ( $pairCount, $game, $user ) {
+                $fileName = $this->generateFileName($game, $user, $image);
+                return
+                    [
+                        'id'  => $imageCount + $pairCount * 2,
+                        'url' => $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
+                                      ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
+                    ];
+            });
+        });
+        $game->content = $content;
         $game->save();
         return $game;
     }
