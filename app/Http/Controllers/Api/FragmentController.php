@@ -182,7 +182,7 @@ class FragmentController extends Controller
                     $this->updateFragmentGamePairsOrSequences($request, $fragment, $user);
                 }
                 elseif ( $gameType === 'matchmaking' ) {
-                    $this->updateFragmentGameMatchmaking($request, $fragment);
+                    $this->updateFragmentGameMatchmaking($request, $fragment, $user);
                 }
                 /*elseif ( $gameType === 'sequences' ) {
                     $this->updateFragmentGameSequences($request, $fragment);
@@ -491,69 +491,45 @@ class FragmentController extends Controller
     }
 
     /**
-     * Update fragment game - sequences
-     * Обновить фрагмент типа игра - последовательности
-     * @param UpdateFragmentRequest $request Объект запроса
-     * @param Fragment $fragment Фрагмент
-     */
-    /*private function updateFragmentGameSequences( UpdateFragmentRequest $request, Fragment $fragment ): void {
-        $user = Auth::user();
-        $game = $fragment->fragmentgable;
-        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
-        $content = ['gameType' => $gameType->type];
-        $content['task']['text'] = $request->input('task') ?? $gameType->description;
-        $content['task']['mediaUrl'] = "";
-        $updatedDataCollection = collect(collect($request->all())->get('content'));
-        $content['images'] = $updatedDataCollection->map(function ( $value ) use ( $gameType, $game, $user ) {
-            if ( gettype($value) === 'string' ) {
-                return $value;
-            }
-            $fileName = $gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) .
-                '.' . $value->extension();
-            return $game->addMedia($value)->usingFileName($fileName)->preservingOriginal()
-                        ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
-        });
-        $updatedContentUrls = collect($content['images']);
-        $updatedGameImages = $game->getMedia('fragments_games')
-                                  ->filter(function ( $image ) use ( $updatedContentUrls ) {
-                                      return $updatedContentUrls->contains($image->getFullUrl());
-                                  })->values();
-        $game->clearMediaCollectionExcept('fragments_games', $updatedGameImages);
-        $game->refresh();
-        $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
-    }*/
-
-    /**
      * Update fragment game - matchmaking
      * Обновить фрагмент типа игра - ассоциации
      * @param UpdateFragmentRequest $request Объект запроса
      * @param Fragment $fragment Фрагмент
      */
-    private function updateFragmentGameMatchmaking( UpdateFragmentRequest $request, Fragment $fragment ) {
-        $user = $fragment->user;
+    private function updateFragmentGameMatchmaking( UpdateFragmentRequest $request, Fragment $fragment, User $user ) {
+        $metaImagesData = json_decode($request->input('metaImagesData'), true);
+        $newImages = $request->file('content');
+        $currentContent = $fragment->fragmentgable->content;
         $game = $fragment->fragmentgable;
-        $gameType = GameType::whereId($fragment->fragmentgable->game_type_id)->get()->first();
-        $imagesCollection = collect(collect($request->only(['content']))->values()[0]);
-        $content = ['gameType' => $gameType->type];
-        $content['task']['text'] = $request->input('task') ?? $gameType->description;
-        $content['task']['mediaUrl'] = "";
-        foreach ( $imagesCollection as $pair ) {
-            $content['images'][] = collect($pair)->map(function ( $image ) use ( $user, $game, $gameType ) {
-                if ( gettype($image) === 'string' ) {
-                    return $image;
+        // Формируем новое поле content['images']
+        $updatedContentImagesData = collect($metaImagesData)->map(function ( $imagePairData ) use ( $newImages, $game, $user ) {
+            return collect($imagePairData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
+                if ( $imageName = collect($metaImageData)->get('imageName', false) ) {
+                    $newImage = collect($newImages)->filter(fn( $image ) => $image->getClientOriginalName() ===
+                        $imageName)->first();
+                    $fileName = $this->generateFileName($game, $user, $newImage);
+                    return [
+                        'id'  => collect($metaImageData)->get('id'),
+                        'url' => $game->addMedia($newImage)->usingFileName($fileName)
+                                      ->preservingOriginal()
+                                      ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
+                    ];
                 }
-                $fileName = "matchmaking-" . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' . $image->extension();
-                return $game->addMedia($image)->usingFileName($fileName)->preservingOriginal()
-                            ->toMediaCollection('fragments_games', 'fragments')->getFullUrl();
-            })->toArray();
-        }
-        $updatedLinks = collect($content['images'])->collapse();
-        $updatedGameImages = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $updatedLinks ) {
-            return $updatedLinks->contains($image->getFullUrl());
+                return $metaImageData;
+            });
+        });
+        $currentContent['images'] = $updatedContentImagesData;
+        $newUpdatedImagesUrls = $updatedContentImagesData->map(function ( $imagesPair ) {
+            return collect($imagesPair)->map(function ( $image ) {
+                return collect($image)->get('url');
+            });
+        })->flatten();
+        $newImagesGame = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $newUpdatedImagesUrls ) {
+            return $newUpdatedImagesUrls->contains($image->getFullUrl());
         })->values();
-        $game->clearMediaCollectionExcept('fragments_games', $updatedGameImages);
+        $game->clearMediaCollectionExcept('fragments_games', $newImagesGame);
         $game->refresh();
-        $game->update(['content' => json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+        $game->update(['content' => $currentContent]);
     }
 
     /**
