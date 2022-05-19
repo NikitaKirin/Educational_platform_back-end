@@ -543,10 +543,8 @@ class FragmentController extends Controller
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
         $game = $fragment->fragmentgable;
-        $rows = $request->input('rows') ?? $currentContent['images'][0]['rows'];
-        $cols = $request->input('rows') ?? $currentContent['images'][0]['cols'];
         // Формируем новое поле content['images']
-        $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user, $rows, $cols ) {
+        $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
             if ( $imageName = collect($metaImageData)->get('imageName', false) ) {
                 $newImage = collect($newImages)->filter(function ( $image ) use ( $metaImageData, $imageName ) {
                     return $image->getClientOriginalName() === $imageName;
@@ -557,8 +555,8 @@ class FragmentController extends Controller
                     'url'  => $game->addMedia($newImage)->usingFileName($fileName)
                                    ->preservingOriginal()
                                    ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
-                    'rows' => $rows,
-                    'cols' => $cols,
+                    'rows' => collect($metaImageData)->get('rows'),
+                    'cols' => collect($metaImageData)->get('cols'),
                 ];
             }
             return $metaImageData;
