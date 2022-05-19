@@ -100,7 +100,7 @@ class UpdateFragmentRequest extends FormRequest
                         'json'     => 'На вход ожидались данные в формате json',
                     ]);
                 }
-                elseif ( $this->gameType === 'matchmaking' ) {
+                elseif ( $this->gameType === 'matchmaking' || $this->gameType === 'puzzles' ) {
                     $this->validate([
                         'content'        => 'nullable|array',
                         'metaImagesData' => 'required|json',
