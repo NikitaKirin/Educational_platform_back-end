@@ -188,7 +188,7 @@ class FragmentController extends Controller
                     $this->updateFragmentGameSequences($request, $fragment);
                 }*/
                 elseif ( $gameType === 'puzzles' ) {
-                    $this->updateFragmentGamePuzzles($request, $fragment);
+                    $this->updateFragmentGamePuzzles($request, $fragment, $user);
                 }
             }
             if ( $request->hasFile('fon') ) {
@@ -396,28 +396,28 @@ class FragmentController extends Controller
      * @return Game Игра
      */
     private function createFragmentGamePuzzles( CreateFragmentRequest $request, $user ): Game {
+        $images = $request->file('content');
+        $rows = (int)$request->input('rows');
+        $cols = (int)$request->input('cols');
         $game = new Game();
         $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
-        $game->game_type_id = $gameType->id;
-        $gameTask = $request->input('task') ?? $gameType->description;
-        $content = ['gameType' => $gameType->type];
-        $content['task']['text'] = $gameTask;
-        $content['task']['url'] = "";
-        $content['image'] = [
-            'id'   => 0,
-            'url'  => '',
-            'rows' => (int)$request->input('rows'),
-            'cols' => (int)$request->input('cols'),
-        ];
-        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE);
-        $image = $request->file('content');
-        $fileName = $gameType->type . '-' . $game->id . '-' . str_slug($user->name) . '-' . Str::random(10) . '.' .
-            $image->extension();
-        $game->addMediaFromRequest('content')->usingFileName($fileName)
-             ->toMediaCollection('fragments_games', 'fragments');
+        $game->gameType()->associate($gameType);
+        $gameTask = $request->input('task') ?? $gameType->task;
+        $content = $this->generateGameContentField($gameType->type, $gameTask);
+        $game->content = $content;
         $game->save();
-        $content['image']['url'] = $game->getFirstMediaUrl('fragments_games');
-        $game->content = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $content['images'] = collect($images)->map(function ( $image, $index ) use ( $game, $user, $rows, $cols ) {
+            $fileName = $this->generateFileName($game, $user, $image);
+            return [
+                'id'   => $index,
+                'url'  => $game->addMedia($image)->usingFileName($fileName)
+                               ->preservingOriginal()
+                               ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
+                'rows' => $rows,
+                'cols' => $cols,
+            ];
+        });
+        $game->content = $content;
         $game->save();
         return $game;
     }
@@ -538,27 +538,39 @@ class FragmentController extends Controller
      * @param UpdateFragmentRequest $request Объект запроса
      * @param Fragment $fragment Фрагмент
      */
-    private function updateFragmentGamePuzzles( UpdateFragmentRequest $request, Fragment $fragment ): void {
-        $user = Auth::user();
+    private function updateFragmentGamePuzzles( UpdateFragmentRequest $request, Fragment $fragment, User $user ): void {
+        $metaImagesData = json_decode($request->input('metaImagesData'), true);
+        $newImages = $request->file('content');
+        $currentContent = $fragment->fragmentgable->content;
         $game = $fragment->fragmentgable;
-        $currentContent = json_decode($game->content, true);
-        if ( $image = $request->file('content') ) {
-            $game->clearMediaCollection('fragments_games');
-            $fileName = $currentContent['gameType'] . '-' . $game->id . '-' . str_slug($user->name) . '-' .
-                Str::random(10) . '.' . $image->extension();
-            $game->addMediaFromRequest('content')->usingFileName($fileName)->toMediaCollection('fragments_games');
-        }
+        $rows = $request->input('rows') ?? $currentContent['images'][0]['rows'];
+        $cols = $request->input('rows') ?? $currentContent['images'][0]['cols'];
+        // Формируем новое поле content['images']
+        $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user, $rows, $cols ) {
+            if ( $imageName = collect($metaImageData)->get('imageName', false) ) {
+                $newImage = collect($newImages)->filter(function ( $image ) use ( $metaImageData, $imageName ) {
+                    return $image->getClientOriginalName() === $imageName;
+                })->first();
+                $fileName = $this->generateFileName($game, $user, $newImage);
+                return [
+                    'id'   => collect($metaImageData)->get('id'),
+                    'url'  => $game->addMedia($newImage)->usingFileName($fileName)
+                                   ->preservingOriginal()
+                                   ->toMediaCollection('fragments_games', 'fragments')->getFullUrl(),
+                    'rows' => $rows,
+                    'cols' => $cols,
+                ];
+            }
+            return $metaImageData;
+        });
+        $currentContent['images'] = $updatedContentImagesData;
+        $newUpdatedImagesUrls = $updatedContentImagesData->map(fn( $image ) => $image['url']);
+        $newImagesGame = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $newUpdatedImagesUrls ) {
+            return $newUpdatedImagesUrls->contains($image->getFullUrl());
+        })->values();
+        $game->clearMediaCollectionExcept('fragments_games', $newImagesGame);
         $game->refresh();
-        $newContent = ['gameType' => $currentContent['gameType']];
-        $newContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
-        $newContent['task']['mediaUrl'] = "";
-        $newContent['image'] = [
-            'id'   => 0,
-            'url'  => $game->getFirstMediaUrl('fragments_games'),
-            'rows' => (int)$request->input('rows') ?? $newContent['image']['rows'],
-            'cols' => (int)$request->input('cols') ?? $newContent['image']['cols'],
-        ];
-        $game->update(['content' => json_encode($newContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]);
+        $game->update(['content' => $currentContent]);
     }
 
     /**
