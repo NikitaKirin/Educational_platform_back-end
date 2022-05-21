@@ -24,57 +24,68 @@ class UserListLayout extends Table
     /**
      * @return TD[]
      */
-    public function columns(): array
-    {
+    public function columns(): array {
         return [
             TD::make('name', __('Name'))
-                ->sort()
-                ->cantHide()
-                ->filter(Input::make())
-                ->render(function (User $user) {
-                    return new Persona($user->presenter());
-                }),
+              ->sort()
+              ->cantHide()
+              ->filter(Input::make())
+              ->render(function ( User $user ) {
+                  return new Persona($user->presenter());
+              }),
 
             TD::make('email', __('Email'))
-                ->sort()
-                ->cantHide()
-                ->filter(Input::make())
-                ->render(function (User $user) {
-                    return ModalToggle::make($user->email)
-                        ->modal('asyncEditUserModal')
-                        ->modalTitle($user->presenter()->title())
-                        ->method('saveUser')
-                        ->asyncParameters([
-                            'user' => $user->id,
-                        ]);
-                }),
+              ->sort()
+              ->cantHide()
+              ->filter(Input::make())
+              ->render(function ( User $user ) {
+                  return ModalToggle::make($user->email)
+                                    ->modal('asyncEditUserModal')
+                                    ->modalTitle($user->presenter()->title())
+                                    ->method('saveUser')
+                                    ->asyncParameters([
+                                        'user' => $user->id,
+                                    ]);
+              }),
 
             TD::make('updated_at', __('Last edit'))
-                ->sort()
-                ->render(function (User $user) {
-                    return $user->updated_at->toDateTimeString();
-                }),
+              ->sort()
+              ->render(function ( User $user ) {
+                  return $user->updated_at->toDateTimeString();
+              }),
 
             TD::make(__('Actions'))
-                ->align(TD::ALIGN_CENTER)
-                ->width('100px')
-                ->render(function (User $user) {
-                    return DropDown::make()
-                        ->icon('options-vertical')
-                        ->list([
+              ->align(TD::ALIGN_CENTER)
+              ->width('100px')
+              ->render(function ( User $user ) {
+                  if ( $user->blocked_at === null ) {
+                      $button = Button::make(__('Block'))
+                                      ->icon('ban')
+                                      ->method('blockUser', ['id' => $user->id]);
+                  }
+                  else {
+                      $button = Button::make(__('Unblock'))
+                                      ->icon('unlock')
+                                      ->method('unblockUser', ['id' => $user->id]);
+                  }
+                  return DropDown::make()
+                                 ->icon('options-vertical')
+                                 ->list([
 
-                            Link::make(__('Edit'))
-                                ->route('platform.systems.users.edit', $user->id)
-                                ->icon('pencil'),
+                                     Link::make(__('Edit'))
+                                         ->route('platform.systems.users.edit', $user->id)
+                                         ->icon('pencil'),
 
-                            Button::make(__('Delete'))
-                                ->icon('trash')
-                                ->confirm(__('Once the account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.'))
-                                ->method('remove', [
-                                    'id' => $user->id,
-                                ]),
-                        ]);
-                }),
+                                     Button::make(__('Delete'))
+                                           ->icon('trash')
+                                           ->confirm(__('Once the account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.'))
+                                           ->method('remove', [
+                                               'id' => $user->id,
+                                           ]),
+
+                                     $button,
+                                 ]);
+              }),
         ];
     }
 }
