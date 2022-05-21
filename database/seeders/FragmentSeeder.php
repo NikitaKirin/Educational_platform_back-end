@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\AgeLimit;
 use App\Models\Article;
+use App\Models\Tag;
 use App\Models\Test;
 use App\Models\Fragment;
 use App\Models\User;
@@ -15,6 +16,7 @@ class FragmentSeeder extends Seeder
     public function run() {
         for ( $i = 0; $i <= 200; $i++ ) {
             $user = User::all()->pluck('id');
+            $tags = Tag::all()->pluck('id');
             $ageLimit = AgeLimit::all()->pluck('id');
             $article = new Article(['content' => '<p>' . Str::random(450) . '</p>']);
             $article->save();
@@ -22,6 +24,8 @@ class FragmentSeeder extends Seeder
             $fragment->user()->associate($user->random());
             $fragment->ageLimit()->associate(AgeLimit::find($ageLimit->random()));
             $fragment->fragmentgable()->associate($article);
+            $fragment->save();
+            $fragment->tags()->sync(collect($tags)->random(4)->toArray());
             $fragment->save();
         }
         /*for ( $i = 0; $i <= 200; $i++ ) {
