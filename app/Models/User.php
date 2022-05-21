@@ -78,9 +78,9 @@ class User extends Authenticatable implements HasMedia
     ];
 
     // Мутатор для хеширования пароля пользователя
-    public function setPasswordAttribute( $value ) {
+    /*public function setPasswordAttribute( $value ) {
         $this->attributes['password'] = Hash::make($value);
-    }
+    }*/
 
     //Акцессор для преобразования формата даты рождения пользователя
     public function getBirthdayAttribute( $value ): ?string {

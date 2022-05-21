@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Orchid\Platform\Models\Role;
@@ -23,7 +24,10 @@ class RegisterController extends Controller
         $role = Role::all()->firstWhere('slug', $request->input('role'));
         $user = User::create($request->except(['role']));
         $user->addRole($role);
-        if ( Auth::attempt(['email' => $request->input('email'), "password" => $request->input('password')]) ) {
+        if ( Auth::attempt([
+            'email'    => $request->input('email'),
+            "password" => Hash::make($request->input('password')),
+        ]) ) {
             $token = Auth::user()->createToken(config('app.name'));
             $token->token->save();
             return response()->json([
