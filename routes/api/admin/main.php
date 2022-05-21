@@ -1,5 +1,5 @@
 <?php
-
+/*
 use Illuminate\Support\Facades\Route;
 
 Route::namespace('Admin')->middleware(['auth:api', 'blockUser'])->group(function () {
@@ -24,4 +24,4 @@ Route::middleware(['auth:api', 'blockUser'])->group(function () {
          ->name('admin.users.block'); // Заблокировать любого пользователя;
     Route::patch('admin/users/{user}/unblock', 'UserController@unblock')->middleware('can:unblock,user')
          ->name('admin.users.unblock'); // Разблокировать любого пользователя;
-});
+});*/
