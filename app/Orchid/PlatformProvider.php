@@ -34,6 +34,11 @@ class PlatformProvider extends OrchidServiceProvider
                     return 6;
                 }),
 
+            Menu::make('Типы игр')
+                ->icon('game-controller')
+                ->route('platform.systems.gameTypes')
+                ->title('Типы игр'),
+
             Menu::make('Example screen')
                 ->icon('monitor')
                 ->route('platform.example')

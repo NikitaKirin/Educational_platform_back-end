@@ -127,5 +127,6 @@ class UserProfileScreen extends Screen
         })->save();
 
         Toast::info(__('Password changed.'));
+
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\GameType;
 use App\Models\Tag;
 use App\Orchid\Screens\Examples\ExampleCardsScreen;
 use App\Orchid\Screens\Examples\ExampleChartsScreen;
@@ -10,6 +11,8 @@ use App\Orchid\Screens\Examples\ExampleFieldsScreen;
 use App\Orchid\Screens\Examples\ExampleLayoutsScreen;
 use App\Orchid\Screens\Examples\ExampleScreen;
 use App\Orchid\Screens\Examples\ExampleTextEditorsScreen;
+use App\Orchid\Screens\GameType\GameTypeEditScreen;
+use App\Orchid\Screens\GameType\GameTypeListScreen;
 use App\Orchid\Screens\PlatformScreen;
 use App\Orchid\Screens\Role\RoleEditScreen;
 use App\Orchid\Screens\Role\RoleListScreen;
@@ -124,6 +127,33 @@ Route::screen('tags/{tag}/edit', TagEditScreen::class)
          return $trail
              ->parent('platform.systems.tags')
              ->push(__('Edit'), route('platform.systems.tags.edit', $tag));
+     });
+
+// Platform > System > GameTypes
+Route::screen('gameTypes', GameTypeListScreen::class)
+     ->name('platform.systems.gameTypes')
+     ->breadcrumbs(function ( trail $trail ) {
+         return $trail
+             ->parent('platform.index')
+             ->push(__('Типы игр'), route('platform.systems.gameTypes'));
+     });
+
+// Platform > System > GameTypes > Create
+Route::screen('gameTypes/create', GameTypeEditScreen::class)
+     ->name('platform.systems.gameTypes.create')
+     ->breadcrumbs(function ( trail $trail ) {
+         return $trail
+             ->parent('platform.systems.gameTypes')
+             ->push(__('Тип игры'), route('platform.systems.gameTypes.create'));
+     });
+
+// Platform > Systems > GameTypes > Edit
+Route::screen('gameTypes/{gameType}/edit', GameTypeEditScreen::class)
+     ->name('platform.systems.gameTypes.edit')
+     ->breadcrumbs(function ( trail $trail, GameType $gameType ) {
+         return $trail
+             ->parent('platform.systems.gameTypes')
+             ->push(__('Тип игры'), route('platform.systems.gameTypes.edit', $gameType));
      });
 
 // Example...
