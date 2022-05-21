@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified'         => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'json.response'    => \App\Http\Middleware\ForceJsonResponse::class,
         'blockUser'        => \App\Http\Middleware\IsBlockUserMiddleware::class,
+        'access'           => \Orchid\Platform\Http\Middleware\Access::class,
     ];
 }
