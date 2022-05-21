@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Orchid\Platform\Models\Role;
 use phpDocumentor\Reflection\Types\Self_;
 
 class RegisterController extends Controller
@@ -19,9 +20,9 @@ class RegisterController extends Controller
     public function __invoke( RegisterRequest $request ) {
         if ( $request['birthday'] )
             $request['birthday'] = Carbon::parse($request['birthday'])->toDateString();
-
-        $user = User::create($request->all());
-
+        $role = Role::all()->firstWhere('slug', $request->input('role'));
+        $user = User::create($request->except(['role']));
+        $user->addRole($role);
         if ( Auth::attempt(['email' => $request->input('email'), "password" => $request->input('password')]) ) {
             $token = Auth::user()->createToken(config('app.name'));
             $token->token->save();
