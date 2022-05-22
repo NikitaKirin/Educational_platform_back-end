@@ -5,16 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Orchid\Filters\Filterable;
+use Orchid\Screen\AsSource;
 
 class AgeLimit extends Model
 {
-    use HasFactory;
+    use HasFactory, AsSource, Filterable;
 
     protected $table = 'age_limits';
 
     protected $fillable = [
         'number_context',
         'text_context',
+    ];
+
+    protected $allowedFilters = [
+        'number_context',
+        'text_context',
+    ];
+    protected $allowedSorts = [
+        'number_context',
+        'updated_at',
     ];
 
 
