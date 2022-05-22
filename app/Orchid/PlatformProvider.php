@@ -26,6 +26,11 @@ class PlatformProvider extends OrchidServiceProvider
      */
     public function registerMainMenu(): array {
         return [
+            Menu::make('Возрастные цензы')
+                ->icon('sort-numeric-desc')
+                ->route('platform.systems.ageLimits')
+                ->title('Теги'),
+
             Menu::make('Теги платформы')
                 ->icon('tag')
                 ->route('platform.systems.tags')

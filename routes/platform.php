@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Models\AgeLimit;
 use App\Models\GameType;
 use App\Models\Tag;
+use App\Orchid\Screens\AgeLimit\AgeLimitEditScreen;
+use App\Orchid\Screens\AgeLimit\AgeLimitListScreen;
 use App\Orchid\Screens\Examples\ExampleCardsScreen;
 use App\Orchid\Screens\Examples\ExampleChartsScreen;
 use App\Orchid\Screens\Examples\ExampleFieldsAdvancedScreen;
@@ -156,6 +159,32 @@ Route::screen('gameTypes/{gameType}/edit', GameTypeEditScreen::class)
              ->push(__('Тип игры'), route('platform.systems.gameTypes.edit', $gameType));
      });
 
+// Platform > Systems > AgeLimits
+Route::screen('ageLimits', AgeLimitListScreen::class)
+     ->name('platform.systems.ageLimits')
+     ->breadcrumbs(function ( trail $trail ) {
+         return $trail
+             ->parent('platform.index')
+             ->push(__('Возрастные цензы'), route('platform.systems.ageLimits'));
+     });
+
+// Platform > Systems > AgeLimits > Edit
+Route::screen('ageLimits/{ageLimit}/edit', AgeLimitEditScreen::class)
+     ->name('platform.systems.ageLimits.edit')
+     ->breadcrumbs(function ( trail $trail, AgeLimit $ageLimit ) {
+         return $trail
+             ->parent('platform.systems.ageLimits')
+             ->push(__('Возрастной ценз'), route('platform.systems.ageLimits.edit', $ageLimit));
+     });
+
+// Platform > Systems > AgeLimits > Create
+Route::screen('ageLimits/create', AgeLimitEditScreen::class)
+     ->name('platform.systems.ageLimits.create')
+     ->breadcrumbs(function ( trail $trail ) {
+         return $trail
+             ->parent('platform.systems.ageLimits')
+             ->push(__('Возрастной ценз'), route('platform.systems.ageLimits.create'));
+     });
 // Example...
 Route::screen('example', ExampleScreen::class)
      ->name('platform.example')

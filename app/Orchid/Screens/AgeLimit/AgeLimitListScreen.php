@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Orchid\Screens;
+namespace App\Orchid\Screens\AgeLimit;
 
 use App\Models\AgeLimit;
+use Illuminate\Http\Request;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
-use Orchid\Support\Facades\Layout;
 use Orchid\Screen\Screen;
 use Orchid\Screen\TD;
+use Orchid\Support\Facades\Layout;
 use Orchid\Support\Facades\Toast;
 
-class AgeLimitScreen extends Screen
+class AgeLimitListScreen extends Screen
 {
     /**
      * Query data.
@@ -20,7 +21,7 @@ class AgeLimitScreen extends Screen
      */
     public function query(): iterable {
         return [
-            'ageLimits' => AgeLimit::filtters()
+            'ageLimits' => AgeLimit::filters()
                                    ->defaultSort('updated_at')
                                    ->withCount(['fragments', 'lessons'])
                                    ->paginate(),
@@ -49,7 +50,7 @@ class AgeLimitScreen extends Screen
         return [
             Link::make(__('Add'))
                 ->icon('plus')
-                ->route('platform.systems.gameTypes.create'),
+                ->route('platform.systems.ageLimits.create'),
         ];
     }
 
@@ -75,26 +76,37 @@ class AgeLimitScreen extends Screen
                       ->render(function ( AgeLimit $ageLimit ) {
                           return $ageLimit->updated_at->toDateTimeString();
                       }),
+                    TD::make(__('Количество уроков'))
+                      ->render(function ( AgeLimit $ageLimit ) {
+                          return $ageLimit->lessons_count;
+                      }),
+                    TD::make(__('Количество фрагментов'))
+                      ->render(function ( AgeLimit $ageLimit ) {
+                          return $ageLimit->fragments_count;
+                      }),
                     TD::make(__('actions'))
                       ->render(function ( AgeLimit $ageLimit ) {
                           return DropDown::make()
+                                         ->icon('options-vertical')
                                          ->list([
                                              Link::make(__('Edit'))
                                                  ->icon('pencil')
-                                                 ->route('platform.systems.ageLimits.edit'),
+                                                 ->route('platform.systems.ageLimits.edit', [
+                                                     'ageLimit' => $ageLimit->id,
+                                                 ]),
                                              Button::make(__('Delete'))
                                                    ->icon('trash')
                                                    ->canSee(($ageLimit->fragments_count === 0) &&
                                                        ($ageLimit->lessons_count === 0))
-                                                   ->method('remove', ['ageLimit' => $ageLimit->id]),
+                                                   ->method('remove', ['id' => $ageLimit->id]),
                                          ]);
                       }),
                 ]),
         ];
     }
 
-    public function remove( AgeLimit $ageLimit ) {
-        AgeLimit::findOrFail($ageLimit)->delete();
+    public function remove( Request $request ) {
+        AgeLimit::findOrFail($request->input('id'))->delete();
         Toast::success(__("Возрастной ценз успешно удалён!"));
     }
 }
