@@ -42,7 +42,7 @@ class GameTypeListLayout extends Table
             TD::make('title', __('Название'))
               ->sort()
               ->filter(),
-            TD::make('description', __('Описание'))->width('150px'),
+            TD::make('description', __('Описание'))->width('300px'),
             TD::make('task', __('Задание по умолчанию'))->width('150px'),
             TD::make('updated_at', __('Последние изменения'))
               ->sort()
