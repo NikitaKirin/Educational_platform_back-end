@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\AgeLimit;
+use App\Models\Fragment;
 use App\Models\GameType;
 use App\Models\Tag;
 use App\Orchid\Screens\AgeLimit\AgeLimitEditScreen;
@@ -14,6 +15,9 @@ use App\Orchid\Screens\Examples\ExampleFieldsScreen;
 use App\Orchid\Screens\Examples\ExampleLayoutsScreen;
 use App\Orchid\Screens\Examples\ExampleScreen;
 use App\Orchid\Screens\Examples\ExampleTextEditorsScreen;
+use App\Orchid\Screens\Fragment\FragmentEditScreen;
+use App\Orchid\Screens\Fragment\FragmentListScreen;
+use App\Orchid\Screens\Fragment\FragmentProfileScreen;
 use App\Orchid\Screens\GameType\GameTypeEditScreen;
 use App\Orchid\Screens\GameType\GameTypeListScreen;
 use App\Orchid\Screens\PlatformScreen;
@@ -184,6 +188,33 @@ Route::screen('ageLimits/create', AgeLimitEditScreen::class)
          return $trail
              ->parent('platform.systems.ageLimits')
              ->push(__('Возрастной ценз'), route('platform.systems.ageLimits.create'));
+     });
+
+// Platform > Systems > Fragments
+Route::screen('fragments', FragmentListScreen::class)
+     ->name('platform.systems.fragments')
+     ->breadcrumbs(function ( Trail $trail ) {
+         return $trail
+             ->parent('platform.index')
+             ->push(__('Все фрагменты'), route('platform.systems.fragments'));
+     });
+
+// Platform > Systems > Fragments > Edit
+Route::screen('fragments/{fragment}/edit', FragmentEditScreen::class)
+     ->name('platform.systems.fragments.edit')
+     ->breadcrumbs(function ( Trail $trail, Fragment $fragment ) {
+         return $trail
+             ->parent('platform.systems.fragments')
+             ->push(__('Изменить фрагмент'), route('platform.systems.fragments.edit', ["fragment" => $fragment->id]));
+     });
+
+// Platform > Systems > Fragments > Profile
+Route::screen('fragments/{fragment}/profile', FragmentProfileScreen::class)
+     ->name('platform.systems.fragments.profile')
+     ->breadcrumbs(function ( Trail $trail, Fragment $fragment ) {
+         return $trail
+             ->parent('platform.systems.fragments')
+             ->push('Фрагмент', route('platform.systems.fragments.profile', $fragment));
      });
 // Example...
 Route::screen('example', ExampleScreen::class)
