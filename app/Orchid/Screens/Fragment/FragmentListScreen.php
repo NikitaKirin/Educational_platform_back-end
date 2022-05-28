@@ -18,6 +18,7 @@ class FragmentListScreen extends Screen
             'fragments' => Fragment::filters()
                                    ->defaultSort('title')
                                    ->paginate(15),
+            'foo' => 'bar',
         ];
     }
 
