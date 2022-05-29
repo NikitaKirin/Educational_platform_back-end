@@ -14,7 +14,7 @@ class UserPolicy
     public function before( User $user, $operation ) {
         if ( $operation == 'view' || $operation == 'viewTeacherFragments' || $operation == 'viewTeacherLessons' )
             return null;
-        return $user->role == 'admin' ? true : Response::deny('Forbidden', 403);
+        return $user->inRole('admin') ? true : Response::deny('Forbidden', 403);
     }
 
     public function __construct() {
@@ -22,11 +22,11 @@ class UserPolicy
     }
 
     public function viewTeacherLessons( User $user, User $model ): bool {
-        return $model->role == 'creator';
+        return $model->inRole('creator');
     }
 
     public function viewTeacherFragments( User $user, User $model ): bool {
-        return $model->role == 'creator';
+        return $model->inRole('creator');
     }
 
     public function showBlocked( User $user ): bool {
@@ -49,12 +49,12 @@ class UserPolicy
 
     // Просмотр списка пользователей
     public function viewAny( User $user ): Response {
-        return $user->role == 'admin' ? Response::allow() : Response::deny('Forbidden', 403);
+        return $user->inRole('admin') ? Response::allow() : Response::deny('Forbidden', 403);
     }
 
     // Просмотр профиля пользователя
     public function view( User $user, User $model ): bool {
-        return $model->role == 'creator';
+        return $model->inRole('creator');
     }
 
     public function create( User $user ): bool {
