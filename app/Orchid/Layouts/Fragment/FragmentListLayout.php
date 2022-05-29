@@ -27,6 +27,13 @@ class FragmentListLayout extends Table
      */
     protected function columns(): iterable {
         return [
+            TD::make('#')
+              ->render(function ( Fragment $fragment, object $loop ) {
+                  $fonPath = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
+                      asset('img/fr_fons/' . $fragment->fragmentgable_type . '.png') :
+                      $fragment->getFirstMediaUrl('fragments_fons');
+                  return sprintf("<span>%s</span> <img src='%s' width='100px'", $loop->index, $fonPath);
+              }),
             TD::make('fragmentgable_type', __('Тип фрагмента')),
             TD::make('title', __('Название')),
             TD::make(__('Автор'))->render(function ( Fragment $fragment ) {
