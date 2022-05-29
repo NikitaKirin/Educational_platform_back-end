@@ -15,13 +15,17 @@ class UserResource extends JsonResource
             'id'              => $this->id,
             'name'            => $this->name,
             'birthday'        => $this->birthday,
-            'role'            => $this->role,
+            'role'            => collect($this->getRoles())
+                ->filter(fn( $role ) => ($role->slug === 'student' || $role->slug === 'creator'))
+                ->get(0)
+                ->slug,
             'email'           => $this->email,
             'avatar'          => User::getAvatar(User::find($this->id)),
             'blocked_at'      => $this->blocked_at,
             'fragments_count' => $this->when($this->fragments()->exists(), $this->fragments()->count()),
             'fragments'       => $this->when($this->fragments()
-                                                  ->exists(), new FragmentResourceCollection($this->whenLoaded('fragments'))),
+                                                  ->exists(),
+                new FragmentResourceCollection($this->whenLoaded('fragments'))),
         ];
     }
 }

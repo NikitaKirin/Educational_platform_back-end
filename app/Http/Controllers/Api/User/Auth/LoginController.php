@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Orchid\Platform\Models\Role;
 
 class LoginController extends Controller
 {
@@ -30,7 +31,10 @@ class LoginController extends Controller
             'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
             'message'    => 'Добро пожаловать, ' . Auth::user()->name . '!',
             'user_id'    => Auth::id(),
-            'user_role'  => Auth::user()->role,
+            'user_role'  => collect(Auth::user()->getRoles())
+                ->filter(fn( Role $role ) => ($role->slug === 'student' || $role->slug === 'creator'))
+                ->first()
+                ->slug,
         ], 200);
     }
 }

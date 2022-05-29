@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Validation\ValidationException;
 use Orchid\Platform\Models\Role;
 use phpDocumentor\Reflection\Types\Self_;
@@ -22,11 +23,13 @@ class RegisterController extends Controller
         if ( $request['birthday'] )
             $request['birthday'] = Carbon::parse($request['birthday'])->toDateString();
         $role = Role::all()->firstWhere('slug', $request->input('role'));
-        $user = User::create($request->except(['role']));
+        $user = new User($request->except('role', 'password'));
+        $user->fill(['password' => Hash::make($request->input('password'))]);
+        $user->save();
         $user->addRole($role);
         if ( Auth::attempt([
             'email'    => $request->input('email'),
-            "password" => Hash::make($request->input('password')),
+            "password" => $request->input('password'),
         ]) ) {
             $token = Auth::user()->createToken(config('app.name'));
             $token->token->save();
@@ -36,8 +39,13 @@ class RegisterController extends Controller
                 'token'      => $token->accessToken,
                 'expires_at' => Carbon::parse($token->token->expires_at)->toDateTimeString(),
                 'user_id'    => Auth::id(),
-                'user_role'  => Auth::user()->role,
+                'user_role'  => collect(Auth::user()->getRoles())
+                    ->filter(fn( Role $role ) => ($role->slug === 'student' || $role->slug === 'creator'))
+                    ->first()
+                    ->slug,
             ], 200);
         }
+
+        return response()->json(['error' => 'bad auth']);
     }
 }
