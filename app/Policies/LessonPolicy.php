@@ -11,7 +11,7 @@ class LessonPolicy
     use HandlesAuthorization;
 
     public function before( User $user, $operation ): ?bool {
-        if ( $operation != 'create' && $operation != 'like' && $user->role == 'admin' )
+        if ( $operation != 'create' && $operation != 'like' && $user->inRole('admin') )
             return true;
         return null;
     }
@@ -29,7 +29,7 @@ class LessonPolicy
     }
 
     public function create( User $user ): bool {
-        if ( $user == 'creator' || 'student' )
+        if ( $user->inRole('creator') || $user->inRole('student') )
             return true;
         return false;
     }
@@ -51,7 +51,7 @@ class LessonPolicy
     }
 
     public function like( User $user, Lesson $lesson ): bool {
-        if ($user->role == 'creator' || $user->role == 'student')
+        if ( $user->inRole('creator') || $user->inRole('student') )
             return true;
         return false;
     }
