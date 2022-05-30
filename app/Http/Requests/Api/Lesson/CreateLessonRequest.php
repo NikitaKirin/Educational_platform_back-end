@@ -42,6 +42,6 @@ class CreateLessonRequest extends FormRequest
     }
 
     public function authorize(): bool {
-        return Auth::user()->role == 'creator' || Auth::user()->role == 'student';
+        return true;
     }
 }
