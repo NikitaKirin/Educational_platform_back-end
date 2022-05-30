@@ -26,23 +26,29 @@ class PlatformProvider extends OrchidServiceProvider
      */
     public function registerMainMenu(): array {
         return [
+            Menu::make('Материалы')
+            ->icon('modules')
+            ->list([
+                Menu::make('Фрагменты')
+                ->icon('grid')
+                ->route('platform.systems.fragments')
+            ])
+            ->title('Основное'),
+
             Menu::make('Возрастные цензы')
                 ->icon('sort-numeric-desc')
-                ->route('platform.systems.ageLimits')
-                ->title('Теги'),
+                ->route('platform.systems.ageLimits'),
 
             Menu::make('Теги платформы')
                 ->icon('tag')
                 ->route('platform.systems.tags')
-                ->title('Теги')
                 ->badge(function () {
                     return 6;
                 }),
 
             Menu::make('Типы игр')
                 ->icon('game-controller')
-                ->route('platform.systems.gameTypes')
-                ->title('Типы игр'),
+                ->route('platform.systems.gameTypes'),
 
             Menu::make('Example screen')
                 ->icon('monitor')
