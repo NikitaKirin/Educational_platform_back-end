@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Orchid\Screens\Lessons;
+namespace App\Orchid\Screens\Lesson;
 
 use App\Models\Lesson;
 use App\Orchid\Layouts\Lessons\LessonListLayout;

@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class LessonSeeder extends Seeder
 {
     public function run() {
-        $users = User::where('role', 'creator')->pluck('id');
+        $users = User::all()->pluck('id');
         $fragments = Fragment::all()->pluck('id');
         $tags = Tag::all()->pluck('id');
         $ageLimits = AgeLimit::all()->pluck('id');

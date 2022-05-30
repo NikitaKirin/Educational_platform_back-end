@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\AgeLimit;
 use App\Models\Fragment;
 use App\Models\GameType;
+use App\Models\Lesson;
 use App\Models\Tag;
 use App\Orchid\Screens\AgeLimit\AgeLimitEditScreen;
 use App\Orchid\Screens\AgeLimit\AgeLimitListScreen;
@@ -20,6 +21,8 @@ use App\Orchid\Screens\Fragment\FragmentListScreen;
 use App\Orchid\Screens\Fragment\FragmentProfileScreen;
 use App\Orchid\Screens\GameType\GameTypeEditScreen;
 use App\Orchid\Screens\GameType\GameTypeListScreen;
+use App\Orchid\Screens\Lesson\LessonListScreen;
+use App\Orchid\Screens\Lesson\LessonProfileScreen;
 use App\Orchid\Screens\PlatformScreen;
 use App\Orchid\Screens\Role\RoleEditScreen;
 use App\Orchid\Screens\Role\RoleListScreen;
@@ -218,13 +221,23 @@ Route::screen('fragments/{fragment}/profile', FragmentProfileScreen::class)
      });
 
 // Platform > Systems > Lessons
-Route::screen('lessons', \App\Orchid\Screens\Lessons\LessonListScreen::class)
+Route::screen('lessons', LessonListScreen::class)
      ->name('platform.systems.lessons')
      ->breadcrumbs(function ( Trail $trail ) {
          return $trail
              ->parent('platform.index')
              ->push(__('Уроки'), route('platform.systems.lessons'));
-    });
+     });
+
+// Platform > Systems > Fragments > Profile
+Route::screen('lessons/{lesson}/profile', LessonProfileScreen::class)
+     ->name('platform.systems.lessons.profile')
+     ->breadcrumbs(function ( Trail $trail, Lesson $lesson ) {
+         return $trail
+             ->parent('platform.systems.lessons')
+             ->push('Урок', route('platform.systems.lessons.profile', $lesson));
+     });
+
 // Example...
 Route::screen('example', ExampleScreen::class)
      ->name('platform.example')
