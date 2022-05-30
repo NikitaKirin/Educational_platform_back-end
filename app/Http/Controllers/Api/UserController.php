@@ -13,11 +13,13 @@ use App\Http\Resources\UserResourceCollection;
 use App\Mail\RegisterNewUserMail;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Orchid\Platform\Models\Role;
 
 class UserController extends Controller
 {
@@ -141,7 +143,10 @@ class UserController extends Controller
     public function teachersIndex( Request $request ): CreatorResourceCollection {
         $request->validate(['name' => 'string'], ['string' => 'Введены недопустимые символы']);
         $name = $request->input('name');
-        return new CreatorResourceCollection(User::withCount(['fragments', 'lessons'])->where('role', 'creator')
+        return new CreatorResourceCollection(User::withCount(['fragments', 'lessons'])
+                                                 ->whereHas('roles', function ( Builder $query ) {
+                                                     return $query->where('slug', 'LIKE', 'creator');
+                                                 })
                                                  ->where('blocked_at', null)
                                                  ->when($name, function ( $query ) use ( $name ) {
                                                      return $query->where('name', 'ILIKE', '%' . $name . '%');
