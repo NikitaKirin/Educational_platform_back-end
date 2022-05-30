@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\Concerns\InteractsWithPivotTable;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Orchid\Filters\Filterable;
+use Orchid\Metrics\Chartable;
 use Orchid\Screen\AsSource;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Fragment extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia, Filterable, AsSource;
+    use SoftDeletes, InteractsWithMedia, Filterable, AsSource, Chartable;
 
     protected $table = 'fragments';
 

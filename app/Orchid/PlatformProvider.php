@@ -53,7 +53,7 @@ class PlatformProvider extends OrchidServiceProvider
                 ->icon('game-controller')
                 ->route('platform.systems.gameTypes'),
 
-            Menu::make('Example screen')
+            /*Menu::make('Example screen')
                 ->icon('monitor')
                 ->route('platform.example')
                 ->title('Navigation')
@@ -106,7 +106,7 @@ class PlatformProvider extends OrchidServiceProvider
                 ->target('_blank')
                 ->badge(function () {
                     return Dashboard::version();
-                }, Color::DARK()),
+                }, Color::DARK()),*/
 
             Menu::make(__('Users'))
                 ->icon('user')
