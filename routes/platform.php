@@ -216,6 +216,15 @@ Route::screen('fragments/{fragment}/profile', FragmentProfileScreen::class)
              ->parent('platform.systems.fragments')
              ->push('Фрагмент', route('platform.systems.fragments.profile', $fragment));
      });
+
+// Platform > Systems > Lessons
+Route::screen('lessons', \App\Orchid\Screens\Lessons\LessonListScreen::class)
+     ->name('platform.systems.lessons')
+     ->breadcrumbs(function ( Trail $trail ) {
+         return $trail
+             ->parent('platform.index')
+             ->push(__('Уроки'), route('platform.systems.lessons'));
+    });
 // Example...
 Route::screen('example', ExampleScreen::class)
      ->name('platform.example')

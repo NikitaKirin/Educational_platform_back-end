@@ -27,13 +27,16 @@ class PlatformProvider extends OrchidServiceProvider
     public function registerMainMenu(): array {
         return [
             Menu::make('Материалы')
-            ->icon('modules')
-            ->list([
-                Menu::make('Фрагменты')
-                ->icon('grid')
-                ->route('platform.systems.fragments')
-            ])
-            ->title('Основное'),
+                ->icon('modules')
+                ->list([
+                    Menu::make('Фрагменты')
+                        ->icon('grid')
+                        ->route('platform.systems.fragments'),
+                    Menu::make('Уроки')
+                        ->icon('graduation')
+                        ->route('platform.systems.lessons'),
+                ])
+                ->title('Основное'),
 
             Menu::make('Возрастные цензы')
                 ->icon('sort-numeric-desc')
