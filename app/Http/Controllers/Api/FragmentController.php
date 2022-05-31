@@ -481,6 +481,7 @@ class FragmentController extends Controller
             return $metaImageData;
         });
         $currentContent['images'] = $updatedContentImagesData;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $newUpdatedImagesUrls = $updatedContentImagesData->map(fn( $image ) => $image['url']);
         $newImagesGame = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $newUpdatedImagesUrls ) {
             return $newUpdatedImagesUrls->contains($image->getFullUrl());
@@ -519,6 +520,7 @@ class FragmentController extends Controller
             });
         });
         $currentContent['images'] = $updatedContentImagesData;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $newUpdatedImagesUrls = $updatedContentImagesData->map(function ( $imagesPair ) {
             return collect($imagesPair)->map(function ( $image ) {
                 return collect($image)->get('url');
@@ -562,6 +564,7 @@ class FragmentController extends Controller
             return $metaImageData;
         });
         $currentContent['images'] = $updatedContentImagesData;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $newUpdatedImagesUrls = $updatedContentImagesData->map(fn( $image ) => $image['url']);
         $newImagesGame = $game->getMedia('fragments_games')->filter(function ( $image ) use ( $newUpdatedImagesUrls ) {
             return $newUpdatedImagesUrls->contains($image->getFullUrl());
