@@ -124,6 +124,9 @@ class FragmentController extends Controller
                 elseif ( $request->input('gameType') === 'puzzles' ) {
                     $fragmentData = $this->createFragmentGamePuzzles($request, $user);
                 }
+                elseif ( $request->input('gameType') === 'graphic_dictation' ) {
+                    $fragmentData = $this->createFragmentGameGraphicDictation($request, $user);
+                }
             }
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
@@ -417,6 +420,24 @@ class FragmentController extends Controller
                 'cols' => $cols,
             ];
         });
+        $game->content = $content;
+        $game->save();
+        return $game;
+    }
+
+    /**
+     * Create fragment of type "Game" - "graphic dictation"
+     * Создать фрагмента типа "игра" - подтип - "графический диктант"
+     * @param CreateFragmentRequest $request Объект запроса
+     * @return Game Игра
+     */
+    private function createFragmentGameGraphicDictation( CreateFragmentRequest $request, User $user ) {
+        $game = new Game();
+        $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
+        $game->gameType()->associate($gameType);
+        $gameTask = $request->input('task') ?? $gameType->task;
+        $content = $this->generateGameContentField($gameType->type, $gameTask);
+        $content['content'] = json_decode($request->input('content'), true);
         $game->content = $content;
         $game->save();
         return $game;
