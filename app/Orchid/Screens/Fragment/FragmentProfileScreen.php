@@ -37,7 +37,14 @@ class FragmentProfileScreen extends Screen
         if ( $fragment->fragmentgable_type === 'image' ) {
             $defaultFonUrl = $fragment->getFirstMediaUrl('fragments_images');
         }
-        $defaultFonUrl = asset('img/fr_fons/' . $fragment->fragmentgable_type . '.png');
+        if ( $fragment->fragmentgable_type === 'game' ) {
+            $defaultFonUrl = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
+                asset('img/fr_fons/' . $fragment->fragmentgable->gameType->type . '.png') :
+                $fragment->getFirstMediaUrl('fragments_fons');
+        }
+        else {
+            $defaultFonUrl = asset('img/fr_fons/' . $fragment->fragmentgable_type . '.png');
+        }
         return [
             'fragment' => $fragment,
             'imageUrl' => empty($fragment->getFirstMediaUrl('fragments_fons')) ? $defaultFonUrl :
@@ -95,12 +102,14 @@ class FragmentProfileScreen extends Screen
                          ->value($this->fragment->fragmentgable->content)
                          ->title('Содержимое статьи')
                          ->required(),
-                    Cropper::make('content')
-                           ->canSee($this->fragment->fragmentgable_type === 'image')
-                           ->title('Новое изображение'),
-                    Upload::make('content')
-                          ->canSee($this->fragment->fragmentgable_type === 'video')
-                          ->title(__('Видео')),
+                    Input::make('content')
+                         ->type('file')
+                         ->canSee($this->fragment->fragmentgable_type === 'image')
+                         ->title('Новое изображение'),
+                    Input::make('content')
+                         ->type('file')
+                         ->canSee($this->fragment->fragmentgable_type === 'video')
+                         ->title(__('Видео')),
                     /*Cropper::make('fon')
                            ->targetId()
                            ->title(__('Новая обложка фрагмента')),*/

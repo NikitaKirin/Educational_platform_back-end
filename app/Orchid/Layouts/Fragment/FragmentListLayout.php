@@ -27,7 +27,8 @@ class FragmentListLayout extends Table
      */
     protected function columns(): iterable {
         return [
-            TD::make('ID')
+            TD::make('id')
+              ->sort()
               ->render(function ( Fragment $fragment ) {
                   $fonPath = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
                       asset('img/fr_fons/' . $fragment->fragmentgable_type . '.png') :
@@ -35,16 +36,36 @@ class FragmentListLayout extends Table
                   if ( $fragment->fragmentgable_type === 'image' ) {
                       $fonPath = $fragment->fragmentgable->content;
                   }
+                  if ($fragment->fragmentgable_type === 'game'){
+                      $fonPath = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
+                          asset('img/fr_fons/' . $fragment->fragmentgable->gameType->type . '.png') :
+                          $fragment->getFirstMediaUrl('fragments_fons');
+                  }
                   return sprintf("<img src='%s' width='100px' class='mw-100 d-block img-fluid'/>
 <span class='small text-muted mt-1 mb-0'>%s</span>", $fonPath, $fragment->id);
+              })
+              ->filter()
+              ->sort('id'),
+            TD::make('fragmentgable_type', __('Тип фрагмента'))
+              ->sort()
+              ->filter(),
+            TD::make('title', __('Название'))
+              ->filter()
+              ->sort()
+              ->render(function ( Fragment $fragment ) {
+                  return Link::make($fragment->title)
+                             ->icon('pencil')
+                             ->route('platform.systems.fragments.profile', $fragment);
               }),
-            TD::make('fragmentgable_type', __('Тип фрагмента')),
-            TD::make('title', __('Название')),
-            TD::make(__('Автор'))->render(function ( Fragment $fragment ) {
-                return "<a href= " . route("platform.systems.users.edit", $fragment->user) . ">" .
-                    $fragment->user->name . "</a>";
-            }),
+            TD::make(__('Автор'))
+              ->render(function ( Fragment $fragment ) {
+                  return Link::make($fragment->user->name)
+                             ->icon('user')
+                             ->route('platform.systems.users.edit', $fragment->user);
+              }),
             TD::make('updated_at', __("Последние изменения"))
+              ->sort()
+              ->filter()
               ->render(function ( Fragment $fragment ) {
                   return $fragment->updated_at->toDateTimeString();
               }),
