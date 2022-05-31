@@ -72,7 +72,7 @@ class PlatformScreen extends Screen
      * @return string|null
      */
     public function name(): ?string {
-        return 'Главная страница';
+        return 'Добро пожаловать, ' . Auth::user()->name . '!';
     }
 
     /**
@@ -91,7 +91,7 @@ class PlatformScreen extends Screen
      */
     public function commandBar(): iterable {
         return [
-            Link::make('Website')
+            Link::make('Основной сайт')
                 ->href('https://youngeek.na4u.ru/')
                 ->icon('globe-alt'),
             /*
