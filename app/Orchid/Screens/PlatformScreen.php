@@ -8,8 +8,10 @@ use App\Models\Fragment;
 use App\Models\User;
 use App\Orchid\Layouts\Fragment\ChartPieFragments;
 use App\Orchid\Layouts\Fragment\FragmentListLayout;
+use App\Orchid\Layouts\User\BarUsersRoles;
 use App\Orchid\Layouts\User\LineUsers;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Orchid\Platform\Models\Role;
 use Orchid\Screen\Actions\Link;
@@ -43,6 +45,23 @@ class PlatformScreen extends Screen
                 User::countByDays(Carbon::now()->subDay(7), Carbon::now())
                     ->toChart('Users'),
                 //Role::countByDays()->toChart('Roles'),
+            ],
+            'userRoles'     => [
+                [
+                    'labels' => ['Ученики', 'Учителя', 'Администраторы'],
+                    'name'   => 'Количество',
+                    'values' => [
+                        User::whereHas('roles', function ( Builder $query ) {
+                            return $query->where('slug', 'LIKE', 'student');
+                        })->count(),
+                        User::whereHas('roles', function ( Builder $query ) {
+                            return $query->where('slug', 'LIKE', 'creator');
+                        })->count(),
+                        User::whereHas('roles', function ( Builder $query ) {
+                            return $query->where('slug', 'LIKE', 'admin');
+                        })->count(),
+                    ],
+                ],
             ],
         ];
     }
@@ -97,6 +116,10 @@ class PlatformScreen extends Screen
             Layout::columns([
                 ChartPieFragments::class,
                 LineUsers::class,
+            ]),
+
+            Layout::columns([
+                BarUsersRoles::class,
             ]),
 
             FragmentListLayout::class,
