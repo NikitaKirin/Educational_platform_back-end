@@ -193,6 +193,9 @@ class FragmentController extends Controller
                 elseif ( $gameType === 'puzzles' ) {
                     $this->updateFragmentGamePuzzles($request, $fragment, $user);
                 }
+                elseif ( $gameType === 'graphic_dictation' ) {
+                    $this->updateFragmentGameGraphicDictation($request, $fragment, $user);
+                }
             }
             if ( $request->hasFile('fon') ) {
                 if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
@@ -590,6 +593,22 @@ class FragmentController extends Controller
         $game->clearMediaCollectionExcept('fragments_games', $newImagesGame);
         $game->refresh();
         $game->update(['content' => $currentContent]);
+    }
+
+    /**
+     * Update fragment game - gr. dictation
+     * Обновить фрагмент типа игра - Графический диктант
+     * @param UpdateFragmentRequest $request Объект запроса
+     * @param Fragment $fragment Фрагмент
+     */
+
+    private function updateFragmentGameGraphicDictation( UpdateFragmentRequest $request, Fragment $fragment, User $user ): void {
+        $newContent = json_decode($request->input('content'), true);
+        $currentContent = $fragment->fragmentgable->content;
+        $currentContent['content'] = json_decode($request->input('content'), true) ?? $currentContent['content'];
+        $fragment->fragmentgable->update([
+            'content' => $currentContent,
+        ]);
     }
 
     /**
