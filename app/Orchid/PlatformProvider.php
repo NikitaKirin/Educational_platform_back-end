@@ -44,10 +44,7 @@ class PlatformProvider extends OrchidServiceProvider
 
             Menu::make('Теги платформы')
                 ->icon('tag')
-                ->route('platform.systems.tags')
-                ->badge(function () {
-                    return 6;
-                }),
+                ->route('platform.systems.tags'),
 
             Menu::make('Типы игр')
                 ->icon('game-controller')
