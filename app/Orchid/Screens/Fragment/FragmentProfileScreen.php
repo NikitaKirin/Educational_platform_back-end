@@ -35,9 +35,9 @@ class FragmentProfileScreen extends Screen
      */
     public function query( Request $request, Fragment $fragment ): iterable {
         if ( $fragment->fragmentgable_type === 'image' ) {
-            $defaultFonUrl = $fragment->getFirstMediaUrl('fragments_images');
+            $defaultFonUrl = $fragment->fragmentgable->getFirstMediaUrl('fragments_images');
         }
-        if ( $fragment->fragmentgable_type === 'game' ) {
+        elseif ( $fragment->fragmentgable_type === 'game' ) {
             $defaultFonUrl = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
                 asset('img/fr_fons/' . $fragment->fragmentgable->gameType->type . '.png') :
                 $fragment->getFirstMediaUrl('fragments_fons');
@@ -81,7 +81,8 @@ class FragmentProfileScreen extends Screen
                 Layout::component(Image::class),
             ])
                   ->title(__('Обложка фрагмента'))
-                  ->description(__('Текущая обложка')),
+                  ->description(__('Текущая обложка'))
+                  ->canSee($this->fragment->fragmentgable_type !== 'image'),
             Layout::block([
                 Layout::rows([
                     Input::make('fragment.title')
@@ -89,7 +90,7 @@ class FragmentProfileScreen extends Screen
                          ->max(255)
                          ->title('Название фрагмента')
                          ->required(),
-                    Input::make('annotation')
+                    Input::make('fragment.annotation')
                          ->value($this->fragment->fragmentgable->annotation)
                          ->type('text')
                          ->max(255)
@@ -102,7 +103,7 @@ class FragmentProfileScreen extends Screen
                          ->value($this->fragment->fragmentgable->content)
                          ->title('Содержимое статьи')
                          ->required(),
-                    Input::make('content')
+                    Input::make('fragment.content')
                          ->type('file')
                          ->canSee($this->fragment->fragmentgable_type === 'image')
                          ->title('Новое изображение'),
@@ -112,8 +113,14 @@ class FragmentProfileScreen extends Screen
                          ->title(__('Видео')),
                     Input::make('fon')
                          ->type('file')
-                         ->title(__('Новая обложка фрагмента')),
+                         ->title(__('Новая обложка фрагмента'))
+                         ->canSee($this->fragment->fragmentgable_type !== 'image'),
                 ]),
+
+                Layout::block([
+                    Layout::component(Image::class),
+                ])->description(__('Текущий медиа-ресурс фрагмента'))
+                      ->title(__('Медиа')),
             ])
                   ->title(__('Основная информация'))
                   ->description(__('Основные данные фрагмента'))
@@ -128,13 +135,26 @@ class FragmentProfileScreen extends Screen
 
     public function saveFragment( Request $request, Fragment $fragment ) {
         DB::transaction(function () use ( $request, $fragment ) {
+            $fragment->update([
+                'title' => $request->input('fragment.title') ?? $fragment->title,
+            ]);
             if ( $fragment->fragmentgable_type === 'article' ) {
-                $fragment->update([
-                    'title' => $request->input('fragment.title') ?? $fragment->title,
-                ]);
                 $fragment->fragmentgable->update([
                     'content' => $request->input('fragment.content') ?? $fragment->fragmentgable->content,
                 ]);
+            }
+            if ( $fragment->fragmentgable_type === 'image' || $fragment->fragmentgable_type === 'video' ) {
+                if ( $request->hasFile('fragment.content') ) {
+                    $fragment->fragmentgable->clearMediaCollection("fragments_{$fragment->fragmentgable_type}s");
+                    $fragment->fragmentgable->addMediaFromRequest('fragment.content')
+                                            ->toMediaCollection("fragments_{$fragment->fragmentgable_type}s",
+                                                'fragments');
+                    $fragment->fragmentgable->update(['content' => $fragment->fragmentgable->getFirstMediaUrl("fragments_{$fragment->fragmentgable_type}s")]);
+                }
+
+                if ( $fragment->fragmentgable_type == 'image' ) {
+                    $fragment->fragmentgable->update(['annotation' => $request->input('fragment.annotation')]);
+                }
             }
             /*$fragment->addMedia(base_path($attachment->path . $attachment->name . '.' . $attachment->extension))
                      ->toMediaCollection('fragments_games');*/
