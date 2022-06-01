@@ -5,6 +5,7 @@ namespace App\Orchid\Screens\Fragment;
 use App\Models\Fragment;
 use App\Models\User;
 use App\View\Components\Fragment\Image;
+use App\View\Components\Fragment\Video;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +50,7 @@ class FragmentProfileScreen extends Screen
             'fragment' => $fragment,
             'imageUrl' => empty($fragment->getFirstMediaUrl('fragments_fons')) ? $defaultFonUrl :
                 $fragment->getFirstMediaUrl('fragments_fons'),
+            'videoUrl' => $fragment->fragmentgable->getFirstMediaUrl('fragments_videos'),
         ];
     }
 
@@ -107,7 +109,7 @@ class FragmentProfileScreen extends Screen
                          ->type('file')
                          ->canSee($this->fragment->fragmentgable_type === 'image')
                          ->title('Новое изображение'),
-                    Input::make('content')
+                    Input::make('fragment.content')
                          ->type('file')
                          ->canSee($this->fragment->fragmentgable_type === 'video')
                          ->title(__('Видео')),
@@ -118,8 +120,11 @@ class FragmentProfileScreen extends Screen
                 ]),
 
                 Layout::block([
-                    Layout::component(Image::class),
-                ])->description(__('Текущий медиа-ресурс фрагмента'))
+                    Layout::component(Image::class)->canSee($this->fragment->fragmentgable_type === 'image'),
+                    Layout::component(Video::class)
+                          ->canSee($this->fragment->fragmentgable_type === 'video'),
+                ])
+                      ->description(__('Текущий медиа-ресурс фрагмента'))
                       ->title(__('Медиа')),
             ])
                   ->title(__('Основная информация'))
@@ -156,8 +161,6 @@ class FragmentProfileScreen extends Screen
                     $fragment->fragmentgable->update(['annotation' => $request->input('fragment.annotation')]);
                 }
             }
-            /*$fragment->addMedia(base_path($attachment->path . $attachment->name . '.' . $attachment->extension))
-                     ->toMediaCollection('fragments_games');*/
             if ( $request->hasFile('fon') ) {
                 if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
                     $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
