@@ -96,7 +96,7 @@ class FragmentProfileScreen extends Screen
                          ->title('Аннотация')
                          ->canSee($this->fragment->fragmentgable_type === 'image')
                          ->required(),
-                    Quill::make('content')
+                    Quill::make('fragment.content')
                          ->canSee($this->fragment->fragmentgable_type === 'article')
                          ->toolbar(["text", "color", "header", "list", "format"])
                          ->value($this->fragment->fragmentgable->content)
@@ -110,9 +110,9 @@ class FragmentProfileScreen extends Screen
                          ->type('file')
                          ->canSee($this->fragment->fragmentgable_type === 'video')
                          ->title(__('Видео')),
-                    /*Cropper::make('fon')
-                           ->targetId()
-                           ->title(__('Новая обложка фрагмента')),*/
+                    Input::make('fon')
+                         ->type('file')
+                         ->title(__('Новая обложка фрагмента')),
                 ]),
             ])
                   ->title(__('Основная информация'))
@@ -127,18 +127,25 @@ class FragmentProfileScreen extends Screen
     }
 
     public function saveFragment( Request $request, Fragment $fragment ) {
-        $attachment = Attachment::findOrFail($request->input('fon'));
-        DB::transaction(function () use ( $request, $fragment, $attachment ) {
+        DB::transaction(function () use ( $request, $fragment ) {
             if ( $fragment->fragmentgable_type === 'article' ) {
-                $fragment->fill([
-                    'title' => $request->input('fragment.title'),
-                ])->save();
-                $fragment->fragmentgable->fill([
-                    'content' => $request->input('content'),
-                ])->save();
+                $fragment->update([
+                    'title' => $request->input('fragment.title') ?? $fragment->title,
+                ]);
+                $fragment->fragmentgable->update([
+                    'content' => $request->input('fragment.content') ?? $fragment->fragmentgable->content,
+                ]);
             }
-            $fragment->addMedia(base_path($attachment->path . $attachment->name . '.' . $attachment->extension))
-                     ->toMediaCollection('fragments_games');
+            /*$fragment->addMedia(base_path($attachment->path . $attachment->name . '.' . $attachment->extension))
+                     ->toMediaCollection('fragments_games');*/
+            if ( $request->hasFile('fon') ) {
+                if ( empty($fragment->getFirstMediaUrl('fragments_fons')) )
+                    $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+                else {
+                    $fragment->clearMediaCollection('fragments_fons');
+                    $fragment->addMediaFromRequest('fon')->toMediaCollection('fragments_fons', 'fragments_fons');
+                }
+            }
         });
 
         Toast::success('Фрагмент успешно сохранен!');
