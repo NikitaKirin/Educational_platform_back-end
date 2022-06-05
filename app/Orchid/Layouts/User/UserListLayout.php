@@ -59,12 +59,12 @@ class UserListLayout extends Table
               ->width('100px')
               ->render(function ( User $user ) {
                   if ( $user->blocked_at === null ) {
-                      $button = Button::make(__('Block'))
+                      $button = Button::make(__('Заблокировать'))
                                       ->icon('ban')
                                       ->method('blockUser', ['id' => $user->id]);
                   }
                   else {
-                      $button = Button::make(__('Unblock'))
+                      $button = Button::make(__('Разблокировать'))
                                       ->icon('unlock')
                                       ->method('unblockUser', ['id' => $user->id]);
                   }
