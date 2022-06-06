@@ -3,6 +3,7 @@
 namespace App\Orchid\Layouts\Fragment;
 
 use App\Models\Fragment;
+use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Layouts\Table;
@@ -36,7 +37,7 @@ class FragmentListLayout extends Table
                   if ( $fragment->fragmentgable_type === 'image' ) {
                       $fonPath = $fragment->fragmentgable->content;
                   }
-                  if ($fragment->fragmentgable_type === 'game'){
+                  if ( $fragment->fragmentgable_type === 'game' ) {
                       $fonPath = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
                           asset('img/fr_fons/' . $fragment->fragmentgable->gameType->type . '.png') :
                           $fragment->getFirstMediaUrl('fragments_fons');
@@ -74,9 +75,13 @@ class FragmentListLayout extends Table
                   return DropDown::make()
                                  ->icon('options-vertical')
                                  ->list([
-                                     Link::make(__('Перейти к фрагменту'))
+                                     Link::make(__('Edit'))
                                          ->icon('eye')
                                          ->route('platform.systems.fragments.profile', ['fragment' => $fragment->id]),
+                                     Button::make(__('Delete'))
+                                           ->icon('trash')
+                                           ->method('remove', ['id' => $fragment->id])
+                                           ->confirm(__('Вы уверены, что хотите удалить фрагмент? Отменить данное действие будет невозможно.')),
                                  ]);
               }),
         ];

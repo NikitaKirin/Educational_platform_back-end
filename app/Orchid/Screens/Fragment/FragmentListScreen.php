@@ -4,7 +4,9 @@ namespace App\Orchid\Screens\Fragment;
 
 use App\Models\Fragment;
 use App\Orchid\Layouts\Fragment\FragmentListLayout;
+use Illuminate\Http\Request;
 use Orchid\Screen\Screen;
+use Orchid\Support\Facades\Toast;
 
 class FragmentListScreen extends Screen
 {
@@ -18,7 +20,7 @@ class FragmentListScreen extends Screen
             'fragments' => Fragment::filters()
                                    ->defaultSort('title')
                                    ->paginate(15),
-            'foo' => 'bar',
+            'foo'       => 'bar',
         ];
     }
 
@@ -49,5 +51,11 @@ class FragmentListScreen extends Screen
         return [
             FragmentListLayout::class,
         ];
+    }
+
+    public function remove( Request $request ) {
+        Fragment::findOrFail($request->input('id'))->delete();
+
+        Toast::success('Фрагмент успешно удален!');
     }
 }
