@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Orchid\Screens;
 
+use App\Models\AgeLimit;
 use App\Models\Fragment;
 use App\Models\Lesson;
 use App\Models\User;
+use App\Orchid\Layouts\AgeLimit\BarAgeLimits;
 use App\Orchid\Layouts\Fragment\ChartPieFragments;
 use App\Orchid\Layouts\Fragment\FragmentListLayout;
 use App\Orchid\Layouts\Fragment\LineFragments;
@@ -78,6 +80,32 @@ class PlatformScreen extends Screen
             'lessons'       => [
                 Lesson::countByDays(Carbon::now()->subDay(14), Carbon::now())->toChart('Уроки'),
             ],
+            'ageLimits'     => [
+                [
+                    'labels' => ['0+', '3+', '5+', '7+'],
+                    'name'   => 'Фрагменты',
+                    'values' => [
+                        AgeLimit::where('text_context', 'LIKE', '0+')->first()->loadCount('fragments')
+                            ->fragments_count,
+                        AgeLimit::where('text_context', 'LIKE', '3+')->first()->loadCount('fragments')
+                            ->fragments_count,
+                        AgeLimit::where('text_context', 'LIKE', '5+')->first()->loadCount('fragments')
+                            ->fragments_count,
+                        AgeLimit::where('text_context', 'LIKE', '7+')->first()->loadCount('fragments')
+                            ->fragments_count,
+                    ],
+                ],
+                [
+                    'labels' => ['0+', '3+', '5+', '7+'],
+                    'name'   => 'Уроки',
+                    'values' => [
+                        AgeLimit::where('text_context', 'LIKE', '0+')->first()->loadCount('lessons')->lessons_count,
+                        AgeLimit::where('text_context', 'LIKE', '3+')->first()->loadCount('lessons')->lessons_count,
+                        AgeLimit::where('text_context', 'LIKE', '5+')->first()->loadCount('lessons')->lessons_count,
+                        AgeLimit::where('text_context', 'LIKE', '7+')->first()->loadCount('lessons')->lessons_count,
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -128,13 +156,16 @@ class PlatformScreen extends Screen
     public function layout(): iterable {
         return [
             //Layout::view('platform::partials.welcome'),
-            Layout::columns([
-                ChartPieFragments::class,
-                LineUsers::class,
+            Layout::blank([
+                Layout::columns([
+                    BarUsersRoles::class,
+                    LineUsers::class,
+                ])
             ]),
 
             Layout::columns([
-                BarUsersRoles::class,
+                BarAgeLimits::class,
+                ChartPieFragments::class,
             ]),
 
             Layout::columns([
