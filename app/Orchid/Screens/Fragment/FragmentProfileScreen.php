@@ -38,6 +38,9 @@ class FragmentProfileScreen extends Screen
         if ( $fragment->fragmentgable_type === 'image' ) {
             $defaultFonUrl = $fragment->fragmentgable->getFirstMediaUrl('fragments_images');
         }
+        elseif ( $fragment->fragmentgable_type === 'video' ) {
+            $videoUrl = $fragment->fragmentgable->getFirstMediaUrl('fragments_videos');
+        }
         elseif ( $fragment->fragmentgable_type === 'game' ) {
             $defaultFonUrl = (empty($fragment->getFirstMediaUrl('fragments_fons'))) ?
                 asset('img/fr_fons/' . $fragment->fragmentgable->gameType->type . '.png') :
@@ -50,7 +53,7 @@ class FragmentProfileScreen extends Screen
             'fragment' => $fragment,
             'imageUrl' => empty($fragment->getFirstMediaUrl('fragments_fons')) ? $defaultFonUrl :
                 $fragment->getFirstMediaUrl('fragments_fons'),
-            'videoUrl' => $fragment->fragmentgable->getFirstMediaUrl('fragments_videos'),
+            'videoUrl' => $videoUrl ?? null,
         ];
     }
 
@@ -125,7 +128,9 @@ class FragmentProfileScreen extends Screen
                           ->canSee($this->fragment->fragmentgable_type === 'video'),
                 ])
                       ->description(__('Текущий медиа-ресурс фрагмента'))
-                      ->title(__('Медиа')),
+                      ->title(__('Медиа'))
+                      ->canSee($this->fragment->fragmentgable_type === 'video' ||
+                          $this->fragment->fragmentgable_type === 'image'),
             ])
                   ->title(__('Основная информация'))
                   ->description(__('Основные данные фрагмента'))

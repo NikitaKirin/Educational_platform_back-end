@@ -38,7 +38,12 @@ class LessonListLayout extends Table
               }),
             TD::make('title', __('Название'))
               ->filter()
-              ->sort(),
+              ->sort()
+              ->render(function ( Lesson $lesson ) {
+                  return Link::make($lesson->title)
+                             ->icon('pencil')
+                             ->route('platform.systems.lessons.profile', $lesson);
+              }),
             TD::make('annotation', __('Краткое описание'))
               ->filter(),
             TD::make('age_limit_id', __('Возрастной ценз'))
@@ -48,8 +53,9 @@ class LessonListLayout extends Table
               }),
             TD::make('user', __('Автор'))
               ->render(function ( Lesson $lesson ) {
-                  return "<a href= " . route("platform.systems.users.edit", $lesson->user) . ">" .
-                      $lesson->user->name . "</a>";
+                  return Link::make($lesson->user->name)
+                             ->icon('user')
+                             ->route('platform.systems.users.edit', $lesson->user);
               }),
             TD::make('updated_at', __('Последние изменения'))
               ->sort()
