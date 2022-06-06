@@ -30,8 +30,8 @@ class LessonProfileScreen extends Screen
         return [
             'lesson'    => $lesson,
             'fragments' => $lesson->fragments()->withPivot('order')->orderBy('fragment_lesson.order')->get(),
-            'imageUrl'  => empty($lesson->getFirstMediaUrl('fragments_fons')) ? asset('img/lesson-fon.png') :
-                $lesson->getFirstMediaUrl('fragments_fons'),
+            'imageUrl'  => empty($lesson->getFirstMediaUrl('lessons_fons')) ? asset('img/lesson-fon.png') :
+                $lesson->getFirstMediaUrl('lessons_fons'),
         ];
     }
 
@@ -82,6 +82,9 @@ class LessonProfileScreen extends Screen
                          ->max(255)
                          ->title(__('Краткое описание'))
                          ->required(),
+                    Input::make('fon')
+                         ->type('file')
+                         ->title(__('Новая обложка фрагмента')),
                     Button::make(__('Save'))
                           ->type(Color::SUCCESS())
                           ->icon('save')
@@ -108,6 +111,15 @@ class LessonProfileScreen extends Screen
                 'title'      => $request->input('lesson.title'),
                 'annotation' => $request->input('lesson.annotation'),
             ])->save();
+
+            if ( $request->hasFile('fon') ) {
+                if ( empty($lesson->getFirstMediaUrl('lessons_fons')) )
+                    $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
+                else {
+                    $lesson->clearMediaCollection('lessons_fons');
+                    $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
+                }
+            }
         });
 
         \Orchid\Support\Facades\Toast::success(__("Урок успешно сохранен!"));
