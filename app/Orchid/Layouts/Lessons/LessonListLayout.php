@@ -27,16 +27,22 @@ class LessonListLayout extends Table
      */
     protected function columns(): iterable {
         return [
-            TD::make('#')
-              ->render(function ( Lesson $lesson, object $loop ) {
+            TD::make('id')
+              ->sort()
+              ->filter()
+              ->render(function ( Lesson $lesson ) {
                   $fonPath = empty($lesson->getFirstMediaUrl('lessons_fons')) ?
                       asset('img/lesson-fon.png') :
-                      $lesson->getFirstMediaUrl('lessons-fons');
-                  return sprintf("<span>%s</span> <img src='%s' width='100px'", $loop->index, $fonPath);
+                      $lesson->getFirstMediaUrl('lessons_fons');
+                  return sprintf("<span>%s</span> <img src='%s' width='100px'", $lesson->id, $fonPath);
               }),
-            TD::make('title', __('Название')),
-            TD::make('annotation', __('Краткое описание')),
-            TD::make('ageLimit', __('Возрастной ценз'))
+            TD::make('title', __('Название'))
+              ->filter()
+              ->sort(),
+            TD::make('annotation', __('Краткое описание'))
+              ->filter(),
+            TD::make('age_limit_id', __('Возрастной ценз'))
+              ->sort()
               ->render(function ( Lesson $lesson ) {
                   return $lesson->ageLimit->text_context;
               }),
@@ -46,10 +52,11 @@ class LessonListLayout extends Table
                       $lesson->user->name . "</a>";
               }),
             TD::make('updated_at', __('Последние изменения'))
+              ->sort()
               ->render(function ( Lesson $lesson ) {
                   return $lesson->updated_at->toDateTimeString();
               }),
-            TD::make( __('Actions'))
+            TD::make(__('Actions'))
               ->render(function ( Lesson $lesson ) {
                   return DropDown::make()
                                  ->icon('options-vertical')

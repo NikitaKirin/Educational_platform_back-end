@@ -23,6 +23,30 @@ class Lesson extends Model implements HasMedia
         'user_id',
     ];
 
+    /**
+     * The attributes for which you can use filters in url.
+     *
+     * @var array
+     */
+    protected $allowedFilters = [
+        'id',
+        'title',
+        'annotation',
+    ];
+
+    /**
+     * The attributes for which can use sort in url.
+     *
+     * @var array
+     */
+    protected $allowedSorts = [
+        'id',
+        'title',
+        'age_limit_id',
+        'updated_at',
+        'created_at',
+    ];
+
     // Устанавливаем обратную связь "один ко многим" с таблицей 'users'
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
