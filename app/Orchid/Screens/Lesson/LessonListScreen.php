@@ -4,7 +4,9 @@ namespace App\Orchid\Screens\Lesson;
 
 use App\Models\Lesson;
 use App\Orchid\Layouts\Lessons\LessonListLayout;
+use Illuminate\Http\Request;
 use Orchid\Screen\Screen;
+use Orchid\Support\Facades\Toast;
 
 class LessonListScreen extends Screen
 {
@@ -53,4 +55,10 @@ class LessonListScreen extends Screen
             LessonListLayout::class,
         ];
     }
+
+    public function remove( Request $request ) {
+        Lesson::findOrFail($request->input('id'))->delete();
+        Toast::success('Урок успешно удален');
+    }
+
 }

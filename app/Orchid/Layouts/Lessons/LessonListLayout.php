@@ -3,6 +3,7 @@
 namespace App\Orchid\Layouts\Lessons;
 
 use App\Models\Lesson;
+use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Layouts\Table;
@@ -70,6 +71,10 @@ class LessonListLayout extends Table
                                      Link::make(__('Edit'))
                                          ->icon('pencil')
                                          ->route('platform.systems.lessons.profile', ["lesson" => $lesson->id]),
+                                     Button::make(__('Delete'))
+                                           ->icon('trash')
+                                           ->method('remove', ['id' => $lesson->id])
+                                           ->confirm(__('Вы уверены, что хотите удалить урок? Отменить данное действие будет невозможно.')),
                                  ]);
               }),
         ];
