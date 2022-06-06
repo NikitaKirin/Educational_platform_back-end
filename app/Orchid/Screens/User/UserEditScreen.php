@@ -8,6 +8,7 @@ use App\Orchid\Layouts\Role\RolePermissionLayout;
 use App\Orchid\Layouts\User\UserEditLayout;
 use App\Orchid\Layouts\User\UserPasswordLayout;
 use App\Orchid\Layouts\User\UserRoleLayout;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -84,6 +85,16 @@ class UserEditScreen extends Screen
                   ->confirm('You can revert to your original state by logging out.')
                   ->method('loginAs')
                   ->canSee($this->user->exists && \request()->user()->id !== $this->user->id),
+
+            Button::make(__('Заблокировать'))
+                  ->icon('unlock')
+                  ->method('blockUser', ['id' => $this->user->id])
+                  ->canSee($this->user->blocked_at === null),
+
+            Button::make(__('Разблокировать'))
+                  ->icon('lock-open')
+                  ->method('unblockUser', ['id' => $this->user->id])
+                  ->canSee($this->user->blocked_at !== null),
 
             Button::make(__('Remove'))
                   ->icon('trash')
@@ -219,5 +230,21 @@ class UserEditScreen extends Screen
         Toast::info(__('You are now impersonating this user'));
 
         return redirect()->route(config('platform.index'));
+    }
+
+    public function blockUser( Request $request ) {
+        $user = User::findOrFail($request->get('id'));
+        $user->blocked_at = Carbon::now()->toDateTimeString();
+        $user->save();
+
+        Toast::success(__('Пользователь успешно заблокирован!'));
+    }
+
+    public function unblockUser( Request $request ) {
+        $user = User::findOrFail($request->get('id'));
+        $user->blocked_at = null;
+        $user->save();
+
+        Toast::success(__('Пользователь успешно разблокирован!'));
     }
 }
