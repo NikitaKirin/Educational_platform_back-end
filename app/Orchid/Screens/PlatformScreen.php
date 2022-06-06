@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Orchid\Screens;
 
 use App\Models\Fragment;
+use App\Models\Lesson;
 use App\Models\User;
 use App\Orchid\Layouts\Fragment\ChartPieFragments;
 use App\Orchid\Layouts\Fragment\FragmentListLayout;
+use App\Orchid\Layouts\Fragment\LineFragments;
+use App\Orchid\Layouts\Lesson\LineLessons;
 use App\Orchid\Layouts\User\BarUsersRoles;
 use App\Orchid\Layouts\User\LineUsers;
 use Carbon\Carbon;
@@ -28,7 +31,16 @@ class PlatformScreen extends Screen
      */
     public function query(): iterable {
         return [
-            'fragments'     => Fragment::latest('created_at')->limit(5)->get(),
+            'fragments'     => [
+                Fragment::where('fragmentgable_type', 'LIKE', 'article')->countByDays(Carbon::now()->subDay(14),
+                    Carbon::now())->toChart('Статьи'),
+                Fragment::where('fragmentgable_type', 'LIKE', 'video')->countByDays(Carbon::now()->subDay(14),
+                    Carbon::now())->toChart('Видео'),
+                Fragment::where('fragmentgable_type', 'LIKE', 'image')->countByDays(Carbon::now()->subDay(14),
+                    Carbon::now())->toChart('Изображения'),
+                Fragment::where('fragmentgable_type', 'LIKE', 'game')->countByDays(Carbon::now()->subDay(14),
+                    Carbon::now())->toChart('Игры'),
+            ],
             'fragmentsType' => [
                 [
                     'labels' => ['Статья', 'Видео', 'Изображение', 'Игра'],
@@ -62,6 +74,9 @@ class PlatformScreen extends Screen
                         })->count(),
                     ],
                 ],
+            ],
+            'lessons'       => [
+                Lesson::countByDays(Carbon::now()->subDay(14), Carbon::now())->toChart('Уроки'),
             ],
         ];
     }
@@ -122,7 +137,11 @@ class PlatformScreen extends Screen
                 BarUsersRoles::class,
             ]),
 
-            FragmentListLayout::class,
+            Layout::columns([
+                    LineFragments::class,
+                    LineLessons::class,
+                ]
+            ),
         ];
     }
 }
