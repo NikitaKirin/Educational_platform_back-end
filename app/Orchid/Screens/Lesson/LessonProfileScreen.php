@@ -2,6 +2,7 @@
 
 namespace App\Orchid\Screens\Lesson;
 
+use App\Models\AgeLimit;
 use App\Models\Fragment;
 use App\Models\Lesson;
 use App\Orchid\Layouts\Fragment\FragmentListLayout;
@@ -91,10 +92,13 @@ class LessonProfileScreen extends Screen
                             ->applyScope('userFragments', $this->lesson->user)
                             ->multiple()
                             ->title('Сформируйте набор фрагментов'),
-                    Button::make(__('Save'))
-                          ->type(Color::SUCCESS())
-                          ->icon('save')
-                          ->method('saveMainDataLesson'),
+                    Relation::make('lesson.ageLimit')
+                            ->fromModel(AgeLimit::class, 'text_context')
+                    ->title(__('Выберите возрастной ценз')),
+                        Button::make(__('Save'))
+                              ->type(Color::SUCCESS())
+                              ->icon('save')
+                              ->method('saveMainDataLesson'),
                 ]),
             ])
                   ->title(__('Основная информация')),
@@ -108,6 +112,9 @@ class LessonProfileScreen extends Screen
                 'title'      => $request->input('lesson.title'),
                 'annotation' => $request->input('lesson.annotation'),
             ])->save();
+            if ($ageLimitId = $request->input('lesson.ageLimit')){
+                $lesson->ageLimit()->associate($ageLimitId)->save();
+            }
             $fragments = $request->input('lesson.fragments');
             $lesson->fragments()->sync([]);
             for ( $i = 0; $i < count($fragments); $i++ ) {

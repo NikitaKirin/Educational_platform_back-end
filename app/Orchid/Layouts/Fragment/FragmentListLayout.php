@@ -81,7 +81,7 @@ class FragmentListLayout extends Table
                                  ->icon('options-vertical')
                                  ->list([
                                      Link::make(__('Edit'))
-                                         ->icon('eye')
+                                         ->icon('pencil')
                                          ->route('platform.systems.fragments.profile', ['fragment' => $fragment->id]),
                                      Button::make(__('Delete'))
                                            ->icon('trash')
