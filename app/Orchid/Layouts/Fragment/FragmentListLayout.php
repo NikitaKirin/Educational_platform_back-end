@@ -58,6 +58,11 @@ class FragmentListLayout extends Table
                              ->icon('pencil')
                              ->route('platform.systems.fragments.profile', $fragment);
               }),
+            TD::make('age_limit_id', __('Возрастной ценз'))
+              ->sort()
+              ->render(function ( Fragment $fragment ) {
+                  return $fragment->ageLimit->text_context;
+              }),
             TD::make(__('Автор'))
               ->render(function ( Fragment $fragment ) {
                   return Link::make($fragment->user->name)

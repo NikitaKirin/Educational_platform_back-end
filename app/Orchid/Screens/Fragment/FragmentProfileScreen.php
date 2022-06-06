@@ -2,6 +2,7 @@
 
 namespace App\Orchid\Screens\Fragment;
 
+use App\Models\AgeLimit;
 use App\Models\Fragment;
 use App\Models\User;
 use App\View\Components\Fragment\Image;
@@ -120,6 +121,9 @@ class FragmentProfileScreen extends Screen
                          ->type('file')
                          ->title(__('Новая обложка фрагмента'))
                          ->canSee($this->fragment->fragmentgable_type !== 'image'),
+                    Relation::make('fragment.ageLimit')
+                            ->fromModel(AgeLimit::class, 'text_context')
+                            ->title(__('Выберите возрастной ценз')),
                 ]),
 
                 Layout::block([
@@ -148,6 +152,9 @@ class FragmentProfileScreen extends Screen
             $fragment->update([
                 'title' => $request->input('fragment.title') ?? $fragment->title,
             ]);
+            if ( $ageLimitId = $request->input('fragment.ageLimit') ) {
+                $fragment->ageLimit()->associate($ageLimitId)->save();
+            }
             if ( $fragment->fragmentgable_type === 'article' ) {
                 $fragment->fragmentgable->update([
                     'content' => $request->input('fragment.content') ?? $fragment->fragmentgable->content,

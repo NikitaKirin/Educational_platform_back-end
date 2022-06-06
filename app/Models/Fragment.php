@@ -43,6 +43,7 @@ class Fragment extends Model implements HasMedia
         'id',
         'title',
         'fragmentgable_type',
+        'age_limit_id',
         'updated_at',
         'created_at',
     ];
