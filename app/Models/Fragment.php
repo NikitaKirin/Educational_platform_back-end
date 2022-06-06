@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Concerns\InteractsWithPivotTable;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Orchid\Filters\Filterable;
@@ -46,6 +46,15 @@ class Fragment extends Model implements HasMedia
         'updated_at',
         'created_at',
     ];
+
+    /**
+     * ORCHID: scope for lessons - fragments,
+     * @param Builder $query
+     * @param User $user
+     */
+    public function scopeUserFragments( Builder $query, User $user ) {
+        return $query->where('user_id', $user->id);
+    }
 
     // Устанавливаем обратную связь "один ко многим" с таблицей 'users'
     public function user(): BelongsTo {

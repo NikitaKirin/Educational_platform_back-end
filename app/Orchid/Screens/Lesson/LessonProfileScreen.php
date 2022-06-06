@@ -84,7 +84,13 @@ class LessonProfileScreen extends Screen
                          ->required(),
                     Input::make('fon')
                          ->type('file')
-                         ->title(__('Новая обложка фрагмента')),
+                         ->title(__('Новая обложка урока')),
+                    Relation::make('lesson.fragments.')
+                            ->fromModel(Fragment::class, 'title')
+                            ->searchColumns('title', 'fragmentgable_type')
+                            ->applyScope('userFragments', $this->lesson->user)
+                            ->multiple()
+                            ->title('Сформируйте набор фрагментов'),
                     Button::make(__('Save'))
                           ->type(Color::SUCCESS())
                           ->icon('save')
@@ -92,16 +98,7 @@ class LessonProfileScreen extends Screen
                 ]),
             ])
                   ->title(__('Основная информация')),
-
-            Layout::columns([
-                FragmentListLayout::class,
-                Layout::rows([
-                    Relation::make('lesson.fragments.')
-                            ->fromModel(Fragment::class, 'title')
-                            ->multiple()
-                            ->title('Сформируйте набор фрагментов'),
-                ]),
-            ]),
+            FragmentListLayout::class,
         ];
     }
 
@@ -111,7 +108,13 @@ class LessonProfileScreen extends Screen
                 'title'      => $request->input('lesson.title'),
                 'annotation' => $request->input('lesson.annotation'),
             ])->save();
-
+            $fragments = $request->input('lesson.fragments');
+            $lesson->fragments()->sync([]);
+            for ( $i = 0; $i < count($fragments); $i++ ) {
+                if ( $lesson->fragments()->where('id', $fragments[$i])->exists() )
+                    continue;
+                $lesson->fragments()->attach($fragments[$i], ['order' => $i + 1]);
+            }
             if ( $request->hasFile('fon') ) {
                 if ( empty($lesson->getFirstMediaUrl('lessons_fons')) )
                     $lesson->addMediaFromRequest('fon')->toMediaCollection('lessons_fons', 'lessons_fons');
