@@ -4,6 +4,7 @@ namespace App\Orchid\Screens\Fragment;
 
 use App\Models\AgeLimit;
 use App\Models\Fragment;
+use App\Models\Tag;
 use App\Models\User;
 use App\View\Components\Fragment\Image;
 use App\View\Components\Fragment\Video;
@@ -124,6 +125,10 @@ class FragmentProfileScreen extends Screen
                     Relation::make('fragment.ageLimit')
                             ->fromModel(AgeLimit::class, 'text_context')
                             ->title(__('Выберите возрастной ценз')),
+                    Relation::make('fragment.tags.')
+                            ->fromModel(Tag::class, 'value')
+                            ->multiple()
+                            ->title(__('Выберите теги')),
                 ]),
 
                 Layout::block([
@@ -154,6 +159,10 @@ class FragmentProfileScreen extends Screen
             ]);
             if ( $ageLimitId = $request->input('fragment.ageLimit') ) {
                 $fragment->ageLimit()->associate($ageLimitId)->save();
+            }
+            if ( $tags = $request->input('fragment.tags') ) {
+                $tags = array_unique($tags);
+                $fragment->tags()->sync($tags);
             }
             if ( $fragment->fragmentgable_type === 'article' ) {
                 $fragment->fragmentgable->update([
