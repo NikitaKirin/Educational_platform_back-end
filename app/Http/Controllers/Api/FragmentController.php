@@ -487,6 +487,7 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $game = $fragment->fragmentgable;
         // Формируем новое поле content['images']
         $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
@@ -524,6 +525,7 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $game = $fragment->fragmentgable;
         // Формируем новое поле content['images']
         $updatedContentImagesData = collect($metaImagesData)->map(function ( $imagePairData ) use ( $newImages, $game, $user ) {
@@ -566,6 +568,7 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $game = $fragment->fragmentgable;
         // Формируем новое поле content['images']
         $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
@@ -605,6 +608,7 @@ class FragmentController extends Controller
     private function updateFragmentGameGraphicDictation( UpdateFragmentRequest $request, Fragment $fragment, User $user ): void {
         $newContent = json_decode($request->input('content'), true);
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $currentContent['content'] = json_decode($request->input('content'), true) ?? $currentContent['content'];
         $fragment->fragmentgable->update([
             'content' => $currentContent,
