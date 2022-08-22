@@ -23,7 +23,9 @@ class LessonResourceCollection extends ResourceCollection
                 elseif ( $request->routeIs('lesson.teacher.index') )
                     return $this->when($request->user->lessons()->exists(), $request->user->lessons()->count(), 0);
                 return Lesson::whereHas('user', function ( Builder $query ) {
-                    $query->where('role', '=', 'creator');
+                    $query->whereHas('roles', function (Builder $role) {
+                        return $role->where('slug', '<>', 'student');
+                    });
                 })->count();
             }),
             'data'      => $this->collection,

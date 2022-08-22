@@ -43,6 +43,6 @@ class UpdateLessonRequest extends FormRequest
     }
 
     public function authorize(): bool {
-        return Auth::user()->role == ('creator' || 'student');
+        return true;
     }
 }

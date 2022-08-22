@@ -6,14 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Orchid\Filters\Filterable;
+use Orchid\Screen\AsSource;
 
 class GameType extends Model
 {
+    use AsSource, Filterable;
+
     protected $table = 'game_types';
     protected $fillable = [
         'title',
+        'type',
         'description',
         'task',
+    ];
+
+    protected $allowedFilters = [
+        'title',
+    ];
+    protected $allowedSorts = [
+        'title',
+        'updated_at',
     ];
 
     /**

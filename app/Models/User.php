@@ -4,20 +4,18 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Auth\Passwords\CanResetPassword;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\URL;
 use Laravel\Passport\HasApiTokens;
+use Orchid\Metrics\Chartable;
+use Orchid\Platform\Models\User as Authenticatable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class User extends Authenticatable implements HasMedia
 {
-    use HasApiTokens, HasFactory, Notifiable, InteractsWithMedia, CanResetPassword;
+    use HasApiTokens, HasFactory, Notifiable, InteractsWithMedia, CanResetPassword, Chartable;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +29,7 @@ class User extends Authenticatable implements HasMedia
         'birthday',
         'role',
         'blocked_at',
+        'permissions',
     ];
 
     /**
@@ -41,21 +40,48 @@ class User extends Authenticatable implements HasMedia
     protected $hidden = [
         'password',
         'remember_token',
+        'permissions',
     ];
 
     /**
-     * The attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'permissions'          => 'array',
+        'email_verified_at'    => 'datetime',
+    ];
+
+    /**
+     * The attributes for which you can use filters in url.
+     *
+     * @var array
+     */
+    protected $allowedFilters = [
+        'id',
+        'name',
+        'email',
+        'permissions',
+    ];
+
+    /**
+     * The attributes for which can use sort in url.
+     *
+     * @var array
+     */
+    protected $allowedSorts = [
+        'id',
+        'name',
+        'email',
+        'updated_at',
+        'created_at',
     ];
 
     // Мутатор для хеширования пароля пользователя
-    public function setPasswordAttribute( $value ) {
+    /*public function setPasswordAttribute( $value ) {
         $this->attributes['password'] = Hash::make($value);
-    }
+    }*/
 
     //Акцессор для преобразования формата даты рождения пользователя
     public function getBirthdayAttribute( $value ): ?string {

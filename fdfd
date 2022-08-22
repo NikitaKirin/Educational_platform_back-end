@@ -1,0 +1,15 @@
+=> [34;4mApp\Models\User[39;24m {#3843
+     [34mid[39m: [35m1[39m,
+     [34mname[39m: "[32mNikita Kirin[39m",
+     [34mbirthday[39m: [36mnull[39m,
+     [34memail[39m: "[32madmin@admin.com[39m",
+     [34memail_verified_at[39m: [36mnull[39m,
+     #[33mpassword[39m: "[32m$2y$10$e7eEeyVS3eO1DA3JtBmVnulC5gtLZH2aprLeoYXOhNM4ahz9qGM12[39m",
+     #[33mremember_token[39m: "[32mzqTpIT2CAGwwz7HvLQu6T3kJG8IiF9I47JRHx5yiDNzhOEostJVK0YoOrtnM[39m",
+     [34mcreated_at[39m: "[32m2022-05-21 11:29:01[39m",
+     [34mupdated_at[39m: "[32m2022-05-21 11:36:22[39m",
+     [34mdeleted_at[39m: [36mnull[39m,
+     #[33mpermissions[39m: "[32m{"platform.index": true, "platform.systems.roles": true, "platform.systems.users": true, "platform.systems.attachment": true}[39m",
+     [34mblocked_at[39m: [36mnull[39m,
+   }
+

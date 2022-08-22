@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\User\Auth;
 
+use App\Http\Requests\Api\ApiFormRequest;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,16 +27,9 @@ class RegisterRequest extends FormRequest
             'email.unique'    => 'Данный email уже занят',
             'date'            => 'Введены недоступные символы',
             'birthday.before' => "Дата не может быть позднее, чем сегодня",
+            'role.in'         => "Доступны только следующие типы ролей: :values"
         ];
     }
-
-    /*    public function withValidator( $validator ) {
-            if ( $validator->fails() ) {
-                $errors = $validator->errors();
-
-                return response()->json(["messages" => $errors]);
-            }
-        }*/
 
     public function authorize(): bool {
         return true;

@@ -43,8 +43,8 @@ class RouteServiceProvider extends ServiceProvider
                  ->group(function () {
                      require_once base_path('routes/api/user/auth/auth.php'); // Роуты с авторизацией пользователей
                      require_once base_path('routes/api/user/main.php'); // Роуты всех пользователей
-                     require_once base_path('routes/api/admin/auth/auth.php'); // Роуты с авторизацией для админов
-                     require_once base_path('routes/api/admin/main.php'); // Роуты для администраторов
+                     //require_once base_path('routes/api/admin/auth/auth.php'); // Роуты с авторизацией для админов
+                     //require_once base_path('routes/api/admin/main.php'); // Роуты для администраторов
                      require_once base_path('routes/api/user/fragments.php'); // Роуты для создания фрагментов
                      require_once base_path('routes/api/user/tags.php'); // Роуты для тегов фрагментов;
                      require_once base_path('routes/api/user/lessons.php'); // Роуты для уроков;

@@ -13,7 +13,7 @@ class FragmentPolicy
     public function before( User $user, $operation ) {
         if ( $operation == 'create' || $operation == 'like' )
             return null;
-        if ( $user->role == 'admin' )
+        if ( $user->inRole('admin') )
             return true;
     }
 
@@ -31,7 +31,7 @@ class FragmentPolicy
     }
 
     public function create( User $user ): bool {
-        return $user->role == 'creator';
+        return $user->inRole('creator');
     }
 
     public function update( User $user, Fragment $fragment ): bool {
@@ -43,7 +43,7 @@ class FragmentPolicy
     }
 
     public function like( User $user ): bool {
-        if ( $user->role == 'creator' || $user->role == 'student' )
+        if ( $user->inRole('creator') || $user->inRole('student') )
             return true;
         return false;
     }

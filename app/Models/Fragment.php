@@ -2,23 +2,60 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Concerns\InteractsWithPivotTable;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Orchid\Filters\Filterable;
+use Orchid\Metrics\Chartable;
+use Orchid\Screen\AsSource;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Fragment extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia;
+    use SoftDeletes, InteractsWithMedia, Filterable, AsSource, Chartable;
 
     protected $table = 'fragments';
 
     protected $fillable = [
         'title',
     ];
+
+    /**
+     * The attributes for which you can use filters in url.
+     *
+     * @var array
+     */
+    protected $allowedFilters = [
+        'id',
+        'title',
+        'fragmentgable_type',
+    ];
+
+    /**
+     * The attributes for which can use sort in url.
+     *
+     * @var array
+     */
+    protected $allowedSorts = [
+        'id',
+        'title',
+        'fragmentgable_type',
+        'age_limit_id',
+        'updated_at',
+        'created_at',
+    ];
+
+    /**
+     * ORCHID: scope for lessons - fragments,
+     * @param Builder $query
+     * @param User $user
+     */
+    public function scopeUserFragments( Builder $query, User $user ) {
+        return $query->where('user_id', $user->id);
+    }
 
     // Устанавливаем обратную связь "один ко многим" с таблицей 'users'
     public function user(): BelongsTo {

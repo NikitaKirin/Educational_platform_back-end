@@ -124,6 +124,9 @@ class FragmentController extends Controller
                 elseif ( $request->input('gameType') === 'puzzles' ) {
                     $fragmentData = $this->createFragmentGamePuzzles($request, $user);
                 }
+                elseif ( $request->input('gameType') === 'graphic_dictation' ) {
+                    $fragmentData = $this->createFragmentGameGraphicDictation($request, $user);
+                }
             }
             $fragment = new Fragment(['title' => $request->input('title')]);
             $fragment->user()->associate(Auth::user());
@@ -189,6 +192,9 @@ class FragmentController extends Controller
                 }*/
                 elseif ( $gameType === 'puzzles' ) {
                     $this->updateFragmentGamePuzzles($request, $fragment, $user);
+                }
+                elseif ( $gameType === 'graphic_dictation' ) {
+                    $this->updateFragmentGameGraphicDictation($request, $fragment, $user);
                 }
             }
             if ( $request->hasFile('fon') ) {
@@ -423,6 +429,24 @@ class FragmentController extends Controller
     }
 
     /**
+     * Create fragment of type "Game" - "graphic dictation"
+     * Создать фрагмента типа "игра" - подтип - "графический диктант"
+     * @param CreateFragmentRequest $request Объект запроса
+     * @return Game Игра
+     */
+    private function createFragmentGameGraphicDictation( CreateFragmentRequest $request, User $user ) {
+        $game = new Game();
+        $gameType = GameType::where('type', $request->input('gameType'))->get()->first();
+        $game->gameType()->associate($gameType);
+        $gameTask = $request->input('task') ?? $gameType->task;
+        $content = $this->generateGameContentField($gameType->type, $gameTask);
+        $content['content'] = json_decode($request->input('content'), true);
+        $game->content = $content;
+        $game->save();
+        return $game;
+    }
+
+    /**
      * Update fragment of types: video or image
      * Обновить фрагмент типа видеоролик или изображение
      * @param Request $request
@@ -463,6 +487,7 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $game = $fragment->fragmentgable;
         // Формируем новое поле content['images']
         $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
@@ -501,6 +526,7 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $game = $fragment->fragmentgable;
         // Формируем новое поле content['images']
         $updatedContentImagesData = collect($metaImagesData)->map(function ( $imagePairData ) use ( $newImages, $game, $user ) {
@@ -544,6 +570,7 @@ class FragmentController extends Controller
         $metaImagesData = json_decode($request->input('metaImagesData'), true);
         $newImages = $request->file('content');
         $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
         $game = $fragment->fragmentgable;
         // Формируем новое поле content['images']
         $updatedContentImagesData = collect($metaImagesData)->map(function ( $metaImageData ) use ( $newImages, $game, $user ) {
@@ -572,6 +599,23 @@ class FragmentController extends Controller
         $game->clearMediaCollectionExcept('fragments_games', $newImagesGame);
         $game->refresh();
         $game->update(['content' => $currentContent]);
+    }
+
+    /**
+     * Update fragment game - gr. dictation
+     * Обновить фрагмент типа игра - Графический диктант
+     * @param UpdateFragmentRequest $request Объект запроса
+     * @param Fragment $fragment Фрагмент
+     */
+
+    private function updateFragmentGameGraphicDictation( UpdateFragmentRequest $request, Fragment $fragment, User $user ): void {
+        $newContent = json_decode($request->input('content'), true);
+        $currentContent = $fragment->fragmentgable->content;
+        $currentContent['task']['text'] = $request->input('task') ?? $currentContent['task']['text'];
+        $currentContent['content'] = json_decode($request->input('content'), true) ?? $currentContent['content'];
+        $fragment->fragmentgable->update([
+            'content' => $currentContent,
+        ]);
     }
 
     /**

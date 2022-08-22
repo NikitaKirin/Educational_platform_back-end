@@ -114,6 +114,11 @@ class CreateFragmentRequest extends FormRequest
                             'content'       => 'На вход ожидался массив',
                         ]);
                 }
+                elseif ( $this->input('gameType') === 'graphic_dictation' ) {
+                    $this->validate([
+                        'content' => 'required|json',
+                    ]);
+                }
             }
         });
     }

@@ -32,7 +32,9 @@ class LessonController extends Controller
         $ageLimit = $request->input('ageLimit');
         $lessons = Lesson::with('tags')->withCount(['tags', 'fragments'])
                          ->whereHas('user', function ( Builder $query ) {
-                             $query->where('role', '<>', 'student');
+                             $query->whereHas('roles', function ( Builder $role ) {
+                                 return $role->where('slug', '<>', 'student');
+                             });
                          })->when($title, function ( $query ) use ( $title ) {
                 return $query->where('title', 'ILIKE', "%{$title}%");
             })->when($creator, function ( $query ) use ( $creator ) {
@@ -196,5 +198,3 @@ class LessonController extends Controller
                                                  ->paginate(6));
     }
 }
-
-

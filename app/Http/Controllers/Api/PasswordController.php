@@ -22,7 +22,7 @@ class PasswordController extends Controller
             'string'   => 'Пароль содержит некорректные символы',
         ]);
 
-        if ( Auth::user()->update(['password' => $request->input('password')]) ) {
+        if ( Auth::user()->update(['password' => Hash::make($request->input('password'))]) ) {
             Auth::user()->refresh();
             return response()->json([
                 'message' => 'Новый пароль успешно сохранен',
@@ -31,7 +31,7 @@ class PasswordController extends Controller
 
         return response()->json([
             'messages' => 'Не удалось обновить пароль',
-        ],409);
+        ], 409);
     }
 
     // Забыл пароль. Функционал пользователя и администратора.
@@ -53,7 +53,7 @@ class PasswordController extends Controller
         $user = User::where('email', '=', $request->email)->get()->first();
 
         if ( Password::broker()->tokenExists($user, $request->token) ) {
-            $user->update(['password' => $request->password]);
+            $user->update(['password' => Hash::make($request->password)]);
             Password::deleteToken($user);
             return response()->json([
                 'messages' => 'Пароль успешно обновлен',
