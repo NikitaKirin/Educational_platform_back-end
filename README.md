@@ -1,64 +1,32 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Учебный проект на Laravel
+## Образовательная платформа для дошкольников - Youngeek
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Конфигурация:
 
-## About Laravel
+- Laravel Framework 9.0
+- PHP 8.1
+- PostgreSQL 12
+- Orchid Software (Админ-панель)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Описание проекта
+После введения COVID-ных ограничений большая часть учебного процесса была перенесена в дистанционный формат. Наш заказчик - преподаватель дошкольного образования, столкнулся с проблемой: отсутствие образовательной платформы для его учеников, на которую можно загружать свой контент в различных форматах (ролики, схемы, статьи, изображения), а также собирать из различных фрагментов готовый урок.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Проект представляет собой образовательную платформу, в которой реализуется несколько ролей пользователей. Основной функционал платформы заключается в том, что пользователь с ролью владелец курса сможет с помощью системой загружать отдельные фрагменты неких уроков и заданий в определенной предметной области в виде фрагментов медиадокументов, и потом собирать их в урок с помощью пошагового конструктора.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+В отдельном интерфейсе владелец может создавать отдельные учебные единицы, например загружать видео с каким то рассказом для дошкольников, видео про животных, видео с какой-то активностью, например тренировкой для разминки и так далее. А потом в отдельном месте создавать уроки, выбирая созданные ранее записи и расставляя их в определённом порядке с определенными правилами, которые он сможет сам заранее определять.
 
-## Learning Laravel
+Пользователям с ролью Обучающийся доступны возможности записи на курсы и просмотр готовых уроков, поиск учебных единиц по системе тегов, а также аналогичная сборка урока из подобранных фрагментов. Также было добавлено несколько шаблонов игр для дошкольников, которые также создаются через конструктор.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Особенности проекта
+- На платформе реализована авторизация/регистрация по схеме Oauth 2.0 через Laravel Passport
+- Представлено 3 роли:
+    - Ученик
+    - Учитель
+    - Администратор
+- Связь с front-end частью реализована через REST API. Документация API-точек доступна по [ссылке](https://documenter.getpostman.com/view/17572705/VUqptda7#d25e05d6-7a1e-464d-8a70-1c54b90e37e4)
+- Для администрирования была подключена и настроена admin-панель [Orchid](https://orchid.software/)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Материалы для ознакомления по проекту
+- [Документация по API-точкам](https://documenter.getpostman.com/view/17572705/VUqptda7)
+- [Макет front-end части](https://www.figma.com/file/Z07ZlaMQpKG9bC5JUh4Bn0/Youngeek?node-id=909:1233)
+- [Схема базы данных](https://drive.google.com/file/d/1JmkinSEE3QM5wf17LikMPA7cKMPM-SQ3/view?usp=sharing)
