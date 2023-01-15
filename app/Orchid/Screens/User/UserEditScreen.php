@@ -192,7 +192,6 @@ class UserEditScreen extends Screen
             ->fill(Arr::except($userData, ['password', 'permissions', 'roles']))
             ->fill([
                 'permissions' => $permissions,
-                'password'    => Hash::make($userData['password']),
             ])
             ->save();
 
